@@ -1,0 +1,342 @@
+.equipo-banner-container {
+    width: 100%;
+    /* Dark blue gradient background matching the reference */
+    background: linear-gradient(180deg, #1e1b4b, #2e308e);
+    /* The curved bottom (smile curve) */
+    border-bottom-left-radius: 50% 30px;
+    border-bottom-right-radius: 50% 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    /* Reduced significantly from 40px to cut empty space */
+    overflow: visible;
+    /* To allow content below to flow properly */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    margin-top: 50px;
+    /* Added space to separate from section above */
+    margin-bottom: 60px;
+    /* Space before Bancos Asociados */
+    position: relative;
+    z-index: 5;
+}
+
+.equipo-banner-text {
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    /* Reduced to bring image closer to title */
+    padding: 0 20px;
+}
+
+.equipo-banner-text h3 {
+    font-size: 3rem;
+    /* Made the font larger since banner is bigger */
+    color: white;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.equipo-banner-img {
+    width: 100%;
+    max-width: 900px;
+    /* Reduced max-width so the image is not so tall inherently */
+    height: auto;
+    max-height: 400px;
+    /* Increased from 250px to 400px */
+    object-fit: contain;
+    display: block;
+    margin-bottom: -10px;
+    /* pull down slightly to touch the bottom edge */
+    filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.4));
+    /* Make the image visibly larger without expanding the div */
+    transform: scale(1.5);
+    /* Increased from 1.3 to 1.5 */
+    transform-origin: bottom center;
+}
+
+/* Sección de Contacto */
+.contacto-section {
+    width: 100%;
+    background: white;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.contacto-content {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    gap: 40px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-bottom: 40px;
+}
+
+.info-column {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.info-item h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.info-item p {
+    font-size: 1rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Formulario de Contacto */
+.form-column {
+    flex: 1;
+    min-width: 280px;
+    background: white;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-title {
+    font-size: 2rem;
+    color: #0052cc;
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-weight: 700;
+}
+
+.form-subtitle {
+    color: #d97705;
+    text-align: center;
+    margin: 0 0 30px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 100%;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #333;
+    transition: border 0.3s ease, background 0.3s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: #999;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    background: #f9f9f9;
+    border-color: #0052cc;
+}
+
+.form-input.full-width {
+    width: 100%;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.link {
+    color: #0052cc;
+    text-decoration: none;
+    transition: text-decoration 0.3s ease;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #0052cc, #0040a8);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 82, 204, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Mapa a ancho completo */
+.map-full-width {
+    width: 100%;
+    max-width: 1200px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.map-iframe-full {
+    width: 100%;
+    height: 400px;
+    display: block;
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 920px) {
+    .contacto-content {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .info-column,
+    .form-column {
+        min-width: 100%;
+    }
+
+    .info-column {
+        text-align: left;
+    }
+
+    .info-item {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .equipo-banner-container {
+        border-bottom-left-radius: 50% 30px;
+        border-bottom-right-radius: 50% 30px;
+        padding-top: 40px;
+    }
+
+    .equipo-banner-text h3 {
+        font-size: 2rem;
+    }
+
+    .equipo-banner-img {
+        max-height: 300px;
+        transform: scale(1.2);
+    }
+
+    .contacto-section {
+        padding: 40px 15px;
+    }
+
+    .contacto-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .info-column,
+    .form-column {
+        min-width: 100%;
+        padding: 20px;
+    }
+
+    .info-column {
+        text-align: left;
+    }
+
+    .info-item {
+        align-items: flex-start;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-input,
+    .form-textarea {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+    }
+
+    .form-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .map-iframe-full {
+        height: 300px;
+    }
+}

@@ -1,0 +1,72 @@
+.empresa-info-container {
+    width: 100%;
+    background-color: #e5ecd8;
+    /* Light greenish background resembling the reference */
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    margin-top: -20px;
+    /* Pull it slightly under the yellow curtain's bottom edge so the holes show this color if needed, or just let it sit flush */
+}
+
+.empresa-info-title {
+    color: #446b5a;
+    /* Dark green/teal text */
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-top: 20px;
+    /* Added margin to push title down away from the top edge */
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.empresa-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.info-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #2e308e;
+    /* Multival Blue */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+}
+
+.info-item p {
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+    max-width: 200px;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .empresa-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+    }
+}
+
+@media (max-width: 500px) {
+    .empresa-info-grid {
+        grid-template-columns: 1fr;
+    }
+}

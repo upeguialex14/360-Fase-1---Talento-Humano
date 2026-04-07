@@ -1,0 +1,77 @@
+.bancos-section {
+    width: 100%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    position: relative;
+    z-index: 10;
+}
+
+.bancos-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 30px;
+    font-family: inherit;
+}
+
+.ticker-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    /* Blend the white background of the JPEG logos into a continuous white ribbon */
+    background-color: #fff;
+    padding: 15px 0;
+    /* Vertical padding so logos don't touch the gray bounds */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    /* Optional ribbon depth */
+}
+
+.ticker-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: tickerScroll 30s linear infinite;
+    will-change: transform;
+}
+
+@keyframes tickerScroll {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.banco-logo {
+    height: 120px;
+    /* Mas grandes */
+    width: auto;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
+    /* Completamente juntas, sin espacio */
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    -webkit-user-drag: none;
+    pointer-events: auto;
+    display: block;
+}
+
+.banco-logo:hover {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .banco-logo {
+        height: 50px;
+        padding: 0 10px;
+    }
+
+    .bancos-title {
+        font-size: 1.5rem;
+    }
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "page_code": "DASHBOARD",
+    "page_name": "Dashboard General",
+    "route": "/dashboard",
+    "descriptión": "Vista principal del sistema",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "ROLES",
+    "page_name": "Gestión de Roles",
+    "route": "/roles",
+    "descriptión": "Administración de roles",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "PERMISSIONS",
+    "page_name": "Gestión de Permisos",
+    "route": "/permissions",
+    "descriptión": "Administración de permisos",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "USUARIOS",
+    "page_name": "Gestión de Usuarios",
+    "route": "/usuarios",
+    "descriptión": "Creación y edición de usuarios",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "PLANTA",
+    "page_name": "Planta Operación",
+    "route": "/planta",
+    "descriptión": "Vista operativa de planta",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "COSTOS",
+    "page_name": "Centro de Costos",
+    "route": "/costos",
+    "descriptión": "Gestión de centros de costos",
+    "is_active": 1,
+    "created_at": "2026-02-19T14:06:48.000Z",
+    "updated_at": "2026-02-19T14:06:48.000Z"
+  },
+  {
+    "page_code": "ACTIVIDAD_USUARIOS",
+    "page_name": "Actividad de Usuarios",
+    "route": "/user-activity",
+    "descriptión": "Historial de inicios de sesión",
+    "is_active": 1,
+    "created_at": "2026-02-26T18:00:00.000Z",
+    "updated_at": "2026-02-26T18:00:00.000Z"
+  }
+]

@@ -1,0 +1,185 @@
+.cortina-scroll-container {
+    position: relative;
+    width: 100%;
+    height: 250vh;
+    /* This dictates how long the page stays sticky while scrolling */
+    margin-top: 20px;
+}
+
+.reveal-wrapper {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    /* Full screen while stuck */
+    background-color: transparent;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.reveal-content-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    z-index: 1;
+    overflow-y: auto;
+    /* Allow scrolling if screen is too small */
+}
+
+/* --- Restored Original Content Styles --- */
+.reveal-gallery {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.reveal-inner-img {
+    height: 180px;
+    width: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+}
+
+.reveal-text {
+    text-align: center;
+}
+
+.reveal-text h3 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.reveal-text p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* ---------------------------------------- */
+
+.reveal-curved-banner {
+    width: 100%;
+    /* Dark blue gradient background matching the reference */
+    background: linear-gradient(180deg, #1e1b4b, #2e308e);
+    /* The curved bottom (smile curve) */
+    border-bottom-left-radius: 50% 40px;
+    border-bottom-right-radius: 50% 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+    overflow: hidden;
+    /* To clip the image at the bottom curve if needed */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.reveal-banner-text {
+    text-align: center;
+    color: white;
+    /* Important: text is white on dark blue background */
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.reveal-banner-text h3 {
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.reveal-banner-text p {
+    color: #e2e8f0;
+    font-size: 1.2rem;
+}
+
+.reveal-banner-img {
+    width: 100%;
+    max-width: 900px;
+    /* prevent it from getting too huge */
+    height: auto;
+    max-height: 450px;
+    object-fit: contain;
+    display: block;
+    margin-bottom: -10px;
+    /* pull down slightly to touch the bottom edge if there's natural padding in the image */
+}
+
+.cortina-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 160vh;
+    /* Taller than the wrapper to make the solid background part longer */
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    /* Smooth out the scroll animation */
+    transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Box shadow moving up creates a top depth effect */
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.cortina-body {
+    flex-grow: 1;
+    background-color: #f4c430;
+    /* Corporate yellow */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Remove transparent background to hide surprise */
+}
+
+.cortina-title {
+    color: #222;
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 0;
+    text-shadow: none;
+    /* No longer needed */
+}
+
+/* 4 rows of holes exactly at the bottom border */
+.cortina-bottom-edge {
+    height: 400px;
+    /* 4 rows of 100px */
+    width: 100%;
+    background: radial-gradient(circle at 50% 50%, transparent 40px, #f4c430 41px);
+    background-size: 100px 100px;
+    background-position: center top;
+    background-repeat: repeat;
+}
+
+@media (max-width: 768px) {
+    .reveal-wrapper {
+        height: 500px;
+    }
+
+    .reveal-inner-img {
+        height: 100px;
+    }
+
+    .cortina-title {
+        font-size: 2rem;
+    }
+
+    .reveal-gallery {
+        gap: 15px;
+    }
+}
