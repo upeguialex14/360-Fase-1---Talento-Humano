@@ -8,6 +8,7 @@
         "preview": "npm run preview --prefix front"
     },
     "dependencies": {
-        "multer": "^2.1.1"
+        "multer": "^2.1.1",
+        "xlsx": "^0.18.5"
     }
 }
