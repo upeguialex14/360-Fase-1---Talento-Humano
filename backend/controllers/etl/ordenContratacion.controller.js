@@ -1,4 +1,4 @@
-const OrdenContratacionService = require('../services/ordenContratacion.service');
+const OrdenContratacionService = require('../../services/etl/ordenContratacion.service');
 
 /**
  * Controller para la gestión de Orden de Contratación

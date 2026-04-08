@@ -4,7 +4,7 @@
  */
 const OrdenContratacion = require('../models/ordenContratacion.model');
 const crypto = require('crypto');
-const { excelDateToJS } = require('../helpers/excel.helper');
+const { excelDateToJS } = require('../../helpers/excel.helper');
 
 const OrdenContratacionService = {
     async upsertRecords(records, selectedColumns, username) {

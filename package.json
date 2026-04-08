@@ -6,5 +6,8 @@
         "build": "npm run build --prefix front",
         "lint": "npm run lint --prefix front",
         "preview": "npm run preview --prefix front"
+    },
+    "dependencies": {
+        "multer": "^2.1.1"
     }
 }
