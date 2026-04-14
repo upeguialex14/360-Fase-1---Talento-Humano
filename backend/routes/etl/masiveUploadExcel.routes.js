@@ -6,6 +6,6 @@ const verifyToken = require('../../middleware/auth.middleware');
 
 router.use(verifyToken);
 
-router.post('/upload/:type', middleware.uploadExcel, controller.uploadExcel);
+router.post('/upload/:type', middleware.uploadExcel, controller.controllerUploadExcel);
 
 module.exports = router;
