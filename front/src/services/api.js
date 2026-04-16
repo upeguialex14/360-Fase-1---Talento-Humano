@@ -83,6 +83,36 @@ export const api = {
     }),
 
     delete: (endpoint) => apiRequest(endpoint, { method: 'DELETE' }),
+
+    /**
+     * Sube un archivo como multipart/form-data.
+     * NO establece Content-Type manualmente para que el navegador
+     * incluya automáticamente el boundary correcto.
+     */
+    upload: async (endpoint, formData) => {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            },
+            body: formData,
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        if (!response.ok) {
+            return { success: false, status: response.status, message: data.msg || data.message || `Error (${response.status})` };
+        }
+        return data;
+    }
 };
 
 export default api;

@@ -1,4 +1,3 @@
-const uploadMiddleware = require('../middleware/etl/masiveUploadExcel.middleware');
 const uploadService = require('../../services/etl/masiveUploadExcel.service');
 
 const controllerUploadExcel = async (req, res, next) => {

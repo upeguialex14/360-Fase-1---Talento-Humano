@@ -2,7 +2,7 @@
  * Servicio de Orden de Contratación
  * Handles business logic for orden_contratacion operations
  */
-const OrdenContratacion = require('../models/ordenContratacion.model');
+const OrdenContratacion = require('../../models/etl/ordenContratacion.model.js');
 const crypto = require('crypto');
 const { excelDateToJS } = require('../../helpers/excel.helper');
 
