@@ -1,10 +1,9 @@
-const uploadMiddleware = require('../middleware/etl/masiveUploadExcel.middleware');
 const uploadService = require('../../services/etl/masiveUploadExcel.service');
 
 const controllerUploadExcel = async (req, res, next) => {
     try {
         // Validacion de que se haya enviado un archivo (portero)
-        const file = req.file;
+        const file = req.file.buffer;
         if (!file) {
             return res.status(400).json({
                 ok: false,
@@ -15,7 +14,9 @@ const controllerUploadExcel = async (req, res, next) => {
         // Preparacion de datos
         const data = {
             ...req.body,
-            filePath: req.file.filename,
+            type: req.params.type,
+            fileBuffer: req.file.buffer,
+            mimetype: req.file.mimetype,
             fileName: req.file.filename,
             fileOriginalName: req.file.originalname
         };

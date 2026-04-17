@@ -5,10 +5,10 @@
 const pool = require('../config/db');
 
 const User = {
-    async findByLogin(login) {
+    async findByLogin(email) {
         const [rows] = await pool.execute(
-            'SELECT * FROM users WHERE login = ?',
-            [login]
+            'SELECT * FROM users WHERE email = ?',
+            [email]
         );
         return rows[0] || null;
     },

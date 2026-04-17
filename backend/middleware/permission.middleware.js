@@ -15,14 +15,14 @@ const checkPermission = (requiredPermission) => {
 
         try {
             // Si es ADMIN, tiene acceso total (opcional, según requerimiento)
-            if (role_code === 'ADMIN') {
+            if (role_code === 'LIDER') {
                 return next();
             }
 
             // Consultar si el rol tiene el permiso solicitado
-        const hasPermission = await PermissionService.checkPermission(role_code, requiredPermission);
+            const hasPermission = await PermissionService.checkPermission(role_code, requiredPermission);
 
-        if (hasPermission) {
+            if (hasPermission) {
             }
 
             return res.status(403).json({ success: false, message: 'No tiene permisos para realizar esta acción' });

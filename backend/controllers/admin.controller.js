@@ -13,7 +13,7 @@ const getBlockedUsers = async (req, res) => {
     try {
         const { role_code } = req.user;
 
-        if (role_code !== 'ADMIN') {
+        if (role_code !== 'LIDER') {
             return res.status(403).json({
                 success: false,
                 message: 'Acceso denegado. Se requiere rol ADMIN.'
@@ -36,7 +36,7 @@ const unlockUser = async (req, res) => {
         const { role_code } = req.user;
         const { id: userId } = req.params;
 
-        if (role_code !== 'ADMIN') {
+        if (role_code !== 'LIDER') {
             return res.status(403).json({
                 success: false,
                 message: 'Acceso denegado. Se requiere rol ADMIN.'
@@ -58,7 +58,7 @@ const getUserActivity = async (req, res) => {
     try {
         const { role_code } = req.user;
 
-        if (role_code !== 'ADMIN') {
+        if (role_code !== 'LIDER') {
             return res.status(403).json({
                 success: false,
                 message: 'Acceso denegado. Se requiere rol ADMIN.'
@@ -82,7 +82,7 @@ const blockUser = async (req, res) => {
         const { id: userId } = req.params;
         const { reason } = req.body;
 
-        if (role_code !== 'ADMIN') {
+        if (role_code !== 'LIDER') {
             return res.status(403).json({
                 success: false,
                 message: 'Acceso denegado. Se requiere rol ADMIN.'
