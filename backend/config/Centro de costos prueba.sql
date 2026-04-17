@@ -391,3 +391,27 @@ CREATE TABLE HIRING_ORDER (
 );
 
 SELECT * FROM users;
+
+INSERT INTO USERS (
+    role_id, 
+    email, 
+    password_hash, 
+    name, 
+    last_name, 
+    status_id
+) VALUES (
+    2, 
+    'dfelipenunez@gmail.com', 
+    '$2a$12$vu6pFNMMo1zUXdA94amz0.QlzLN5yclV5sY0/3qzcpcUjc0QHdMdS', 
+    'Felipe', 
+    'Conde', 
+    1
+);
+
+ALTER TABLE USERS 
+ADD COLUMN failed_attempts INT DEFAULT 0 AFTER status_id,
+ADD COLUMN is_locked TINYINT(1) DEFAULT 0 AFTER failed_attempts;
+
+ALTER TABLE USERS 
+ADD COLUMN password_expires_at DATETIME AFTER password_changed_at,
+ADD COLUMN change_password_required TINYINT(1) DEFAULT 0 AFTER password_expires_at;
