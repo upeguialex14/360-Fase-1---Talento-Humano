@@ -58,7 +58,7 @@ const OrdenContratacion = () => {
 
     // Obtener permiso de edición para esta página
     const pageAccess = user?.pages?.find(p => p.page_code === 'ORDEN_CONTRATACION');
-    const canEdit = pageAccess?.can_edit === 1 || user?.role_code === 'ADMIN';
+    const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
 
     const fetchRecords = async () => {
         setLoading(true);

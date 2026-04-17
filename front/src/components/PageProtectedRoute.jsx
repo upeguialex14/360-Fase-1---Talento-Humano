@@ -30,9 +30,8 @@ const PageProtectedRoute = ({ children, requiredPageCode, isOptional = false }) 
         return <Navigate to="/login" replace />;
     }
 
-    // Si es opcional (ejemplo: ADMIN tiene acceso a todo), permitir siempre
-    // O si es ADMIN, permitir acceso (tienen privilegios totales)
-    if (isOptional || user.role_code === 'ADMIN') {
+    // Si es opcional (ejemplo: se permite siempre) o el Gerente tiene acceso total
+    if (isOptional || user.role_id === 1) {
         return children;
     }
 

@@ -9,7 +9,7 @@ const AdminBlockedUsers = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (user && user.role_code === 'ADMIN') {
+        if (user && user.role_id === 1) {
             fetchBlocked();
         } else {
             setLoading(false);
@@ -52,7 +52,7 @@ const AdminBlockedUsers = () => {
         return null;
     }
 
-    if (user.role_code !== 'ADMIN') {
+    if (user.role_id !== 1) {
         return <Navigate to="/" replace />;
     }
 

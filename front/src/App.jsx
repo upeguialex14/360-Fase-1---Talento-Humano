@@ -48,7 +48,7 @@ function App() {
           }>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<PageProtectedRoute requiredPageCode="DASHBOARD"><Dashboard /></PageProtectedRoute>} />
-            <Route path="carga-excel" element={<PageProtectedRoute requiredPageCode="CARGA_EXCEL" isOptional={true}><CargaExcel /></PageProtectedRoute>} />
+            <Route path="upload" element={<PageProtectedRoute requiredPageCode="CARGA_EXCEL" isOptional={true}><CargaExcel /></PageProtectedRoute>} />
             <Route path="empleados" element={<PageProtectedRoute requiredPageCode="EMPLEADOS"><Empleados /></PageProtectedRoute>} />
             <Route path="departamentos" element={<PageProtectedRoute requiredPageCode="DEPARTAMENTOS"><Departamentos /></PageProtectedRoute>} />
             <Route path="reportes" element={<PageProtectedRoute requiredPageCode="REPORTES"><Reportes /></PageProtectedRoute>} />
@@ -57,8 +57,8 @@ function App() {
             <Route path="role-permissions" element={<PageProtectedRoute requiredPageCode="ROLE_PERMISSIONS"><RolePermissions /></PageProtectedRoute>} />
             <Route path="planta" element={<PageProtectedRoute requiredPageCode="PLANTA"><Planta /></PageProtectedRoute>} />
             <Route path="costos" element={<PageProtectedRoute requiredPageCode="COSTOS"><Costos /></PageProtectedRoute>} />
-            <Route path="usuarios" element={<PageProtectedRoute requiredPageCode="USUARIOS"><Usuarios /></PageProtectedRoute>} />
-            <Route path="orden-contratacion" element={<PageProtectedRoute requiredPageCode="ORDEN_CONTRATACION"><OrdenContratacion /></PageProtectedRoute>} />
+            <Route path="users" element={<PageProtectedRoute requiredPageCode="USUARIOS"><Usuarios /></PageProtectedRoute>} />
+            <Route path="contratacion" element={<PageProtectedRoute requiredPageCode="ORDEN_CONTRATACION"><OrdenContratacion /></PageProtectedRoute>} />
             <Route path="user-activity" element={<PageProtectedRoute requiredPageCode="ACTIVIDAD_USUARIOS"><UserActivity /></PageProtectedRoute>} />
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
 

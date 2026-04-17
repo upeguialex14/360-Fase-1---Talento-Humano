@@ -25,7 +25,7 @@ const Header = () => {
                             <span className="header-user-info">👤 {user.full_name || user.login}</span>
                         )}
 
-                        {user?.role_code === 'ADMIN' && (
+                        {user?.role_id === 1 && (
                             <button
                                 onClick={async () => {
                                     if (window.confirm('¿Forzar expiración de contraseña para esta cuenta? (Función de demostración)')) {

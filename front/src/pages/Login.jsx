@@ -83,6 +83,8 @@ const Login = () => {
                 password: formData.password,
             });
 
+            console.log('PAYLOAD DE LOGIN:', response);
+
             if (response.success) {
                 // Guardar en contexto
                 login(response);

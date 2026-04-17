@@ -1,11 +1,18 @@
 const pool = require('../config/db');
 
 class Page {
-    static async getPagesForRole(roleCode) {
+    static async getPagesForRole(roleId) {
         try {
+            if (roleId === 1) {
+                const [rows] = await pool.execute(
+                    'SELECT p.page_code, p.page_name, COALESCE(p.route, p.page_route) AS route, 1 as can_view, 1 as can_edit FROM pages p ORDER BY p.page_name ASC'
+                );
+                return rows;
+            }
+
             const [rows] = await pool.execute(
-                'SELECT p.page_code, p.page_name, p.route, rp.can_view, rp.can_edit FROM pages p JOIN role_pages rp ON p.page_code = rp.page_code WHERE rp.role_code = ?',
-                [roleCode]
+                'SELECT p.page_code, p.page_name, COALESCE(p.route, p.page_route) AS route, rp.can_view, rp.can_edit FROM pages p JOIN role_pages rp ON p.page_code = rp.page_code WHERE rp.role_id = ?',
+                [roleId]
             );
             return rows;
         } catch (err) {
@@ -37,19 +44,19 @@ class Page {
         }
     }
 
-    static async getRolePages(roleCode) {
+    static async getRolePages(roleId) {
         try {
             const [rows] = await pool.execute(
                 `SELECT 
                     p.page_code, 
                     p.page_name, 
-                    p.route, 
+                    COALESCE(p.route, p.page_route) AS route, 
                     IFNULL(rp.can_view, 0) as can_view, 
                     IFNULL(rp.can_edit, 0) as can_edit 
                 FROM pages p 
-                LEFT JOIN role_pages rp ON p.page_code = rp.page_code AND rp.role_code = ?
+                LEFT JOIN role_pages rp ON p.page_code = rp.page_code AND rp.role_id = ?
                 ORDER BY p.page_name ASC`,
-                [roleCode]
+                [roleId]
             );
             return rows;
         } catch (err) {
@@ -58,15 +65,16 @@ class Page {
         }
     }
 
-    static async updateRolePages(roleCode, pages, user) {
+    static async updateRolePages(roleId, pages, user) {
         const connection = await pool.getConnection();
 
         try {
             // Validate role exists
-            const [roleCheck] = await connection.execute('SELECT 1 FROM roles WHERE role_code = ?', [roleCode]);
+            const [roleCheck] = await connection.execute('SELECT name_role FROM roles WHERE role_id = ?', [roleId]);
             if (roleCheck.length === 0) {
-                throw new Error(`El rol '${roleCode}' no existe en la base de datos`);
+                throw new Error(`El rol con ID '${roleId}' no existe en la base de datos`);
             }
+            const roleName = roleCheck[0].name_role;
 
             // Validate pages exist
             if (pages.length > 0) {
@@ -85,8 +93,8 @@ class Page {
 
             // Get old states for audit
             const [oldRows] = await connection.execute(
-                'SELECT page_code, can_view, can_edit FROM role_pages WHERE role_code = ?',
-                [roleCode]
+                'SELECT page_code, can_view, can_edit FROM role_pages WHERE role_id = ?',
+                [roleId]
             );
             const oldMap = {};
             oldRows.forEach(r => { oldMap[r.page_code] = r; });
@@ -95,7 +103,7 @@ class Page {
 
             // UPSERT
             const upsertQuery = `
-                INSERT INTO role_pages (role_code, page_code, can_view, can_edit)
+                INSERT INTO role_pages (role_id, page_code, can_view, can_edit)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                     can_view = VALUES(can_view),
@@ -105,7 +113,7 @@ class Page {
 
             for (const p of pages) {
                 await connection.execute(upsertQuery, [
-                    roleCode,
+                    roleId,
                     p.page_code,
                     p.can_view ? 1 : 0,
                     p.can_edit ? 1 : 0
@@ -121,14 +129,14 @@ class Page {
                 if (!prev && currentlyCanView === 1) {
                     await connection.execute(
                         `INSERT INTO historial_permisos_roles (id, rol_id, nombre_rol, page, accion, realizado_por, nombre_admin, fecha_accion)
-                         VALUES (?, NULL, ?, ?, 'otorgado', ?, ?, NOW())`,
-                        [require('crypto').randomUUID(), roleCode, p.page_code, user.user_id, user.login]
+                         VALUES (?, ?, ?, ?, 'otorgado', ?, ?, NOW())`,
+                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.login]
                     );
                 } else if (prev && currentlyCanView === 0 && previouslyCanView === 1) {
                     await connection.execute(
                         `INSERT INTO historial_permisos_roles (id, rol_id, nombre_rol, page, accion, realizado_por, nombre_admin, fecha_accion)
-                         VALUES (?, NULL, ?, ?, 'revocado', ?, ?, NOW())`,
-                        [require('crypto').randomUUID(), roleCode, p.page_code, user.user_id, user.login]
+                         VALUES (?, ?, ?, ?, 'revocado', ?, ?, NOW())`,
+                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.login]
                     );
                 }
             }

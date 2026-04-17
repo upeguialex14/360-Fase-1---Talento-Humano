@@ -7,16 +7,16 @@ const userService = require('../services/user.service');
 const loggingService = require('../services/logging.service');
 
 /**
- * Get all locked users - ADMIN only
+ * Get all locked users - Gerente only
  */
 const getBlockedUsers = async (req, res) => {
     try {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
 
-        if (role_code !== 'LIDER') {
+        if (role_id !== 1) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado. Se requiere rol ADMIN.'
+                message: 'Acceso denegado. Se requiere rol Gerente.'
             });
         }
 
@@ -29,17 +29,17 @@ const getBlockedUsers = async (req, res) => {
 };
 
 /**
- * Unlock user - ADMIN only
+ * Unlock user - Gerente only
  */
 const unlockUser = async (req, res) => {
     try {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
         const { id: userId } = req.params;
 
-        if (role_code !== 'LIDER') {
+        if (role_id !== 1) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado. Se requiere rol ADMIN.'
+                message: 'Acceso denegado. Se requiere rol Gerente.'
             });
         }
 
@@ -52,16 +52,16 @@ const unlockUser = async (req, res) => {
 };
 
 /**
- * Get user activity history - ADMIN only
+ * Get user activity history - Gerente only
  */
 const getUserActivity = async (req, res) => {
     try {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
 
-        if (role_code !== 'LIDER') {
+        if (role_id !== 1) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado. Se requiere rol ADMIN.'
+                message: 'Acceso denegado. Se requiere rol Gerente.'
             });
         }
 
@@ -74,18 +74,18 @@ const getUserActivity = async (req, res) => {
 };
 
 /**
- * Block user manually - ADMIN only
+ * Block user manually - Gerente only
  */
 const blockUser = async (req, res) => {
     try {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
         const { id: userId } = req.params;
         const { reason } = req.body;
 
-        if (role_code !== 'LIDER') {
+        if (role_id !== 1) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado. Se requiere rol ADMIN.'
+                message: 'Acceso denegado. Se requiere rol Gerente.'
             });
         }
 

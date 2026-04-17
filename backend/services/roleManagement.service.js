@@ -14,8 +14,8 @@ class RoleManagementService {
     }
 
     async createRole(roleData) {
-        const { role_code, role_name, description } = roleData;
-        return await Role.create({ role_code, role_name, description });
+        const { role_name, description } = roleData;
+        return await Role.create({ role_name, description });
     }
 
     async getAllPermissions() {
@@ -31,12 +31,12 @@ class RoleManagementService {
         return await RolePermission.getAllRolePermissions();
     }
 
-    async assignPermissionToRole(roleCode, permissionCode, user) {
-        await RolePermission.assignPermissionToRole(roleCode, permissionCode);
+    async assignPermissionToRole(roleId, permissionCode, user) {
+        await RolePermission.assignPermissionToRole(roleId, permissionCode);
 
         // Audit log
         try {
-            await this.logPermissionAction(roleCode, permissionCode, 'otorgado', user);
+            await this.logPermissionAction(roleId, permissionCode, 'otorgado', user);
         } catch (auditErr) {
             console.error('[AUDIT] Error logging permission assignment:', auditErr);
         }
@@ -51,11 +51,11 @@ class RoleManagementService {
             throw new Error('Asignación no encontrada');
         }
 
-        await RolePermission.removePermissionFromRole(assignment.role_code, assignment.permission_code);
+        await RolePermission.removePermissionFromRole(assignment.role_id, assignment.permission_code);
 
         // Audit log
         try {
-            await this.logPermissionAction(assignment.role_code, assignment.permission_code, 'revocado', user);
+            await this.logPermissionAction(assignment.role_id, assignment.permission_code, 'revocado', user);
         } catch (auditErr) {
             console.error('[AUDIT] Error logging permission revocation:', auditErr);
         }
@@ -63,13 +63,13 @@ class RoleManagementService {
         return { success: true, message: 'Permiso revocado exitosamente' };
     }
 
-    async logPermissionAction(roleCode, permissionCode, action, user) {
+    async logPermissionAction(roleId, permissionCode, action, user) {
         try {
-            const roleInfo = await Role.getRoleAndId(roleCode);
+            const roleInfo = await Role.getRoleAndId(roleId);
             const permission = await Permission.getByCode(permissionCode);
 
-            const rolId = roleInfo?.role_id || null;
-            const rolName = roleInfo?.role_name || roleCode;
+            const rolId = roleInfo?.role_id || roleId;
+            const rolName = roleInfo?.role_name || `Role ID: ${roleId}`;
             const permissionName = permission?.permission_name || permissionCode;
 
             await HistorialPermisosRoles.logAction(rolId, rolName, permissionName, action, user.user_id, user.login);

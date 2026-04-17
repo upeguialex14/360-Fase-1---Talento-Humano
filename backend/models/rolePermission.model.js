@@ -1,11 +1,11 @@
 const pool = require('../config/db');
 
 class RolePermission {
-    static async assignPermissionToRole(roleCode, permissionCode) {
+    static async assignPermissionToRole(roleId, permissionCode) {
         try {
             await pool.execute(
-                'INSERT INTO role_permissions (role_code, permission_code) VALUES (?, ?) ON DUPLICATE KEY UPDATE permission_code = permission_code',
-                [roleCode, permissionCode]
+                'INSERT INTO role_permissions (role_id, permission_code) VALUES (?, ?) ON DUPLICATE KEY UPDATE permission_code = permission_code',
+                [roleId, permissionCode]
             );
             return { success: true };
         } catch (err) {
@@ -14,11 +14,11 @@ class RolePermission {
         }
     }
 
-    static async removePermissionFromRole(roleCode, permissionCode) {
+    static async removePermissionFromRole(roleId, permissionCode) {
         try {
             await pool.execute(
-                'DELETE FROM role_permissions WHERE role_code = ? AND permission_code = ?',
-                [roleCode, permissionCode]
+                'DELETE FROM role_permissions WHERE role_id = ? AND permission_code = ?',
+                [roleId, permissionCode]
             );
             return { success: true };
         } catch (err) {
@@ -27,11 +27,11 @@ class RolePermission {
         }
     }
 
-    static async getPermissionsByRole(roleCode) {
+    static async getPermissionsByRole(roleId) {
         try {
             const [rows] = await pool.execute(
-                'SELECT p.* FROM permissions p JOIN role_permissions rp ON p.permission_code = rp.permission_code WHERE rp.role_code = ?',
-                [roleCode]
+                'SELECT p.* FROM permissions p JOIN role_permissions rp ON p.permission_code = rp.permission_code WHERE rp.role_id = ?',
+                [roleId]
             );
             return rows;
         } catch (err) {
@@ -43,7 +43,7 @@ class RolePermission {
     static async getAllRolePermissions() {
         try {
             const [rows] = await pool.execute(
-                'SELECT rp.*, r.role_name, p.permission_name FROM role_permissions rp JOIN roles r ON rp.role_code = r.role_code JOIN permissions p ON rp.permission_code = p.permission_code'
+                'SELECT rp.*, r.role_name, p.permission_name FROM role_permissions rp JOIN roles r ON rp.role_id = r.role_id JOIN permissions p ON rp.permission_code = p.permission_code'
             );
             return rows;
         } catch (err) {
@@ -55,7 +55,7 @@ class RolePermission {
     static async getById(rolePermissionId) {
         try {
             const [rows] = await pool.execute(
-                'SELECT role_code, permission_code FROM role_permissions WHERE role_permission_id = ?',
+                'SELECT role_id, permission_code FROM role_permissions WHERE role_permission_id = ?',
                 [rolePermissionId]
             );
             return rows[0] || null;
@@ -65,11 +65,11 @@ class RolePermission {
         }
     }
 
-    static async checkPermission(roleCode, permissionName) {
+    static async checkPermission(roleId, permissionName) {
         try {
             const [permissions] = await pool.execute(
-                'SELECT p.permission_name FROM permissions p JOIN role_permissions rp ON p.permission_code = rp.permission_code WHERE rp.role_code = ? AND p.permission_name = ?',
-                [roleCode, permissionName]
+                'SELECT p.permission_name FROM permissions p JOIN role_permissions rp ON p.permission_code = rp.permission_code WHERE rp.role_id = ? AND p.permission_name = ?',
+                [roleId, permissionName]
             );
             return permissions.length > 0;
         } catch (err) {
@@ -78,11 +78,11 @@ class RolePermission {
         }
     }
 
-    static async checkPageAccess(roleCode, pageCode, accessType = 'can_view') {
+    static async checkPageAccess(roleId, pageCode, accessType = 'can_view') {
         try {
             const [access] = await pool.execute(
-                `SELECT ${accessType} FROM role_pages WHERE role_code = ? AND page_code = ?`,
-                [roleCode, pageCode]
+                `SELECT ${accessType} FROM role_pages WHERE role_id = ? AND page_code = ?`,
+                [roleId, pageCode]
             );
             return access.length > 0 && access[0][accessType] === 1;
         } catch (err) {

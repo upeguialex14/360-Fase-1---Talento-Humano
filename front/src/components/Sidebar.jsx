@@ -15,12 +15,7 @@ const Sidebar = () => {
     if (user && user.pages) {
         const seenCodes = new Set();
         const seenNames = new Set();
-        user.pages.forEach(p => {
-            let page = p;
-            // normalize english variant if somehow still exists
-            if (page.page_code === 'USERS') {
-                page = { ...page, page_code: 'USUARIOS', page_name: 'Gestión de Usuarios', route: '/usuarios' };
-            }
+        user.pages.forEach(page => {
             if (seenCodes.has(page.page_code) || seenNames.has(page.page_name)) {
                 return;
             }
@@ -69,16 +64,21 @@ const Sidebar = () => {
                         </NavLink>
                     </li>
 
-                    {uniquePages.map(page => (
-                        <li key={page.page_code}>
-                            <NavLink to={page.route} className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-                                {page.page_name}
-                            </NavLink>
-                        </li>
-                    ))}
+                    {uniquePages.map(page => {
+                        const pageRoute = page.route || page.path;
+                        const pageName = page.page_name || page.name;
+
+                        return (
+                            <li key={page.page_code}>
+                                <NavLink to={pageRoute} className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+                                    {pageName}
+                                </NavLink>
+                            </li>
+                        );
+                    })}
 
 
-                    {user && user.role_code === 'ADMIN' && (
+                    {user && user.role_id === 1 && (
                         <>
                             <li>
                                 <NavLink to="/role-page-access" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>

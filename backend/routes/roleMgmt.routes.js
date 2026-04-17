@@ -21,7 +21,7 @@ router.post('/role-permissions', verifyToken, checkPermission('MANAGE_ROLE_PERMI
 router.delete('/role-permissions/:role_permission_id', verifyToken, checkPermission('MANAGE_ROLE_PERMISSIONS'), roleMgmtController.revokePermissionFromRole);
 
 // Nuevas rutas para gestión de páginas por rol
-router.get('/roles/:role_code/pages', verifyToken, checkPermission('MANAGE_ROLES'), rolePageController.getRolePages);
-router.put('/roles/:role_code/pages', verifyToken, checkPermission('MANAGE_ROLES'), rolePageController.updateRolePages);
+router.get('/roles/:role_id/pages', verifyToken, checkPermission('MANAGE_ROLES'), rolePageController.getRolePages);
+router.put('/roles/:role_id/pages', verifyToken, checkPermission('MANAGE_ROLES'), rolePageController.updateRolePages);
 
 module.exports = router;
