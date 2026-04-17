@@ -1,4 +1,4 @@
-//Importamos la libreria xlsx con sus funcionesS
+//Importamos la libreria xlsx con sus funciones
 const xlsx = require('xlsx');
 const costCenterProcessor = require('./processors/costCenterProcessor.service');
 
@@ -19,7 +19,7 @@ const uploadExcel = async (data) => {
     }
 
 
-    // Transformamos y cargamos segun el tipo en el procesador correspontiende
+    // Transformamos y cargamos segun el tipo en el procesador correspondiente
     let result;
     switch (type) {
         case 'COST_CENTER':
@@ -27,11 +27,15 @@ const uploadExcel = async (data) => {
             break;
         case 'HIRING_ORDER':
             // result = await hiringOrderProcessor.process(rawJson);
-            break;
+            throw new Error("Tipo HIRING_ORDER aún no implementado");
         /*case 'PEOPLE':
             // result = await orderProcessor.process(rawJson);
             break; ARMAR LOGICA DESPUES YA QUE ESTA PEOPLE, PEOPLE_DETAILS Y PEOPLE_BUSSINES*/
         default:
-            throw new Error("Tipo de carga no soportado");
+            throw new Error("Tipo de carga no soportado: " + type);
     }
-}
+
+    return result;
+};
+
+module.exports = { uploadExcel };

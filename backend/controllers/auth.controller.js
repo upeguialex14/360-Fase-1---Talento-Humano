@@ -44,7 +44,7 @@ const changePassword = async (req, res) => {
             });
         }
 
-        await authService.changePassword(userId, newPassword);
+        await authService.changePassword(user_id, newPassword);
 
         res.json({
             success: true,

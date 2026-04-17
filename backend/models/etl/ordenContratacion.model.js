@@ -2,7 +2,7 @@
  * Modelo de Orden de Contratación
  * Encapsulates all orden_contratacion-related database queries
  */
-const pool = require('../config/db');
+const pool = require('../../config/db.js');
 
 const OrdenContratacion = {
     async findByIdentificacion(identificacion) {
