@@ -7,6 +7,7 @@ const roleMgmtRoutes = require('./routes/roleMgmt.routes');
 const adminRoutes = require('./routes/admin.routes');
 const ordenContratacionRoutes = require('./routes/etl/ordenContratacion.routes');
 const masiveUploadRoutes = require('./routes/etl/masiveUploadExcel.routes');
+const requisicionRoutes = require('./routes/requisicion.routes');
 
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/role-mgmt', roleMgmtRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/orden-contratacion', ordenContratacionRoutes);
 app.use('/api/etl', masiveUploadRoutes);
+app.use('/api/requisiciones', requisicionRoutes);
 
 
 // Manejo básico de rutas no encontradas

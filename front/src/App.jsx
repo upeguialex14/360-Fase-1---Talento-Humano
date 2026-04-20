@@ -23,6 +23,10 @@ import RolePageAccess from './pages/RolePageAccess';
 import AdminBlockedUsers from './pages/AdminBlockedUsers';
 import OrdenContratacion from './pages/OrdenContratacion';
 import UserActivity from './pages/UserActivity';
+import SolicitudVacantes from './pages/SolicitudVacantes';
+import GestionRequisiciones from './pages/GestionRequisiciones';
+import Documentacion from './pages/Documentacion';
+import Vacaciones from './pages/Vacaciones';
 
 
 /**
@@ -60,6 +64,10 @@ function App() {
             <Route path="users" element={<PageProtectedRoute requiredPageCode="USUARIOS"><Usuarios /></PageProtectedRoute>} />
             <Route path="contratacion" element={<PageProtectedRoute requiredPageCode="ORDEN_CONTRATACION"><OrdenContratacion /></PageProtectedRoute>} />
             <Route path="user-activity" element={<PageProtectedRoute requiredPageCode="ACTIVIDAD_USUARIOS"><UserActivity /></PageProtectedRoute>} />
+            <Route path="solicitud-vacantes" element={<PageProtectedRoute requiredPageCode="SOLICITUD_VACANTES" isOptional={true}><SolicitudVacantes /></PageProtectedRoute>} />
+            <Route path="gestion-requisiciones" element={<PageProtectedRoute requiredPageCode="GESTION_REQUISICIONES" isOptional={true}><GestionRequisiciones /></PageProtectedRoute>} />
+            <Route path="documentacion" element={<PageProtectedRoute requiredPageCode="DOCUMENTACION" isOptional={true}><Documentacion /></PageProtectedRoute>} />
+            <Route path="vacaciones" element={<PageProtectedRoute requiredPageCode="VACACIONES" isOptional={true}><Vacaciones /></PageProtectedRoute>} />
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
 
             <Route path="admin/blocked-users" element={<PageProtectedRoute requiredPageCode="" isOptional={true}><AdminBlockedUsers /></PageProtectedRoute>} />
