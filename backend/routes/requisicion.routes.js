@@ -1,19 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const requisicionController = require('../controllers/requisicion.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const verifyToken = require('../middleware/auth.middleware'); // 👈 importar directo
 
-// Todas las rutas requieren autenticación
-router.use(authMiddleware.verifyToken);
-
-// Rutas CRUD
-router.get('/', requisicionController.getAll);
-router.get('/estadisticas', requisicionController.getEstadisticas);
-router.get('/analistas', requisicionController.getAnalistas);
-router.get('/exportar', requisicionController.exportarCSV);
-router.get('/:id', requisicionController.getById);
-router.post('/', requisicionController.create);
-router.put('/:id', requisicionController.update);
-router.delete('/:id', requisicionController.delete);
+// Rutas CRUD con middleware aplicado correctamente
+router.get('/', verifyToken, requisicionController.getAll);
+router.get('/estadisticas', verifyToken, requisicionController.getEstadisticas);
+router.get('/analistas', verifyToken, requisicionController.getAnalistas);
+router.get('/exportar', verifyToken, requisicionController.exportarCSV);
+router.get('/:id', verifyToken, requisicionController.getById);
+router.post('/', verifyToken, requisicionController.create);
+router.put('/:id', verifyToken, requisicionController.update);
+router.delete('/:id', verifyToken, requisicionController.delete);
 
 module.exports = router;
