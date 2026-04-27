@@ -37,7 +37,7 @@ const PageProtectedRoute = ({ children, requiredPageCode, isOptional = false }) 
 
     // Si no hay páginas permitidas, denegar acceso
     if (!user.pages || !Array.isArray(user.pages)) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/home" replace />;
     }
 
     // Buscar si el usuario tiene acceso a esta página
@@ -47,7 +47,7 @@ const PageProtectedRoute = ({ children, requiredPageCode, isOptional = false }) 
 
     // Si no tiene acceso, redirigir al home
     if (!hasAccess) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/home" replace />;
     }
 
     return children;

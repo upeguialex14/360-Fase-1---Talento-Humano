@@ -12,7 +12,9 @@ const Layout = () => {
     <div className="app-layout">
       <Header />
       <div className="layout-body">
-        <Sidebar />
+        <div className="sidebar-container">
+          <Sidebar />
+        </div>
         <main className="main-content">
           <Outlet />
         </main>

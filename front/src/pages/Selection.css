@@ -1,0 +1,228 @@
+.selection-page {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+/* Animaciones de Entrada/Salida de Página */
+.page-enter {
+    opacity: 0;
+    transform: scale(1.05);
+}
+
+.page-exit {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(10px);
+}
+
+.selection-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.side-left {
+    transform: translateX(0);
+    transition: flex 1s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s ease;
+}
+
+.side-right {
+    transform: translateX(0);
+    transition: flex 1s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s ease;
+}
+
+.page-enter .side-left { transform: translateX(-100%); }
+.page-enter .side-right { transform: translateX(100%); }
+
+.selection-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: flex 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+    /* overflow: visible para que la ola no se corte */
+}
+
+.selection-side.expand {
+    flex: 1.25; /* Menos exagerado */
+}
+
+.selection-side.shrink {
+    flex: 0.75; /* No desaparece */
+}
+
+/* Colores de fondo */
+.side-left {
+    background: #00843d;
+}
+
+.side-right {
+    background: #1e224f;
+}
+
+/* Contenido de cada lado */
+.side-content {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    color: white;
+    z-index: 5;
+    padding: 2rem;
+    transition: all 0.8s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.shrink .side-content {
+    opacity: 0.4; /* Se atenúa pero no desaparece del todo */
+    transform: scale(0.9);
+}
+
+.side-icon-container {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.side-content h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    text-transform: none; /* Mantener formato original */
+}
+
+.side-content p {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+    font-weight: 300;
+    max-width: 300px;
+}
+
+/* Botones */
+.selection-btn {
+    padding: 1rem 2rem;
+    border-radius: 999px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    width: auto;
+    min-width: 260px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.btn-green {
+    background: white;
+    color: #00843d;
+}
+
+.btn-blue {
+    background: white;
+    color: #1e224f;
+}
+
+.selection-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Badge superior */
+.selection-header-badge {
+    position: absolute;
+    top: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 1rem 2.5rem;
+    border-radius: 3rem;
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.badge-content h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #1e224f;
+}
+
+.badge-content p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+/* Separador de Onda Real - Anclado al borde derecho del panel verde */
+.curvy-separator {
+    position: absolute;
+    top: 0;
+    right: -100px; /* Centrado en la linea de unión */
+    height: 100%;
+    width: 200px; 
+    z-index: 20;
+    pointer-events: none;
+}
+
+.curvy-separator svg {
+    height: 100%;
+    width: 100%;
+}
+
+
+/* Footer y Ayuda */
+.selection-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+    z-index: 10;
+}
+
+.help-button {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e224f;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .selection-container { flex-direction: column; }
+    .curvy-separator { display: none; }
+    .side-content h2 { font-size: 2rem; }
+}
