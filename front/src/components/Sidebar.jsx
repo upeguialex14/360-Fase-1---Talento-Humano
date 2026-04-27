@@ -101,17 +101,23 @@ const Icons = {
 
 // Rutas que pertenecen al menú de Parametrización
 const PARAMETRIZACION_ROUTES = [
-    '/roles',
-    '/permissions',
-    '/users',
-    '/role-page-access',
-    '/admin/blocked-users'
+    '/home/roles',
+    '/home/permissions',
+    '/home/users',
+    '/home/role-page-access',
+    '/home/admin/blocked-users'
 ];
 
 // Rutas que pertenecen al menú de Formularios
 const FORMULARIOS_ROUTES = [
-    '/documentacion',
-    '/vacaciones'
+    '/home/documentacion',
+    '/home/vacaciones'
+];
+
+// Rutas que pertenecen al menú de Bases
+const BASES_ROUTES = [
+    '/home/base-inactiva',
+    '/home/base-unificada'
 ];
 
 /**
@@ -123,6 +129,7 @@ const Sidebar = () => {
     const location = useLocation();
     const [isParametrizacionOpen, setIsParametrizacionOpen] = useState(false);
     const [isFormulariosOpen, setIsFormulariosOpen] = useState(false);
+    const [isBasesOpen, setIsBasesOpen] = useState(false);
 
     // Verificar si alguna ruta activa pertenece a Parametrización
     useEffect(() => {
@@ -138,6 +145,14 @@ const Sidebar = () => {
             location.pathname === route || location.pathname.startsWith(route + '/')
         );
         setIsFormulariosOpen(isFormulariosRoute);
+    }, [location.pathname]);
+
+    // Verificar si alguna ruta activa pertenece a Bases
+    useEffect(() => {
+        const isBasesRoute = BASES_ROUTES.some(route => 
+            location.pathname === route || location.pathname.startsWith(route + '/')
+        );
+        setIsBasesOpen(isBasesRoute);
     }, [location.pathname]);
 
     // prepare unique page list so duplicates from the backend don't show twice
@@ -199,6 +214,11 @@ const Sidebar = () => {
         location.pathname === route || location.pathname.startsWith(route + '/')
     );
 
+    // Determinar si el menú de Bases está activo
+    const isBasesActive = BASES_ROUTES.some(route => 
+        location.pathname === route || location.pathname.startsWith(route + '/')
+    );
+
     return (
         <aside className="app-sidebar">
             <div className="sidebar-brand">
@@ -208,14 +228,18 @@ const Sidebar = () => {
             <nav className="sidebar-nav">
                 <ul>
                     <li>
-                        <NavLink to="/" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+                        <NavLink to="/home" end className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
                             <span className="sidebar-icon">{Icons.home}</span>
                             Inicio
                         </NavLink>
                     </li>
 
                     {uniquePages.map(page => {
-                        const pageRoute = page.route || page.path;
+                        const rawRoute = page.route || page.path || '';
+                        // Normalizar ruta: si el backend la devuelve sin /home/, agregarla
+                        const pageRoute = rawRoute.startsWith('/home')
+                            ? rawRoute
+                            : `/home${rawRoute.startsWith('/') ? rawRoute : '/' + rawRoute}`;
                         const pageName = page.page_name || page.name;
 
                         return (
@@ -230,7 +254,7 @@ const Sidebar = () => {
                     {/* Solicitud de Vacantes - Solo para administradores */}
                     {user && user.role_id === 1 && (
                         <li>
-                            <NavLink to="/solicitud-vacantes" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+                            <NavLink to="/home/solicitud-vacantes" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
                                 <span className="sidebar-icon">{Icons.briefcase}</span>
                                 Solicitud de Vacantes
                             </NavLink>
@@ -240,7 +264,7 @@ const Sidebar = () => {
                     {/* Gestión de Requisiciones - Solo para administradores */}
                     {user && user.role_id === 1 && (
                         <li>
-                            <NavLink to="/gestion-requisiciones" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+                            <NavLink to="/home/gestion-requisiciones" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
                                 <span className="sidebar-icon">{Icons.clipboard}</span>
                                 Gestión de Requisiciones
                             </NavLink>
@@ -262,7 +286,7 @@ const Sidebar = () => {
                             <ul className={`sidebar-dropdown-menu ${isParametrizacionOpen ? 'open' : ''}`}>
                                 <li>
                                     <NavLink 
-                                        to="/roles" 
+                                        to="/home/roles" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.users}</span>
@@ -271,7 +295,7 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink 
-                                        to="/permissions" 
+                                        to="/home/permissions" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.shield}</span>
@@ -280,7 +304,7 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink 
-                                        to="/users" 
+                                        to="/home/users" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.key}</span>
@@ -289,7 +313,7 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink 
-                                        to="/role-page-access" 
+                                        to="/home/role-page-access" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.link}</span>
@@ -298,7 +322,7 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink 
-                                        to="/admin/blocked-users" 
+                                        to="/home/admin/blocked-users" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.userX}</span>
@@ -324,7 +348,7 @@ const Sidebar = () => {
                             <ul className={`sidebar-dropdown-menu ${isFormulariosOpen ? 'open' : ''}`}>
                                 <li>
                                     <NavLink 
-                                        to="/documentacion" 
+                                        to="/home/documentacion" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.fileText}</span>
@@ -333,11 +357,46 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink 
-                                        to="/vacaciones" 
+                                        to="/home/vacaciones" 
                                         className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
                                     >
                                         <span className="sidebar-icon">{Icons.calendar}</span>
                                         Vacaciones
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        </li>
+                    )}
+
+                    {/* Menú Bases - Solo para administradores */}
+                    {user && user.role_id === 1 && (
+                        <li className="sidebar-dropdown">
+                            <button 
+                                className={`sidebar-dropdown-toggle ${isBasesActive ? 'active' : ''}`}
+                                onClick={() => setIsBasesOpen(!isBasesOpen)}
+                            >
+                                <span className="sidebar-icon">{Icons.briefcase}</span>
+                                <span className="sidebar-link-text">Bases</span>
+                                <span className="sidebar-chevron">{Icons.chevronDown(isBasesOpen)}</span>
+                            </button>
+                            
+                            <ul className={`sidebar-dropdown-menu ${isBasesOpen ? 'open' : ''}`}>
+                                <li>
+                                    <NavLink 
+                                        to="/home/base-inactiva" 
+                                        className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
+                                    >
+                                        <span className="sidebar-icon">{Icons.briefcase}</span>
+                                        Base inactiva
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink 
+                                        to="/home/base-unificada" 
+                                        className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}
+                                    >
+                                        <span className="sidebar-icon">{Icons.briefcase}</span>
+                                        Base unificada
                                     </NavLink>
                                 </li>
                             </ul>

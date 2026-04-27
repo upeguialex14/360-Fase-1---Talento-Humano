@@ -93,7 +93,7 @@ const Login = () => {
                 if (response.forceChangePassword) {
                     navigate('/change-password');
                 } else {
-                    navigate('/');
+                    navigate('/home');
                 }
             } else {
                 // Mostrar el mensaje exacto devuelto por el backend

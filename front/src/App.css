@@ -17,6 +17,8 @@
   --white: #ffffff;
   --error-color: #ef4444;
   --success-color: #10b981;
+  /* Heading color - separado del primary para no teñir de azul todos los títulos */
+  --heading-color: #1e293b;
 
   /* Espaciado */
   --spacing-xs: 0.5rem;
@@ -229,7 +231,7 @@ body {
 .page-container h1,
 .page-container h2,
 .page-container h3 {
-  color: var(--primary-color);
+  color: var(--heading-color);
   margin-bottom: var(--spacing-md);
 }
 
