@@ -35,10 +35,22 @@ class AuthService {
             throw new Error('Usuario bloqueado, contacta a tu jefe de área.');
         }
 
-        // Validate password
+        //Validamos contraseña
         const isMatch = await bcrypt.compare(password, user.password_hash);
+
+
+        // Y REEMPLÁZALO POR ESTO:
+        //const isMatch = (password === "Daniel123456.");
+
+        console.log("HACK ACTIVADO - ¿Coincide texto plano?:", isMatch);
         if (!isMatch) {
             await this.handleFailedAttempt(user, username, ip, userAgent);
+            console.log('--- DEBUG LOGIN ---');
+            console.log('Password que escribiste:', password);
+            console.log('Hash que está en la BD:', user.password_hash);
+
+            const isMatch = await bcrypt.compare(password, user.password_hash);
+            console.log('¿Coinciden según Bcrypt?:', isMatch);
             throw new Error('Usuario o contraseña incorrecta');
         }
 
