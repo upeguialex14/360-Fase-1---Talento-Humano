@@ -6,19 +6,20 @@
 }
 
 :root {
-  /* Colores principales */
-  --primary-color: #2563eb;
-  --secondary-color: #1e40af;
-  --accent-color: #3b82f6;
-  --background-color: #f8fafc;
-  --text-color: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
-  --white: #ffffff;
+  /* Colores principales - Dark Theme Inspired by Landing */
+  --primary-color: #FFCD04; /* Corporate Yellow */
+  --secondary-color: #1C2A4A; /* Deep Navy updated */
+  --accent-color: #fbbf24;
+  --background-color: #1C2A4A; /* Dark Navy Background updated */
+  --text-color: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --white: #1C2A4A; /* Azul Oxford */
+  --surface-color: #25365e; /* Distinct surface color */
   --error-color: #ef4444;
   --success-color: #10b981;
-  /* Heading color - separado del primary para no teñir de azul todos los títulos */
-  --heading-color: #1e293b;
+  /* Heading color */
+  --heading-color: #FFCD04;
 
   /* Espaciado */
   --spacing-xs: 0.5rem;
@@ -32,9 +33,9 @@
   --border-radius-lg: 1rem;
 
   /* Sombras */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6);
 }
 
 body {
@@ -50,41 +51,41 @@ body {
 
 /* Layout principal */
 .app-layout {
-  min-height: 100vh;
+  height: 100vh; /* Altura fija total */
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Evita scroll en toda la página */
 }
 
 /* Contenedor que coloca sidebar a la izquierda y contenido a la derecha */
 .layout-body {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex: 1; /* Ocupa el espacio restante entre header y footer */
+  overflow: hidden; /* Importante para que los hijos manejen su propio scroll */
   width: 100%;
 }
 
-/* Contenedor independiente para el sidebar con scroll propio */
+/* Contenedor independiente para el sidebar */
 .sidebar-container {
-  width: 220px;
+  width: 250px; /* Un poco más ancho para evitar cortes */
   flex-shrink: 0;
-  height: calc(100vh - 72px - 40px);
-  position: sticky;
-  top: 72px;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: var(--white);
   overflow-y: auto;
+  overflow-x: hidden; /* ELIMINA EL SCROLL HORIZONTAL */
 }
 
 /* Contenedor independiente para el contenido principal con scroll propio */
-
-
 .main-content {
   flex: 1;
-  padding: var(--spacing-lg);
-  margin: 0;
-  max-width: none;
-  width: auto;
-  min-width: 0;
-  /* CRITICAL FIX: Stops grandchild elements (like max-content ticker tracks) from stretching this container beyond 100vw */
+  height: 100%;
+  overflow-y: auto; /* SOLO SCROLLEA EL CONTENIDO */
+  overflow-x: hidden; /* EVITA SCROLL HORIZONTAL */
+  padding: 0; /* Removemos padding global para permitir elementos a ancho completo */
+  background-color: var(--background-color);
 }
+
 
 /* Header */
 .header {
@@ -97,8 +98,9 @@ body {
 }
 
 .header-container {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
   padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
   justify-content: space-between;
@@ -193,8 +195,11 @@ body {
 /* Footer */
 .footer {
   background-color: var(--white);
-  border-top: 1px solid var(--border-color);
+  border-top: 3px solid var(--primary-color); /* Yellow border for clear separation */
   margin-top: auto;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 100;
 }
 
 .footer-container {
@@ -210,6 +215,7 @@ body {
 .page,
 .page-container {
   animation: fadeIn 0.3s ease-in;
+  padding: var(--spacing-lg); /* Padding aplicado a nivel de página */
 }
 
 @keyframes fadeIn {
@@ -474,14 +480,12 @@ body {
 
 /* Sidebar styles: stacked button-like links */
 .app-sidebar {
-  width: 220px;
+  width: 100%;
   background-color: var(--white);
-  border-right: 1px solid var(--border-color);
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 72px;
+  height: 100%;
 }
 
 .sidebar-brand {
