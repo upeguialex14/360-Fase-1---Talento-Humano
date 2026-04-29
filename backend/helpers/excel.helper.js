@@ -23,6 +23,12 @@ const excelDateToJS = (excelDate) => {
     // Si es un número (formato serial de Excel)
     const num = parseFloat(excelDate);
     if (!isNaN(num)) {
+        // Un número de serie de Excel razonable está entre 1 (1900) y 100000 (2173)
+        // Si el número es extremadamente grande (como un ID o teléfono), no es una fecha.
+        if (num < 1 || num > 100000) {
+            return null;
+        }
+
         // Excel usa 1899-12-30 como base (25569 es el offset para Unix epoch)
         const date = new Date((num - 25569) * 86400 * 1000);
 
@@ -32,7 +38,7 @@ const excelDateToJS = (excelDate) => {
         }
     }
 
-    return excelDate;
+    return null;
 };
 
 module.exports = {

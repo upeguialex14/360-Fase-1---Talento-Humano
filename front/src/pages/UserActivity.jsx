@@ -9,7 +9,7 @@ const UserActivity = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (user && user.role_code === 'ADMIN') {
+        if (user && user.role_id === 1) {
             fetchActivity();
         } else {
             setLoading(false);
@@ -30,7 +30,7 @@ const UserActivity = () => {
     };
 
     if (!user) return null;
-    if (user.role_code !== 'ADMIN') {
+    if (user.role_id !== 1) {
         return <Navigate to="/" replace />;
     }
 

@@ -7,8 +7,8 @@ const rolePageService = require('../services/rolePage.service');
  */
 const getRolePages = async (req, res) => {
     try {
-        const { role_code } = req.params;
-        const data = await rolePageService.getRolePages(role_code);
+        const { role_id } = req.params;
+        const data = await rolePageService.getRolePages(role_id);
         res.json({ success: true, data });
     } catch (error) {
         console.error('Error al obtener páginas por rol:', error);
@@ -25,14 +25,14 @@ const getRolePages = async (req, res) => {
  */
 const updateRolePages = async (req, res) => {
     try {
-        const { role_code } = req.params;
+        const { role_id } = req.params;
         const { pages } = req.body; // Array de { page_code, can_view, can_edit }
 
         if (!Array.isArray(pages)) {
             return res.status(400).json({ success: false, message: 'El cuerpo de la petición debe contener un array de páginas' });
         }
 
-        const result = await rolePageService.updateRolePages(role_code, pages, req.user);
+        const result = await rolePageService.updateRolePages(role_id, pages, req.user);
         res.json(result);
     } catch (error) {
         console.error('Error al actualizar páginas por rol:', error);

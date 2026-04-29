@@ -2,18 +2,18 @@ const Page = require('../models/page.model');
 const Role = require('../models/role.model');
 
 class RolePageService {
-    async getRolePages(roleCode) {
+    async getRolePages(roleId) {
         // Validate role exists
-        const role = await Role.getRoleByCode(roleCode);
+        const role = await Role.getRoleById(roleId);
         if (!role) {
             throw new Error('El rol especificado no existe');
         }
 
-        return await Page.getRolePages(roleCode);
+        return await Page.getRolePages(roleId);
     }
 
-    async updateRolePages(roleCode, pages, user) {
-        return await Page.updateRolePages(roleCode, pages, user);
+    async updateRolePages(roleId, pages, user) {
+        return await Page.updateRolePages(roleId, pages, user);
     }
 }
 

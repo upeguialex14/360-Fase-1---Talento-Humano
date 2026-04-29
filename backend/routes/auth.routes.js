@@ -15,7 +15,7 @@ router.post('/logout', verifyToken, authController.logout);
 // Consultar última sesión del usuario (para mostrar en menú)
 router.get('/last-session', verifyToken, authController.getLastSession);
 
-// Endpoint de forzado manual para DEMOSTRACIÓN (protegido, rol ADMIN verificado en controlador)
+// Endpoint de forzado manual para DEMOSTRACIÓN (protegido, rol Gerente verificado en controlador)
 router.post('/force-expire-demo', verifyToken, authController.forcePasswordChangeDemo);
 
 module.exports = router;

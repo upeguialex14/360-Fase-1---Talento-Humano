@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
      * @param {object} response - Respuesta del servidor { success, token, user, forceChangePassword }
      */
     const login = (response) => {
+        console.log('PAYLOAD DE LOGIN EN AUTHCONTEXT:', response);
         const { token, user, forceChangePassword } = response;
 
         // Guardar en estado

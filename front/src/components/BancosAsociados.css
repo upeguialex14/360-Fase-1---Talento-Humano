@@ -4,13 +4,14 @@
     margin-bottom: 50px;
     position: relative;
     z-index: 10;
+    display: block;
 }
 
 .bancos-title {
     text-align: center;
     font-size: 2rem;
     font-weight: 600;
-    color: #444;
+    color: var(--primary-color);
     margin-bottom: 30px;
     font-family: inherit;
 }
@@ -21,7 +22,7 @@
     position: relative;
     user-select: none;
     /* Blend the white background of the JPEG logos into a continuous white ribbon */
-    background-color: #fff;
+    background-color: transparent;
     padding: 15px 0;
     /* Vertical padding so logos don't touch the gray bounds */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);

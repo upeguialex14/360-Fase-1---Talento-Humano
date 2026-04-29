@@ -95,16 +95,16 @@ const getLastSession = async (req, res) => {
 
 const forcePasswordChangeDemo = async (req, res) => {
     try {
-        const { user_id, role_code } = req.user;
+        const { user_id, role_id } = req.user;
 
-        if (role_code !== 'ADMIN') {
+        if (role_id !== 1) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado. Se requiere rol ADMIN.'
+                message: 'Acceso denegado. Se requiere rol Gerente.'
             });
         }
 
-        await authService.forcePasswordChange(user_id, user_id, role_code);
+        await authService.forcePasswordChange(user_id, user_id, role_id);
 
         res.json({
             success: true,

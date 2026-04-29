@@ -30,15 +30,14 @@ const PageProtectedRoute = ({ children, requiredPageCode, isOptional = false }) 
         return <Navigate to="/login" replace />;
     }
 
-    // Si es opcional (ejemplo: ADMIN tiene acceso a todo), permitir siempre
-    // O si es ADMIN, permitir acceso (tienen privilegios totales)
-    if (isOptional || user.role_code === 'ADMIN') {
+    // Si es opcional (ejemplo: se permite siempre) o el Gerente tiene acceso total
+    if (isOptional || user.role_id === 1) {
         return children;
     }
 
     // Si no hay páginas permitidas, denegar acceso
     if (!user.pages || !Array.isArray(user.pages)) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/home" replace />;
     }
 
     // Buscar si el usuario tiene acceso a esta página
@@ -48,7 +47,7 @@ const PageProtectedRoute = ({ children, requiredPageCode, isOptional = false }) 
 
     // Si no tiene acceso, redirigir al home
     if (!hasAccess) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/home" replace />;
     }
 
     return children;

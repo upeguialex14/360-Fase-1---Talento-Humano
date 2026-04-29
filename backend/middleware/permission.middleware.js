@@ -7,22 +7,23 @@ const PermissionService = require('../services/permission.service');
  */
 const checkPermission = (requiredPermission) => {
     return async (req, res, next) => {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
 
-        if (!role_code) {
+        if (!role_id) {
             return res.status(403).json({ success: false, message: 'No se encontró el rol del usuario' });
         }
 
         try {
-            // Si es ADMIN, tiene acceso total (opcional, según requerimiento)
-            if (role_code === 'LIDER') {
+            // Gerente (1) y Tecnologia (2) tienen acceso total
+            if (role_id === 1 || role_id === 2) {
                 return next();
             }
 
             // Consultar si el rol tiene el permiso solicitado
-            const hasPermission = await PermissionService.checkPermission(role_code, requiredPermission);
+            const hasPermission = await PermissionService.checkPermission(role_id, requiredPermission);
 
             if (hasPermission) {
+                return next();
             }
 
             return res.status(403).json({ success: false, message: 'No tiene permisos para realizar esta acción' });
@@ -40,20 +41,30 @@ const checkPermission = (requiredPermission) => {
  */
 const checkPageAccess = (pageCode, accessType = 'can_view') => {
     return async (req, res, next) => {
-        const { role_code } = req.user;
+        const { role_id } = req.user;
 
-        if (!role_code) {
+        if (!role_id) {
             return res.status(403).json({ success: false, message: 'No se encontró el rol del usuario' });
         }
 
         try {
-            // El ADMIN tiene acceso total
-            if (role_code === 'ADMIN') {
+            // Gerente (1) y Tecnologia (2) tienen acceso total
+            if (role_id === 1 || role_id === 2) {
+                return next();
+            }
+
+            // Líderes (3) y Soporte (4) tienen acceso a gestión de equipo
+            if ((role_id === 3 || role_id === 4) && ['USUARIOS', 'ROLES', 'PERMISSIONS'].includes(pageCode)) {
+                return next();
+            }
+
+            // Analista (5) solo tiene acceso de consulta básica
+            if (role_id === 5 && accessType === 'can_view' && ['DASHBOARD', 'REPORTES'].includes(pageCode)) {
                 return next();
             }
 
             // Consultar si el rol tiene el acceso solicitado para la página
-            const hasAccess = await PermissionService.checkPageAccess(role_code, pageCode, accessType);
+            const hasAccess = await PermissionService.checkPageAccess(role_id, pageCode, accessType);
 
             if (hasAccess) {
                 return next();

@@ -30,15 +30,27 @@ class AuthService {
         }
 
         // Check if locked
-        if (user.is_locked) {
+        if (user.status_id === 0) {
             await LoggingService.logLogin(false, user.user_id, username, 'USER_LOCKED', ip, userAgent);
             throw new Error('Usuario bloqueado, contacta a tu jefe de área.');
         }
 
-        // Validate password
+        //Validamos contraseña
         const isMatch = await bcrypt.compare(password, user.password_hash);
+
+
+        // Y REEMPLÁZALO POR ESTO:
+        //const isMatch = (password === "Daniel123456.");
+
+        console.log("HACK ACTIVADO - ¿Coincide texto plano?:", isMatch);
         if (!isMatch) {
             await this.handleFailedAttempt(user, username, ip, userAgent);
+            console.log('--- DEBUG LOGIN ---');
+            console.log('Password que escribiste:', password);
+            console.log('Hash que está en la BD:', user.password_hash);
+
+            const isMatch = await bcrypt.compare(password, user.password_hash);
+            console.log('¿Coinciden según Bcrypt?:', isMatch);
             throw new Error('Usuario o contraseña incorrecta');
         }
 
@@ -50,19 +62,19 @@ class AuthService {
         await this.logHistoricalLogin(user, ip, userAgent);
 
         // Get user role
-        const roleName = await Role.getRoleName(user.role_code);
+        const roleName = await Role.getRoleName(user.role_id);
         user.role_name = roleName;
 
         // Check if password change is required
         const forceChange = this.needsPasswordChange(user);
 
         // Get permissions and pages
-        const permissions = await this.getUserPermissions(user.role_code);
-        const pages = await this.getUserPages(user.role_code);
+        const permissions = await this.getUserPermissions(user.role_id);
+        const pages = await this.getUserPages(user.role_id, user.user_id);
 
         // Generate JWT
         const token = jwt.sign(
-            { user_id: user.user_id, role_code: user.role_code, login: user.login },
+            { user_id: user.user_id, role_id: user.role_id, document_number: user.document_number },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -71,10 +83,11 @@ class AuthService {
             token,
             user: {
                 user_id: user.user_id,
-                login: user.login,
+                document_number: user.document_number,
                 email: user.email,
-                full_name: user.full_name,
-                role_code: user.role_code,
+                name: user.name,
+                last_name: user.last_name,
+                role_id: user.role_id,
                 role_name: user.role_name,
                 permissions,
                 pages
@@ -84,22 +97,13 @@ class AuthService {
     }
 
     async handleFailedAttempt(user, username, ip, userAgent) {
-        const newAttempts = (user.failed_attempts || 0) + 1;
-        const maxAttempts = await Parameter.getByKey('max_login_attempts') || 5;
-        const isLocked = newAttempts >= maxAttempts ? 1 : 0;
-
-        await User.updateFailedAttempts(user.user_id, newAttempts, isLocked);
-
-        if (isLocked) {
-            await LoggingService.logLockHistory(user.user_id, user.login, user.email, newAttempts);
-        }
-
+        // Log the failed login attempt
         await LoggingService.logLogin(false, user.user_id, username, 'WRONG_PASSWORD', ip, userAgent);
     }
 
     async logHistoricalLogin(user, ip, userAgent) {
         try {
-            await HistoricalLogin.logHistoricalLogin(user.user_id, user.login, user.email, ip, userAgent);
+            await HistoricalLogin.logHistoricalLogin(user.user_id, user.document_number, user.email, ip, userAgent);
         } catch (err) {
             console.error('[AuthService] Error logging historical login:', err);
             // Don't throw - don't block login due to audit error
@@ -116,18 +120,24 @@ class AuthService {
         }
     }
 
-    async getUserPages(roleCode) {
+    async getUserPages(roleId, userId) {
         try {
-            const pageRows = await Page.getPagesForRole(roleCode);
+            if (roleId === 1) {
+                return [
+                    { page_code: 'DASHBOARD', page_name: 'Dashboard', route: '/dashboard', can_view: 1, can_edit: 1 },
+                    { page_code: 'ROLES', page_name: 'Gestión de Roles', route: '/roles', can_view: 1, can_edit: 1 },
+                    { page_code: 'PERMISSIONS', page_name: 'Gestión de Permisos', route: '/permissions', can_view: 1, can_edit: 1 },
+                    { page_code: 'USUARIOS', page_name: 'Gestión de Usuarios', route: '/users', can_view: 1, can_edit: 1 },
+                    { page_code: 'PLANTA', page_name: 'Planta Operación', route: '/planta', can_view: 1, can_edit: 1 },
+                    { page_code: 'COSTOS', page_name: 'Centro de Costos', route: '/costos', can_view: 1, can_edit: 1 },
+                    { page_code: 'ORDEN_CONTRATACION', page_name: 'Orden de Contratación', route: '/contratacion', can_view: 1, can_edit: 1 }
+                ];
+            }
 
-            // Normalize and filter duplicates
+            const pageRows = await Page.getPagesForRole(roleId);
+
             const seen = new Set();
             return pageRows.filter(p => {
-                if (p.page_code === 'USERS') {
-                    p.page_code = 'USUARIOS';
-                    p.page_name = 'Gestión de Usuarios';
-                    p.route = '/usuarios';
-                }
                 if (seen.has(p.page_code)) return false;
                 seen.add(p.page_code);
                 return true;
@@ -139,11 +149,12 @@ class AuthService {
     }
 
     needsPasswordChange(user) {
-        if (user.change_password_required === 1) return true;
+        if (user.requires_password_change === 1) return true;
         if (!user.password_changed_at) return true;
-        const now = new Date();
-        const expiresAt = new Date(user.password_expires_at);
-        return now > expiresAt;
+        // Check if password hasn't been changed in 30 days
+        const passwordChangedDate = new Date(user.password_changed_at);
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        return passwordChangedDate < thirtyDaysAgo;
     }
 
     async changePassword(userId, newPassword) {
@@ -186,9 +197,9 @@ class AuthService {
         }
     }
 
-    async forcePasswordChange(userId, adminId, role) {
-        if (role !== 'ADMIN') {
-            throw new Error('Acceso denegado. Se requiere rol ADMIN.');
+    async forcePasswordChange(userId, adminId, roleId) {
+        if (roleId !== 1) { // Solo Gerente (role_id: 1) puede forzar cambio de contraseña
+            throw new Error('Acceso denegado. Se requiere rol de Gerente.');
         }
 
         const diasMax = await Parameter.getByKey('dias_cambio_pwd') || 30;

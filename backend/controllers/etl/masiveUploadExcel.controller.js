@@ -1,14 +1,11 @@
 const uploadService = require('../../services/etl/masiveUploadExcel.service');
+const CostCenterModel = require('../../models/etl/costCenter.model');
+const BaseDatosModel = require('../../models/etl/BaseDatos.model');
 
-const controllerUploadExcel = async (req, res, next) => {
+const controllerUploadExcel = async (req, res) => {
     try {
-        // Validacion de que se haya enviado un archivo (portero)
-        const file = req.file.buffer;
-        if (!file) {
-            return res.status(400).json({
-                ok: false,
-                msg: "No se envio ningun archivo"
-            });
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No se subió ningún archivo' });
         }
 
         // Preparacion de datos
@@ -29,13 +26,19 @@ const controllerUploadExcel = async (req, res, next) => {
 
 
     } catch (error) {
-        console.log(error);
-        //En caso de error devolvemos 500
-        return res.status(500).json({
-            ok: false,
-            msg: error.message || "Error al subir el archivo"
-        });
+        console.error("Error getCostCenters:", error);
+        return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
-module.exports = { controllerUploadExcel };
+const getBaseDatos = async (req, res) => {
+    try {
+        const data = await BaseDatosModel.getAll();
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error("Error getBaseDatos:", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos };

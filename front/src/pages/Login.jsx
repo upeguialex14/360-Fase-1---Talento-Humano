@@ -83,6 +83,8 @@ const Login = () => {
                 password: formData.password,
             });
 
+            console.log('PAYLOAD DE LOGIN:', response);
+
             if (response.success) {
                 // Guardar en contexto
                 login(response);
@@ -91,7 +93,7 @@ const Login = () => {
                 if (response.forceChangePassword) {
                     navigate('/change-password');
                 } else {
-                    navigate('/');
+                    navigate('/home');
                 }
             } else {
                 // Mostrar el mensaje exacto devuelto por el backend

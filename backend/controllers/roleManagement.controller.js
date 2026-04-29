@@ -13,8 +13,8 @@ const getRoles = async (req, res) => {
 
 const createRole = async (req, res) => {
     try {
-        const { role_code, role_name, description } = req.body;
-        await roleManagementService.createRole({ role_code, role_name, description });
+        const { role_name, description } = req.body;
+        await roleManagementService.createRole({ role_name, description });
         res.json({ success: true, message: 'Rol creado exitosamente' });
     } catch (error) {
         console.error('Error al crear rol:', error);
@@ -57,8 +57,8 @@ const getRolePermissions = async (req, res) => {
 
 const assignPermissionToRole = async (req, res) => {
     try {
-        const { role_code, permission_code } = req.body;
-        await roleManagementService.assignPermissionToRole(role_code, permission_code, req.user);
+        const { role_id, permission_code } = req.body;
+        await roleManagementService.assignPermissionToRole(role_id, permission_code, req.user);
         res.json({ success: true, message: 'Permiso asignado exitosamente' });
     } catch (error) {
         console.error('Error al asignar permiso:', error);

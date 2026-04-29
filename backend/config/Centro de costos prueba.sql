@@ -1,6 +1,6 @@
 -- Tabla de Roles (Admin, Editor, etc.)
 
--- DROP DATABASE talentohumano360;
+DROP DATABASE talentohumano360;
 
 CREATE DATABASE talentohumano360;
 USE talentohumano360;
@@ -85,7 +85,6 @@ CREATE TABLE SYSTEM_TRAZABILITY (
 
 
 -- Flujo de centro de costos.
-USE talentohumano360;
 
 CREATE TABLE STATUS_MASTER (
     status_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -336,15 +335,12 @@ UPDATE MASTER_LEADER ml
 JOIN USERS u ON ml.name = CONCAT(u.name, ' ', u.last_name)
 SET ml.user_id = u.user_id;
 
+DESCRIBE MASTER_LEADER;
+
 -- D. Eliminamos la columna name de MASTER_LEADER
 -- A partir de ahora, el nombre se consulta haciendo JOIN con USERS
 ALTER TABLE MASTER_LEADER 
 DROP COLUMN name;
-
-USE talentohumano360;
-
--- Desactivamos revisiones de llaves foráneas temporalmente para poder limpiar
-SET FOREIGN_KEY_CHECKS = 0;
 
 -- Borrar todos los registros de la tabla de líderes
 TRUNCATE TABLE MASTER_LEADER;
@@ -352,9 +348,10 @@ TRUNCATE TABLE MASTER_LEADER;
 -- Volvemos a activar las revisiones
 SET FOREIGN_KEY_CHECKS = 1;
 
-select*from users;
+select*from master_leader;
 
-USE talentohumano360;
+
+
 
 -- 1. Crear tabla de Cargos (Master Job Titles)
 CREATE TABLE MASTER_JOB_TITLES (
@@ -391,6 +388,7 @@ CREATE TABLE HIRING_ORDER (
 );
 
 SELECT * FROM users;
+USE talentohumano360;
 
 INSERT INTO USERS (
     role_id, 

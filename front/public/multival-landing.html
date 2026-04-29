@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multival 360 - Landing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f1a;
+      --primary: #FFCD04;
+      --secondary: #2A2A54;
+      --surface: rgba(18, 24, 48, 0.92);
+      --surface-strong: rgba(11, 15, 26, 0.98);
+      --text: #f8f8ff;
+      --text-muted: rgba(248, 248, 255, 0.72);
+      --radius: 2rem;
+      --transition: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      position: relative;
+      overflow-x: hidden;
+      background: radial-gradient(circle at top left, rgba(255, 205, 4, 0.12), transparent 18%),
+        radial-gradient(circle at bottom right, rgba(42, 42, 84, 0.12), transparent 15%),
+        var(--bg);
+    }
+
+    #landingRoot {
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 205, 4, 0.18);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 45px rgba(255, 205, 4, 0.35);
+      z-index: 9999;
+      transition: transform 0.15s var(--transition), width 0.2s ease, height 0.2s ease;
+    }
+
+    .section-reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s var(--transition), transform 1s var(--transition);
+    }
+
+    .section-reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-section {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .hero-inner {
+      width: min(1140px, calc(100% - 3rem));
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 6vw, 6.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      font-weight: 900;
+      font-style: italic;
+      color: var(--primary);
+      text-shadow: 0 0 35px rgba(255, 205, 4, 0.26);
+      text-align: center;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hero-copy {
+      font-size: 1rem;
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-align: center;
+      width: 100%;
+      margin: 0;
+    }
+
+    .hero-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 2.5rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #111827;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      box-shadow: 0 24px 80px rgba(255, 205, 4, 0.24);
+      border: 1px solid rgba(255, 205, 4, 0.2);
+      transition: transform 0.25s var(--transition), box-shadow 0.25s var(--transition);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+    }
+
+    .hero-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 30px 100px rgba(255, 205, 4, 0.34);
+    }
+
+    /* SCROLL: absolute, no ocupa espacio en el flujo, centrado abajo del botón */
+    .hero-small {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 205, 4, 0.75);
+      font-size: 0.72rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+      animation: scrollBounce 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollBounce {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(6px);
+      }
+    }
+
+    .section-card {
+      width: min(1140px, calc(100% - 3rem));
+      margin: 0 auto;
+      padding: 3rem;
+      border-radius: 2.5rem;
+      background: rgba(15, 19, 38, 0.88);
+      border: 1px solid rgba(255, 205, 4, 0.08);
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+    }
+
+    .xray-container {
+      position: relative;
+      height: 600px;
+      overflow: hidden;
+      border-radius: 2.5rem;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent 30%),
+        linear-gradient(180deg, rgba(18, 24, 48, 0.96), rgba(11, 14, 28, 0.98));
+      border: 1px solid rgba(255, 205, 4, 0.12);
+      box-shadow: inset 0 0 60px rgba(255, 205, 4, 0.05);
+    }
+
+    .xray-base,
+    .xray-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255, 200, 50, 0.05), transparent 18%),
+        radial-gradient(circle at 80% 25%, rgba(65, 72, 156, 0.08), transparent 18%),
+        linear-gradient(135deg, rgba(248, 248, 255, 0.03), transparent 20%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 12px);
+      background-size: cover;
+      mix-blend-mode: normal;
+    }
+
+    .xray-base {
+      filter: grayscale(1) brightness(0.2);
+      opacity: 1;
+    }
+
+    .xray-overlay {
+      filter: brightness(1.2);
+      mix-blend-mode: screen;
+      clip-path: circle(150px at var(--x, 50%) var(--y, 50%));
+      transition: clip-path 0.12s ease;
+    }
+
+    .xray-label {
+      position: absolute;
+      z-index: 5;
+      background: rgba(11, 14, 26, 0.9);
+      border: 1px solid rgba(255, 205, 4, 0.24);
+      color: var(--primary);
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(6px);
+    }
+
+    .label-core {
+      top: 2.5rem;
+      left: 2.5rem;
+    }
+
+    .label-biometric {
+      bottom: 2.5rem;
+      right: 3.5rem;
+    }
+
+    .xray-content {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      pointer-events: none;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: center;
+      font-size: 1.05rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .engine-section {
+      padding: 4rem 1.5rem 6rem;
+    }
+
+    .engine-card {
+      width: min(1140px, calc(100% - 3rem));
+      margin: 0 auto;
+      padding: 3.5rem;
+      border-radius: 3rem;
+      border: 2px dashed rgba(255, 205, 4, 0.9);
+      position: relative;
+      overflow: hidden;
+      background: rgba(11, 15, 26, 0.94);
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.28);
+    }
+
+    .engine-gear {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.05;
+      pointer-events: none;
+      transform: scale(1.2);
+    }
+
+    .engine-gear svg {
+      width: 30rem;
+      height: 30rem;
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 1.8;
+      opacity: 0.5;
+      animation: spin 25s linear infinite;
+    }
+
+    .engine-title {
+      position: relative;
+      z-index: 3;
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.04em;
+      color: var(--primary);
+      text-shadow: 0 0 35px rgba(255, 205, 4, 0.5), 0 0 80px rgba(255, 205, 4, 0.18);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .team-grid {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 1.5rem;
+      justify-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .team-dot {
+      width: 100px;
+      height: 100px;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 205, 4, 0.95);
+      background: radial-gradient(circle, rgba(255, 205, 4, 0.18), rgba(11, 15, 26, 0.7));
+      box-shadow: 0 0 30px rgba(255, 205, 4, 0.25);
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 15, 26, 0.96);
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+    }
+
+    .login-overlay.active {
+      display: flex;
+    }
+
+    .login-card {
+      width: min(520px, 100%);
+      padding: 2.5rem;
+      border-radius: 2rem;
+      background: rgba(17, 22, 43, 0.98);
+      border: 1px solid rgba(255, 205, 4, 0.18);
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-header {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .login-text {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    .login-field {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .login-field label {
+      display: block;
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 0.5rem;
+      font-size: 0.92rem;
+    }
+
+    .login-field input {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .login-field input:focus {
+      border-color: rgba(255, 205, 4, 0.65);
+    }
+
+    .login-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .login-actions button {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      transition: transform 0.25s var(--transition), box-shadow 0.25s var(--transition);
+    }
+
+    .login-actions .login-submit {
+      background: var(--primary);
+      color: #111827;
+      box-shadow: 0 20px 80px rgba(255, 205, 4, 0.18);
+    }
+
+    .login-actions .login-cancel {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .login-actions button:hover {
+      transform: translateY(-2px);
+    }
+
+    .login-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 960px) {
+      .xray-container {
+        height: 520px;
+      }
+
+      .hero-section {
+        padding-top: 3rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: 3.2rem;
+      }
+
+      .hero-copy {
+        font-size: 0.95rem;
+      }
+
+      .hero-button {
+        width: 100%;
+      }
+
+      .xray-container {
+        height: 420px;
+      }
+
+      .engine-card {
+        padding: 2rem;
+      }
+
+      .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      }
+
+      .team-dot {
+        width: 80px;
+        height: 80px;
+      }
+
+      .xray-label {
+        font-size: 0.72rem;
+        padding: 0.65rem 0.95rem;
+      }
+    }
+
+    /* SLOGAN SECTION */
+    .slogan-section {
+      padding: 6rem 1.5rem;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .slogan-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      color: var(--primary);
+      text-shadow: 0 0 35px rgba(255, 205, 4, 0.35);
+      margin: 0;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="landingRoot">
+    <div class="custom-cursor" id="customCursor"></div>
+
+    <section class="hero-section section-reveal active" id="heroSection">
+      <div class="hero-inner">
+        <h1 class="hero-title">IMPULSANDO EL ÉXITO HUMANO</h1>
+        <p class="hero-copy">Plataforma Multival 360 — experiencia de Talento Humano con visión X-Ray.</p>
+        <button class="hero-button" id="enterButton" type="button">INGRESAR AL SISTEMA</button>
+      </div>
+      <div class="hero-small">SCROLL ↓</div>
+    </section>
+
+    <section class="section-reveal" id="xraySection">
+      <div class="section-card">
+        <div class="mb-10 text-center">
+          <div class="text-sm uppercase tracking-[0.4em] text-yellow-300">CORE TECHNOLOGY</div>
+          <h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-white">Descubrimientos del área</h2>
+          <p class="mt-3 text-base text-slate-300">Desplaza el cursor y descubre el núcleo activo con un efecto de
+            máscara real.</p>
+        </div>
+        <div class="xray-container" id="xrayContainer">
+          <div class="xray-base"></div>
+          <div class="xray-overlay"></div>
+          <div class="xray-content">NÚCLEO DIGITAL ACTIVADO</div>
+          <div class="xray-label label-core">Quantum Core</div>
+          <div class="xray-label label-biometric">Biometría Activa</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-reveal slogan-section" id="sloganSection">
+      <p class="slogan-text">"Conectamos personas, Potenciamos Talento, Transformamos Futuros."</p>
+    </section>
+
+    <section class="section-reveal engine-section" id="engineSection">
+      <div class="engine-card">
+        <div class="engine-gear" aria-hidden="true">
+          <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M487.4 315.7l-42.8-24.7c2.1-11.8 3.2-23.9 3.2-36 0-12.1-1.1-24.1-3.2-36l42.8-24.7c15.7-9.1 21.6-28.4 13.2-43.6l-44.5-77c-8.4-14.5-27.8-19.6-43.4-12.2l-42.5 24.7c-19.2-16.2-40.7-29-64.2-38.3V24c0-17.4-14.1-31.5-31.5-31.5h-89c-17.4 0-31.5 14.1-31.5 31.5v49.4c-23.5 9.3-45 22.1-64.2 38.3L95.3 87.7C79.7 80.3 60.3 85.4 52 99.9l-44.5 77c-8.4 15.2-2.5 34.5 13.2 43.6l42.8 24.7c-2.1 11.8-3.2 23.9-3.2 36 0 12.1 1.1 24.1 3.2 36L20.7 315.7C5 324.8-.9 344.1 7.5 359.3l44.5 77c8.4 14.5 27.8 19.6 43.4 12.2l42.5-24.7c19.2 16.2 40.7 29 64.2 38.3V488c0 17.4 14.1 31.5 31.5 31.5h89c17.4 0 31.5-14.1 31.5-31.5v-49.4c23.5-9.3 45-22.1 64.2-38.3l42.5 24.7c15.7 7.4 35.1 2.3 43.4-12.2l44.5-77c8.4-15.2 2.5-34.5-13.2-43.6zM256 360c-57.3 0-104-46.7-104-104s46.7-104 104-104 104 46.7 104 104-46.7 104-104 104z" />
+          </svg>
+        </div>
+        <div class="engine-title">MOTOR DE TALENTO HUMANO</div>
+        <div class="team-grid">
+          <div class="team-dot">HUMANO</div>
+          <div class="team-dot">ANÁLISIS</div>
+          <div class="team-dot">OP</div>
+          <div class="team-dot">COSTOS</div>
+          <div class="team-dot">DATA</div>
+          <div class="team-dot">RPO</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-reveal" id="footerSection">
+      <div class="section-card text-center">
+        <div class="text-sm uppercase tracking-[0.4em] text-yellow-300">INTERFAZ AAA</div>
+        <h3 class="mt-4 text-3xl font-black text-white">Estética brutalista-futurista y fluidez interactiva</h3>
+        <p class="mt-3 text-slate-300">Scroll reveal, cursor lerp, X-Ray, motor animado y módulo de login integrado en
+          un solo documento.</p>
+      </div>
+    </section>
+
+    <div class="login-overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <div class="login-card">
+        <div class="login-close" id="loginClose">×</div>
+        <div class="login-header" id="loginTitle">Inicio de sesión</div>
+        <div class="login-text">Accede al módulo de control y continúa en la plataforma Multival 360.</div>
+        <div class="login-field">
+          <label for="userInput">Usuario</label>
+          <input id="userInput" type="text" placeholder="usuario@multival.com" autocomplete="username" />
+        </div>
+        <div class="login-field">
+          <label for="passInput">Contraseña</label>
+          <input id="passInput" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div class="login-actions">
+          <button type="button" class="login-submit" id="loginSubmit">Entrar</button>
+          <button type="button" class="login-cancel" id="loginCancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const root = document.getElementById('landingRoot');
+    const cursor = document.getElementById('customCursor');
+    const xray = document.getElementById('xrayContainer');
+    const overlay = document.querySelector('.xray-overlay');
+    const enterButton = document.getElementById('enterButton');
+    const loginOverlay = document.getElementById('loginOverlay');
+    const loginClose = document.getElementById('loginClose');
+    const loginCancel = document.getElementById('loginCancel');
+    const loginSubmit = document.getElementById('loginSubmit');
+    const sections = document.querySelectorAll('.section-reveal');
+
+    let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    let cursorPos = { x: mouse.x, y: mouse.y };
+
+    function lerp(start, end, t) {
+      return start + (end - start) * t;
+    }
+
+    function updateCursor() {
+      cursorPos.x = lerp(cursorPos.x, mouse.x, 0.16);
+      cursorPos.y = lerp(cursorPos.y, mouse.y, 0.16);
+      cursor.style.transform = `translate(${cursorPos.x}px, ${cursorPos.y}px)`;
+      requestAnimationFrame(updateCursor);
+    }
+
+    updateCursor();
+
+    window.addEventListener('mousemove', (event) => {
+      mouse.x = event.clientX;
+      mouse.y = event.clientY;
+    });
+
+    const pointerTargets = [xray, root];
+
+    function updateXray(event) {
+      const rect = xray.getBoundingClientRect();
+      let clientX, clientY;
+
+      if (event.type.startsWith('touch')) {
+        const touch = event.touches[0] || event.changedTouches[0];
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      }
+
+      const x = ((clientX - rect.left) / rect.width) * 100;
+      const y = ((clientY - rect.top) / rect.height) * 100;
+      xray.style.setProperty('--x', `${Math.min(100, Math.max(0, x))}%`);
+      xray.style.setProperty('--y', `${Math.min(100, Math.max(0, y))}%`);
+    }
+
+    xray.addEventListener('mousemove', updateXray);
+    xray.addEventListener('touchmove', (event) => {
+      event.preventDefault();
+      updateXray(event);
+    }, { passive: false });
+
+    xray.addEventListener('mouseleave', () => {
+      xray.style.setProperty('--x', '50%');
+      xray.style.setProperty('--y', '50%');
+    });
+
+    function startTransition() {
+      root.style.transition = 'transform 0.8s ease-in-out, filter 0.8s ease-in-out, opacity 0.8s ease-in-out';
+      root.style.transform = 'scale(1.2)';
+      root.style.filter = 'blur(14px)';
+      root.style.opacity = '0.12';
+      setTimeout(() => {
+        loginOverlay.classList.add('active');
+      }, 650);
+    }
+
+    enterButton.addEventListener('click', startTransition);
+
+    function closeLogin() {
+      loginOverlay.classList.remove('active');
+      root.style.transform = 'scale(1)';
+      root.style.filter = 'blur(0px)';
+      root.style.opacity = '1';
+    }
+
+    loginClose.addEventListener('click', closeLogin);
+    loginCancel.addEventListener('click', closeLogin);
+    loginSubmit.addEventListener('click', () => {
+      closeLogin();
+      alert('Ingreso simulado.');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+
+</html>

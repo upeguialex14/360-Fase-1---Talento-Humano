@@ -16,6 +16,8 @@ const pool = mysql.createPool({
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('❌ Error conectando a la base de datos:', err.message);
+        console.error('Código de error:', err.code);
+        console.error('Detalles completos:', err);
     } else {
         console.log('✅ Conexión a MySQL exitosa');
         connection.release();

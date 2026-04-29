@@ -5,10 +5,10 @@
 const pool = require('../config/db');
 
 const User = {
-    async findByLogin(email) {
+    async findByLogin(documentNumber) {
         const [rows] = await pool.execute(
-            'SELECT * FROM users WHERE email = ?',
-            [email]
+            'SELECT * FROM users WHERE document_number = ?',
+            [documentNumber]
         );
         return rows[0] || null;
     },
@@ -23,51 +23,51 @@ const User = {
 
     async getAll() {
         const [rows] = await pool.execute(
-            'SELECT user_id, login, email, full_name, role_code, is_active, last_login, password_changed_at, password_expires_at, created_at FROM users'
+            'SELECT user_id, document_number, email, name, last_name, role_id, status_id, last_login, password_changed_at, created_at FROM users'
         );
         return rows;
     },
 
     async updateFailedAttempts(userId, attempts, isLocked) {
-        await pool.execute(
-            'UPDATE users SET failed_attempts = ?, is_locked = ? WHERE user_id = ?',
-            [attempts, isLocked, userId]
-        );
+        // Note: System doesn't track failed_attempts. Implement if needed.
+        console.log(`[User.updateFailedAttempts] Attempted attempts=${attempts}, isLocked=${isLocked}`);
     },
 
     async resetLoginData(userId) {
         await pool.execute(
-            'UPDATE users SET failed_attempts = 0, is_locked = 0, last_login = NOW() WHERE user_id = ?',
+            'UPDATE users SET last_login = NOW() WHERE user_id = ?',
             [userId]
         );
     },
 
     async updatePassword(userId, hash, expiresAt) {
         await pool.execute(
-            'UPDATE users SET password_hash = ?, password_changed_at = NOW(), password_expires_at = ?, change_password_required = 0, failed_attempts = 0, is_locked = 0 WHERE user_id = ?',
-            [hash, expiresAt, userId]
+            'UPDATE users SET password_hash = ?, password_changed_at = NOW(), requires_password_change = 0 WHERE user_id = ?',
+            [hash, userId]
         );
     },
 
     async lockAccount(userId) {
+        // Lock by setting status_id to 0 (inactive)
         await pool.execute(
-            'UPDATE users SET is_locked = 1 WHERE user_id = ?',
+            'UPDATE users SET status_id = 0 WHERE user_id = ?',
             [userId]
         );
     },
 
     async unlockAccount(userId) {
+        // Unlock by setting status_id to 1 (active)
         await pool.execute(
-            'UPDATE users SET is_locked = 0, failed_attempts = 0 WHERE user_id = ?',
+            'UPDATE users SET status_id = 1 WHERE user_id = ?',
             [userId]
         );
     },
 
     async create(userData) {
-        const { login, password_hash, email, full_name, role_code } = userData;
+        const { document_number, password_hash, email, name, last_name, role_id } = userData;
         const [result] = await pool.execute(
-            'INSERT INTO users (login, password_hash, email, full_name, role_code, is_active) VALUES (?, ?, ?, ?, ?, 1)',
-            [login, password_hash, email, full_name, role_code]
+            'INSERT INTO users (document_number, password_hash, email, name, last_name, role_id, status_id) VALUES (?, ?, ?, ?, ?, ?, 1)',
+            [document_number, password_hash, email, name, last_name, role_id]
         );
         return result.insertId;
     },
@@ -80,17 +80,21 @@ const User = {
             fields.push('email = ?');
             values.push(updates.email);
         }
-        if (updates.full_name) {
-            fields.push('full_name = ?');
-            values.push(updates.full_name);
+        if (updates.name) {
+            fields.push('name = ?');
+            values.push(updates.name);
         }
-        if (updates.role_code) {
-            fields.push('role_code = ?');
-            values.push(updates.role_code);
+        if (updates.last_name) {
+            fields.push('last_name = ?');
+            values.push(updates.last_name);
         }
-        if (updates.is_active !== undefined) {
-            fields.push('is_active = ?');
-            values.push(updates.is_active);
+        if (updates.role_id) {
+            fields.push('role_id = ?');
+            values.push(updates.role_id);
+        }
+        if (updates.status_id !== undefined) {
+            fields.push('status_id = ?');
+            values.push(updates.status_id);
         }
 
         if (fields.length === 0) {
@@ -106,22 +110,22 @@ const User = {
 
     async getBlockedUsers() {
         const [rows] = await pool.execute(
-            'SELECT user_id, login, full_name, failed_attempts, last_login FROM users WHERE is_locked = 1'
+            'SELECT user_id, document_number, email, name, last_name, last_login FROM users WHERE status_id = 0'
         );
         return rows;
     },
 
     async forcePasswordChange(userId) {
         await pool.execute(
-            'UPDATE users SET change_password_required = 1 WHERE user_id = ?',
+            'UPDATE users SET requires_password_change = 1 WHERE user_id = ?',
             [userId]
         );
     },
 
     async forcePasswordExpiry(userId, diasMax) {
         await pool.execute(
-            'UPDATE users SET password_changed_at = DATE_SUB(NOW(), INTERVAL ? + 1 DAY), password_expires_at = DATE_SUB(NOW(), INTERVAL 1 DAY) WHERE user_id = ?',
-            [diasMax, userId]
+            'UPDATE users SET password_changed_at = DATE_SUB(NOW(), INTERVAL ? DAY), requires_password_change = 1 WHERE user_id = ?',
+            [diasMax + 1, userId]
         );
     }
 };
