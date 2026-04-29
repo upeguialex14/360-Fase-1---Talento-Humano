@@ -1,5 +1,5 @@
 const bd = require('../../config/db')
-const peopleModel = require('../../../models/etl/people.model')
+const peopleModel = require('../../../../models/etl/people/people.model')
 
 const process = async (rawJson) => {
     const [
