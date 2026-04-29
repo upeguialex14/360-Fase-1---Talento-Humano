@@ -119,9 +119,8 @@ const BaseDatos = () => {
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                // Preview limit to 50
-                const preview = jsonData.slice(0, 50);
-                setPreviewData(preview);
+                // No limit on preview, show all records
+                setPreviewData(jsonData);
             } catch (err) { console.error("Error preview:", err); }
         };
         reader.readAsArrayBuffer(selectedFile);
