@@ -5,7 +5,7 @@
     background: transparent;
     overflow: visible;
     margin-top: 60px;
-    margin-bottom: 600px; /* Strong separation from footer */
+    margin-bottom: 0px; /* Removed large separation to match user request */
 }
 
 .stack-sticky {

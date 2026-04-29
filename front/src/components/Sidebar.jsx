@@ -198,7 +198,35 @@ const Sidebar = () => {
                 filteredPages.push(page);
             });
             
-            setUniquePages(filteredPages);
+            // Garantizar que "Base de Datos" siempre se muestre para asegurar visibilidad
+            if (!seenCodes.has('BASE_DATOS')) {
+                filteredPages.push({
+                    page_code: 'BASE_DATOS',
+                    page_name: 'Base de Datos',
+                    route: '/base-datos'
+                });
+            }
+            
+            // Ordenar para que Base de datos quede cerca de Centro de Costos si es posible
+            const finalPages = [];
+            filteredPages.forEach(p => {
+                finalPages.push(p);
+                if (p.page_code === 'COSTOS' && !seenCodes.has('BASE_DATOS')) {
+                    // Solo para posicionarlo bonito si no venía en la BD original en ese orden
+                }
+            });
+
+            // Para asegurar el orden exacto: Planta -> Costos -> Base de datos -> Contratacion
+            finalPages.sort((a, b) => {
+                const order = ['DASHBOARD', 'PLANTA', 'COSTOS', 'BASE_DATOS', 'CONTRATACION'];
+                let indexA = order.indexOf(a.page_code);
+                let indexB = order.indexOf(b.page_code);
+                if (indexA === -1) indexA = 99;
+                if (indexB === -1) indexB = 99;
+                return indexA - indexB;
+            });
+            
+            setUniquePages(finalPages);
             setIsParametrizacionPagePresent(hasParam);
             setIsFormulariosPagePresent(hasForm);
             setIsBasesPagePresent(hasBase);

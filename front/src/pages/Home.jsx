@@ -4,7 +4,7 @@ import ParticleBackground from '../components/ParticleBackground';
 import BancosAsociados from '../components/BancosAsociados';
 import CortinaReveal from '../components/CortinaReveal';
 import StackedCards from '../components/StackedCards';
-import EquipoBanner from '../components/EquipoBanner';
+
 import './Home.css';
 
 /**
@@ -29,7 +29,7 @@ const Home = () => {
             
             <div className="home-padded-section">
                 <StackedCards />
-                <EquipoBanner showHeader={false} />
+
             </div>
         </div>
     );

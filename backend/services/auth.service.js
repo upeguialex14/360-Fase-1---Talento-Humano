@@ -118,7 +118,6 @@ class AuthService {
                     { page_code: 'USUARIOS', page_name: 'Gestión de Usuarios', route: '/users', can_view: 1, can_edit: 1 },
                     { page_code: 'PLANTA', page_name: 'Planta Operación', route: '/planta', can_view: 1, can_edit: 1 },
                     { page_code: 'COSTOS', page_name: 'Centro de Costos', route: '/costos', can_view: 1, can_edit: 1 },
-                    { page_code: 'CARGA_EXCEL', page_name: 'Carga Excel', route: '/upload', can_view: 1, can_edit: 1 },
                     { page_code: 'ORDEN_CONTRATACION', page_name: 'Orden de Contratación', route: '/contratacion', can_view: 1, can_edit: 1 }
                 ];
             }
