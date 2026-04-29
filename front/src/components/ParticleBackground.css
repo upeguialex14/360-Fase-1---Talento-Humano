@@ -14,8 +14,7 @@
 .particle {
     position: absolute;
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.15);
-    /* Tonos más oscuros que el gris claro */
+    /* Estilos controlados dinámicamente desde el componente */
     animation-name: particleMove;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
@@ -27,15 +26,12 @@
         transform: translate(100px, -100px);
         opacity: 0;
     }
-
-    10% {
-        opacity: 1;
+    15% {
+        opacity: inherit;
     }
-
-    90% {
-        opacity: 1;
+    85% {
+        opacity: inherit;
     }
-
     100% {
         transform: translate(-300px, 300px);
         opacity: 0;

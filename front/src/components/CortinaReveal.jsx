@@ -1,60 +1,120 @@
 import React, { useEffect, useRef } from 'react';
 import './CortinaReveal.css';
-import img1 from '../IMG/Carrusel_1.jpeg';
-import img2 from '../IMG/Carrusel_2.jpeg';
-import img3 from '../IMG/banco_5.jpeg';
-
 const CortinaReveal = () => {
     const containerRef = useRef(null);
     const cortinaRef = useRef(null);
+    const [selectedValor, setSelectedValor] = React.useState(null);
+
+    const valores = [
+        {
+            id: 1,
+            titulo: 'Integridad',
+            emoji: '🤝',
+            descripcion: 'Actuamos con honestidad y transparencia en cada proceso de selección y gestión.',
+            aporte: 'Asegura un ambiente de confianza y justicia para todos los colaboradores de Multival.'
+        },
+        {
+            id: 2,
+            titulo: 'Innovación',
+            emoji: '💡',
+            descripcion: 'Adoptamos nuevas tecnologías para optimizar la captación y desarrollo del talento.',
+            aporte: 'Permite que el área de Talento Humano sea ágil y se adapte a los retos del mercado digital.'
+        },
+        {
+            id: 3,
+            titulo: 'Empatía',
+            emoji: '❤️',
+            descripcion: 'Priorizamos el bienestar humano, escuchando y entendiendo las necesidades de nuestro equipo.',
+            aporte: 'Fomenta una cultura organizacional sólida donde cada persona se siente valorada y escuchada.'
+        }
+    ];
 
     useEffect(() => {
+        const getScrollParent = (node) => {
+            let current = node.parentElement;
+            while (current && current !== document.body && current !== document.documentElement) {
+                const style = window.getComputedStyle(current);
+                if (/(auto|scroll)/.test(style.overflowY) && current.scrollHeight > current.clientHeight) {
+                    return current;
+                }
+                current = current.parentElement;
+            }
+            return window;
+        };
+
+        const scrollParent = getScrollParent(containerRef.current);
+
         const handleScroll = () => {
             if (!containerRef.current || !cortinaRef.current) return;
 
             const rect = containerRef.current.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
+            const parentRect = scrollParent === window ? { top: 0, bottom: window.innerHeight } : scrollParent.getBoundingClientRect();
+            const viewportHeight = scrollParent === window ? window.innerHeight : scrollParent.clientHeight;
 
-            // The total height of the scroll container minus the viewport defines how long it stays sticky
             const scrollDistance = containerRef.current.offsetHeight - viewportHeight;
 
-            if (rect.top <= 0 && rect.bottom >= viewportHeight) {
-                // We are scrolling inside the sticky area
-                let progress = Math.abs(rect.top) / scrollDistance;
-                // Clamp between 0 and 1
+            if (rect.top <= parentRect.top && rect.bottom >= parentRect.bottom) {
+                let progress = (parentRect.top - rect.top) / scrollDistance;
                 progress = Math.max(0, Math.min(1, progress));
-                // Move curtain Y up up to 105% entirely
                 cortinaRef.current.style.transform = `translateY(-${progress * 105}%)`;
-            } else if (rect.top > 0) {
-                // Before reaching the sticky container
+            } else if (rect.top > parentRect.top) {
                 cortinaRef.current.style.transform = `translateY(0%)`;
-            } else if (rect.bottom < viewportHeight) {
-                // Scrolled past the sticky container
+            } else if (rect.bottom < parentRect.bottom) {
                 cortinaRef.current.style.transform = `translateY(-105%)`;
             }
         };
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        handleScroll(); // initial trigger on mount
+        const target = scrollParent === window ? window : scrollParent;
+        target.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
 
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => target.removeEventListener('scroll', handleScroll);
     }, []);
 
     return (
         <div className="cortina-scroll-container" ref={containerRef}>
             <div className="reveal-wrapper">
                 <div className="reveal-content-layer">
-                    {/* Original content restored */}
-                    <div className="reveal-gallery">
-                        <img src={img1} alt="Exclusivo 1" className="reveal-inner-img" />
-                        <img src={img3} alt="Exclusivo 2" className="reveal-inner-img" style={{ height: '100px' }} />
-                        <img src={img2} alt="Exclusivo 3" className="reveal-inner-img" />
-                    </div>
                     <div className="reveal-text">
-                        <h3>Descubre Nuestra Plataforma</h3>
-                        <p>Una experiencia de integración completa y profesional</p>
+                        <h3>Valores Talento Humano</h3>
+                        <p>Nuestra esencia y compromiso con el equipo</p>
+                    </div>
+                    
+                    <div className="reveal-features">
+                        {valores.map(valor => (
+                            <div 
+                                key={valor.id} 
+                                className="reveal-feature-card interactive"
+                                onClick={() => setSelectedValor(valor)}
+                            >
+                                <div className="feature-icon">{valor.emoji}</div>
+                                <h4>{valor.titulo}</h4>
+                                <span className="click-hint">Ver detalle</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
+
+                {/* Modal para detalles del valor */}
+                {selectedValor && (
+                    <div className="valor-modal-overlay" onClick={() => setSelectedValor(null)}>
+                        <div className="valor-modal-content" onClick={e => e.stopPropagation()}>
+                            <button className="modal-close" onClick={() => setSelectedValor(null)}>×</button>
+                            <div className="modal-icon">{selectedValor.emoji}</div>
+                            <h2>{selectedValor.titulo}</h2>
+                            <div className="modal-body">
+                                <div className="modal-section">
+                                    <strong>¿Qué es?</strong>
+                                    <p>{selectedValor.descripcion}</p>
+                                </div>
+                                <div className="modal-section">
+                                    <strong>¿Cómo aporta al área?</strong>
+                                    <p>{selectedValor.aporte}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* The yellow curtain layer that slides up */}
                 <div className="cortina-layer" ref={cortinaRef}>

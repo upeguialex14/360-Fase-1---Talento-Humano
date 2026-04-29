@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './EquipoBanner.css';
 import admonImg from '../IMG/Admon_Palmira-removebg-preview.png';
 
-const EquipoBanner = () => {
+const EquipoBanner = ({ showHeader = true }) => {
     const [formData, setFormData] = useState({
         nombre: '',
         email: '',
@@ -33,12 +33,15 @@ const EquipoBanner = () => {
     };
 
     return (
-        <div className="equipo-banner-container">
-            <div className="equipo-banner-text">
-                <h3>Haz equipo con nosotros</h3>
-            </div>
-            <img src={admonImg} alt="Equipo" className="equipo-banner-img" />
-            
+        <div className={`equipo-banner-container ${showHeader ? '' : 'no-header'}`}>
+            {showHeader && (
+                <>
+                    <div className="equipo-banner-text">
+                        <h3>Haz equipo con nosotros</h3>
+                    </div>
+                    <img src={admonImg} alt="Equipo" className="equipo-banner-img" />
+                </>
+            )}
             {/* Sección de Contacto e Info */}
             <div className="contacto-section">
                 <div className="contacto-content">

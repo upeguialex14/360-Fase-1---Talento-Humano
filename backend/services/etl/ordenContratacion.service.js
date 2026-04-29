@@ -29,15 +29,29 @@ const OrdenContratacionService = {
             const identificacion = record.identificacion;
             if (!identificacion) continue;
 
-            // Filter record to valid columns and convert dates
+            // Filter record to valid columns and convert dates/numbers
             const cleanRecord = {};
             for (const col of validColumns) {
                 if (record[col] !== undefined && record[col] !== null) {
                     let val = record[col];
-                    // Convert date if applicable
-                    if (dateFields.includes(col)) {
+
+                    // Defensive parsing for numeric fields
+                    if (col === 'salario') {
+                        if (typeof val === 'string') {
+                            // Remove currency symbols, commas and spaces
+                            val = val.replace(/[^0-9.]/g, '');
+                        }
+                        val = parseFloat(val) || 0;
+                    } else if (col === 'dias_prueba') {
+                        if (typeof val === 'string') {
+                            val = val.replace(/[^0-9]/g, '');
+                        }
+                        val = parseInt(val) || 0;
+                    } else if (dateFields.includes(col)) {
+                        // Convert date if applicable
                         val = excelDateToJS(val);
                     }
+                    
                     cleanRecord[col] = val;
                 }
             }

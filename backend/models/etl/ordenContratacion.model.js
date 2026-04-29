@@ -6,15 +6,15 @@ const pool = require('../../config/db.js');
 
 const OrdenContratacion = {
     async findByIdentificacion(identificacion) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM orden_contratacion WHERE identificacion = ?',
+        const [rows] = await pool.query(
+            'SELECT * FROM `orden_contratacion` WHERE `identificacion` = ?',
             [identificacion]
         );
         return rows[0] || null;
     },
 
     async getAll() {
-        const [rows] = await pool.execute('SELECT * FROM orden_contratacion ORDER BY fecha_registro DESC');
+        const [rows] = await pool.query('SELECT * FROM `orden_contratacion` ORDER BY `fecha_registro` DESC');
         return rows;
     },
 
@@ -34,9 +34,10 @@ const OrdenContratacion = {
         });
 
         const placeholders = columns.map(() => '?').join(', ');
-        const query = `INSERT INTO orden_contratacion (${columns.join(', ')}) VALUES (${placeholders})`;
+        const backtickedColumns = columns.map(c => `\`${c}\``).join(', ');
+        const query = `INSERT INTO \`orden_contratacion\` (${backtickedColumns}) VALUES (${placeholders})`;
 
-        const [result] = await pool.execute(query, values);
+        const [result] = await pool.query(query, values);
         return result.insertId;
     },
 
@@ -46,20 +47,20 @@ const OrdenContratacion = {
 
         Object.keys(updates).forEach(key => {
             if (updates[key] !== undefined && updates[key] !== null) {
-                updateSets.push(`${key} = ?`);
+                updateSets.push(`\`${key}\` = ?`);
                 updateValues.push(updates[key]);
             }
         });
 
         if (updateSets.length === 0) return { success: true };
 
-        updateSets.push('fecha_actualizacion = NOW()');
-        updateSets.push('usuario_edicion = ?');
+        updateSets.push('`fecha_actualizacion` = NOW()');
+        updateSets.push('`usuario_edicion` = ?');
         updateValues.push(usuario_edicion);
         updateValues.push(identificacion);
 
-        const query = `UPDATE orden_contratacion SET ${updateSets.join(', ')} WHERE identificacion = ?`;
-        await pool.execute(query, updateValues);
+        const query = `UPDATE \`orden_contratacion\` SET ${updateSets.join(', ')} WHERE \`identificacion\` = ?`;
+        await pool.query(query, updateValues);
         return { success: true };
     },
 

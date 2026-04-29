@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logoTH from '../IMG/LOGO_TH__2.png';
 
 /**
  * Componente Header de la aplicación
@@ -16,7 +17,8 @@ const Header = () => {
     return (
         <header className="header">
             <div className="header-container">
-                <Link to="/" className="logo">
+                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <img src={logoTH} alt="Talento Humano 360" className="header-logo-image" style={{ height: '100px', width: 'auto' }} />
                     <h1>TalentoHumano360</h1>
                 </Link>
                 {isAuthenticated && (

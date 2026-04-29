@@ -2,6 +2,7 @@ const pool = require('../../../config/db');
 const CostCenterModel = require('../../../models/etl/costCenter.model');
 
 const process = async (rawJson) => {
+<<<<<<< HEAD
     // 1. Precarga de Maestros
     const [oficinas, clientes, unidadesNegocio, ciudades, zonas, regionales, empresas, departamentos] = await Promise.all([
         pool.execute('SELECT office_id AS id, name FROM MASTER_OFFICES').then(([rows]) => rows),
@@ -11,6 +12,20 @@ const process = async (rawJson) => {
         pool.execute('SELECT area_id AS id, name FROM MASTER_AREA').then(([rows]) => rows),
         pool.execute('SELECT regional_id AS id, name FROM MASTER_REGIONAL').then(([rows]) => rows),
         pool.execute('SELECT company_id AS id, name FROM MASTER_COMPANY').then(([rows]) => rows),
+=======
+    // Precarga de Maestros (utilizando mysql2 directamente con nombres de tablas reales)
+    const [oficinas, clientes, unidadesNegocio, ciudades, zonas, regionales, empresas, lideres, departamentos, status] = await Promise.all([
+        pool.execute('SELECT office_id as id, name as nombre FROM master_offices').then(([rows]) => rows),
+        pool.execute('SELECT client_id as id, name as nombre FROM master_client').then(([rows]) => rows),
+        pool.execute('SELECT unit_id as id, name as nombre FROM master_unit').then(([rows]) => rows),
+        pool.execute('SELECT city_id as id, name as nombre FROM master_cities').then(([rows]) => rows),
+        pool.execute('SELECT area_id as id, name as nombre FROM master_area').then(([rows]) => rows),
+        pool.execute('SELECT regional_id as id, name as nombre FROM master_regional').then(([rows]) => rows),
+        pool.execute('SELECT company_id as id, name as nombre FROM master_company').then(([rows]) => rows),
+        pool.execute("SELECT u.user_id as id, CONCAT(u.name, ' ', u.last_name) as nombre FROM USERS u JOIN ROLES r ON u.role_id = r.role_id WHERE r.name_role = 'LIDER'").then(([rows]) => rows),
+        pool.execute('SELECT departament_id as id, name as nombre FROM master_departament').then(([rows]) => rows),
+        pool.execute('SELECT status_id as id, status as nombre FROM status_master').then(([rows]) => rows)
+>>>>>>> b9f3cebe96ae0899db0e35f1e43af9b11e0bbf78
     ]);
 
     const sqlLeaders = `

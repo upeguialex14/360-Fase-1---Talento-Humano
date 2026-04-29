@@ -146,7 +146,7 @@ const Landing = () => {
         <div className="section-card">
           <div className="section-header">
             <span className="section-chip">CORE TECHNOLOGY</span>
-            <h2>Describimientos del area</h2>
+            <h2>Descubrimientos del area</h2>
             <p>Descubre el núcleo de datos con una máscara dinámica y etiquetas flotantes.</p>
           </div>
           <div className="xray-container" ref={xrayRef}>
@@ -157,8 +157,8 @@ const Landing = () => {
             <div 
               className="xray-overlay" 
               style={{
-                maskImage: `circle(120px at var(--x) var(--y))`,
-                WebkitMaskImage: `circle(120px at var(--x) var(--y))`
+                maskImage: `circle(150px at var(--x) var(--y))`,
+                WebkitMaskImage: `circle(150px at var(--x) var(--y))`
               }}
             >
               <img src={xrayImg} alt="X-Ray View" className="xray-image-internal" />
@@ -169,6 +169,12 @@ const Landing = () => {
             <div className="xray-label xray-label-right">Biometría Activa</div>
           </div>
         </div>
+      </section>
+
+      <section className="slogan-section section-reveal">
+        <p className="slogan-text">
+          "Conectamos personas, Potenciamos Talento, Transformamos Futuros."
+        </p>
       </section>
 
       {/* MOTOR DE TALENTO HUMANO: Interactive Section */}

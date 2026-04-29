@@ -18,7 +18,6 @@ import Planta from './pages/Planta';
 import Costos from './pages/Costos';
 import Usuarios from './pages/Usuarios';
 import Dashboard from './pages/Dashboard';
-import CargaExcel from './pages/CargaExcel';
 import RolePageAccess from './pages/RolePageAccess';
 import AdminBlockedUsers from './pages/AdminBlockedUsers';
 import OrdenContratacion from './pages/OrdenContratacion';
@@ -31,6 +30,7 @@ import BaseUnificada from './pages/BaseUnificada';
 import Vacaciones from './pages/Vacaciones';
 import Selection from './pages/Selection';
 import Upcoming from './pages/Upcoming';
+import BaseDatos from './pages/BaseDatos';
 
 
 /**
@@ -65,7 +65,6 @@ function App() {
           }>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<PageProtectedRoute requiredPageCode="DASHBOARD"><Dashboard /></PageProtectedRoute>} />
-            <Route path="upload" element={<PageProtectedRoute requiredPageCode="CARGA_EXCEL" isOptional={true}><CargaExcel /></PageProtectedRoute>} />
             <Route path="empleados" element={<PageProtectedRoute requiredPageCode="EMPLEADOS"><Empleados /></PageProtectedRoute>} />
             <Route path="departamentos" element={<PageProtectedRoute requiredPageCode="DEPARTAMENTOS"><Departamentos /></PageProtectedRoute>} />
             <Route path="reportes" element={<PageProtectedRoute requiredPageCode="REPORTES"><Reportes /></PageProtectedRoute>} />
@@ -85,6 +84,7 @@ function App() {
             <Route path="base-unificada" element={<PageProtectedRoute requiredPageCode="BASE_UNIFICADA" isOptional={true}><BaseUnificada /></PageProtectedRoute>} />
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
             <Route path="admin/blocked-users" element={<PageProtectedRoute requiredPageCode="" isOptional={true}><AdminBlockedUsers /></PageProtectedRoute>} />
+            <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
           </Route>
 
           {/* Redirigir cualquier ruta no encontrada a login */}
