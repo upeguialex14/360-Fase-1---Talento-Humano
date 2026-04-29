@@ -1,11 +1,12 @@
 //Importamos la libreria xlsx con sus funciones
 const xlsx = require('xlsx');
 const costCenterProcessor = require('./processors/costCenterProcessor.service');
+const hiringOrderProcessor = require('./processors/hiringOrderProcessor.service');
 
 
 const uploadExcel = async (data) => {
     //Destructuramos los datos que vienen
-    const { fileBuffer, type } = data;
+    const { fileBuffer, type, username } = data;
 
     //Convertimos el buffer en JSON
     const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
@@ -26,8 +27,8 @@ const uploadExcel = async (data) => {
             result = await costCenterProcessor.process(rawJson);
             break;
         case 'HIRING_ORDER':
-            // result = await hiringOrderProcessor.process(rawJson);
-            throw new Error("Tipo HIRING_ORDER aún no implementado");
+            result = await hiringOrderProcessor.process(rawJson, username);
+            break;
         /*case 'PEOPLE':
             // result = await orderProcessor.process(rawJson);
             break; ARMAR LOGICA DESPUES YA QUE ESTA PEOPLE, PEOPLE_DETAILS Y PEOPLE_BUSSINES*/

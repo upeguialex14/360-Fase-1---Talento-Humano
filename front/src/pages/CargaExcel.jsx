@@ -32,7 +32,7 @@ const CargaExcel = () => {
     // Columnas información persona (16)
     const personalCols = [
         "Fecha de Retiro", "Fin de Prueba", "Dias prueba", "Salario", "ARL", "Celular",
-        "Correo electronico", "Direccion", "Ciudad", "Fecha de nacimiento",
+        "Correo electronico", "Direccion", "Ciudad Personal", "Fecha de nacimiento",
         "Fecha expedicion CC", "RH", "EPS", "CCF", "AFP", "BH", "Cuenta Bancaria"
     ];
 
@@ -70,6 +70,7 @@ const CargaExcel = () => {
         "Celular": "celular",
         "Correo electronico": "correo_electronico",
         "Direccion": "direccion",
+        "Ciudad Personal": "ciudad_personal",
         "Fecha de nacimiento": "fecha_nacimiento",
         "Fecha expedicion CC": "fecha_expedicion_cc",
         "RH": "rh",
@@ -149,6 +150,7 @@ const CargaExcel = () => {
                             "Celular": ["celular", "telefono", "movil"],
                             "Correo electronico": ["correo electronico", "email", "correo"],
                             "Direccion": ["direccion", "residencia"],
+                            "Ciudad Personal": ["ciudad personal", "ciudad residencia", "municipio residencia"],
                             "Fecha de nacimiento": ["fecha de nacimiento", "nacimiento"],
                             "Fecha expedicion CC": ["fecha expedicion cc", "expedicion"],
                             "RH": ["rh", "sangre"],

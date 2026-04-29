@@ -14,7 +14,7 @@ const OrdenContratacionService = {
 
         const validColumns = [
             'identificacion', 'nombre_apellido', 'cargo', 'empleador', 'ciudad',
-            'zona', 'fecha_ingreso', 'salario', 'estado_proceso', 'arl', 'tipo_contrato',
+            'zona', 'fecha_ingreso', 'salario', 'arl', 'tipo_contrato',
             'detalle', 'oficina', 'unidad', 'cliente', 'centro_costos', 'jefe', 'correo_jefe',
             'analista_encargado', 'poligrafia', 'confirmacion_seleccion', 'anexos',
             'verificacion_documentos', 'verificacion_anexos', 'observaciones', 'fecha_retiro',
@@ -91,7 +91,7 @@ const OrdenContratacionService = {
 
         const editableColumns = [
             'identificacion', 'nombre_apellido', 'cargo', 'empleador', 'ciudad',
-            'zona', 'fecha_ingreso', 'salario', 'estado_proceso', 'arl', 'tipo_contrato',
+            'zona', 'fecha_ingreso', 'salario', 'arl', 'tipo_contrato',
             'detalle', 'oficina', 'unidad', 'cliente', 'centro_costos', 'jefe', 'correo_jefe',
             'analista_encargado', 'poligrafia', 'confirmacion_seleccion', 'anexos',
             'verificacion_documentos', 'verificacion_anexos', 'observaciones', 'fecha_retiro',

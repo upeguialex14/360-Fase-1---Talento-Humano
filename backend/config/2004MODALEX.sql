@@ -969,6 +969,37 @@ INSERT INTO master_area (name, status_id) VALUES
 ('TROPAS EJE CAFETERO', 1);
 
 
+-- -------------------------------------------------------------------------------------------
+-- 2. Crear tabla de Órdenes de Contratación (Hiring Order)
+CREATE TABLE HIRING_ORDER (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    id_job INT,
+    user_id INT,
+    detail_justification VARCHAR(255),
+    polygraph_test TINYINT(1),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    update_by VARCHAR(100),
+    probation_end_date DATETIME,
+    hire_date DATETIME,
+    probation_days TINYINT(1), -- Según tu imagen es TINYINT
+    uploaded_by VARCHAR(100),
+    cost_center_id INT,
+    plant_id INT,
+    office_id INT,
+    contract_id INT NOT NULL,
+    city_id INT,
+    client_id INT,
+    status_id INT,
+    selection_confirmed VARCHAR(100),
+    selection_hiring_confirmed VARCHAR(100),
+    leader_id INT
+);
+
+
+
+
+
 
 
 

@@ -18,7 +18,8 @@ const controllerUploadExcel = async (req, res, next) => {
             fileBuffer: req.file.buffer,
             mimetype: req.file.mimetype,
             fileName: req.file.filename,
-            fileOriginalName: req.file.originalname
+            fileOriginalName: req.file.originalname,
+            username: req.user?.login || 'Sistema'
         };
 
         //Lamada al servicio donde esta la logica pasandole el documento con la info

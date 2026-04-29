@@ -12,7 +12,6 @@ const ALL_COLUMNS = [
     { key: 'cargo', label: 'Cargo', type: 'text' },
     { key: 'tipo_contrato', label: 'Tipo Contrato', type: 'text' },
     { key: 'salario', label: 'Salario', type: 'number' },
-    { key: 'estado_proceso', label: 'Estado', type: 'select', options: ['Pendiente', 'En Proceso', 'Completado', 'Rechazado'] },
     { key: 'empleador', label: 'Empleador', type: 'text' },
     { key: 'ciudad', label: 'Ciudad', type: 'text' },
     { key: 'zona', label: 'Zona', type: 'text' },
