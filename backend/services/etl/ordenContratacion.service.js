@@ -13,7 +13,7 @@ const OrdenContratacion = require('../../models/etl/ordenContratacion.model.js')
  */
 const cleanDate = (value) => {
     if (!value || value === '' || value === 'null') return null;
-    
+
     const str = value.toString().trim();
     // Buscar patrón DD/MM/YYYY o DD-MM-YYYY
     const matchDMY = str.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
@@ -21,7 +21,7 @@ const cleanDate = (value) => {
         const [_, day, month, year] = matchDMY;
         return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
-    
+
     // Buscar patrón YYYY-MM-DD
     const matchYMD = str.match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
     if (matchYMD) {
@@ -44,9 +44,9 @@ const cleanValue = (key, value) => {
 
     // Campos numéricos
     const numericFields = [
-        'id_job', 'user_id', 'contract_id', 'city_id', 'client_id', 'cost_center_id', 
-        'plant_id', 'office_id', 'status_id', 'leader_id', 'probation_days', 
-        'company_id', 'area_id', 'unit_id', 'salary', 'blood_id', 'gender_id', 
+        'id_job', 'user_id', 'contract_id', 'city_id', 'client_id', 'cost_center_id',
+        'plant_id', 'office_id', 'status_id', 'leader_id', 'probation_days',
+        'company_id', 'area_id', 'unit_id', 'salary', 'blood_id', 'gender_id',
         'marital_status_id', 'eps_id', 'pension_id', 'arl_id', 'compensation_box_id', 'severance_id'
     ];
     if (numericFields.includes(key)) {
@@ -96,7 +96,7 @@ const OrdenContratacionService = {
             if (!name || name === '-' || name === 'null' || name === '') return null;
             const normalizedSearch = name.toString().toLowerCase().trim()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            
+
             // 1. Intento de coincidencia exacta
             let item = list.find(i => {
                 if (!i.nombre) return false;
@@ -111,7 +111,7 @@ const OrdenContratacionService = {
                     if (!i.nombre) return false;
                     const normalizedItem = i.nombre.toString().toLowerCase().trim()
                         .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    
+
                     if (context === 'RH') {
                         return normalizedSearch.startsWith(normalizedItem);
                     }
@@ -156,7 +156,7 @@ const OrdenContratacionService = {
         const [existing] = await pool.execute('SELECT people_id, details_id FROM PEOPLE WHERE document_number = ?', [record.identificacion]);
         let peopleId;
         let detailsId;
-        
+
         const firstName = (record.nombre_apellido?.split(' ')[0] || '').substring(0, 100);
         const lastName = (record.nombre_apellido?.split(' ').slice(1).join(' ') || '').substring(0, 100);
         const phone = record.celular ? record.celular.toString().substring(0, 20) : null;
@@ -166,10 +166,10 @@ const OrdenContratacionService = {
         if (existing.length > 0) {
             peopleId = existing[0].people_id;
             detailsId = existing[0].details_id;
-            await pool.execute('UPDATE PEOPLE SET first_name = ?, last_name = ?, birthdate = ?, phone_number = ? WHERE people_id = ?', 
+            await pool.execute('UPDATE PEOPLE SET first_name = ?, last_name = ?, birthdate = ?, phone_number = ? WHERE people_id = ?',
                 [firstName, lastName, birthDate, phone, peopleId]);
         } else {
-            const [result] = await pool.execute('INSERT INTO PEOPLE (document_number, first_name, last_name, birthdate, phone_number, type_id) VALUES (?, ?, ?, ?, ?, ?)', 
+            const [result] = await pool.execute('INSERT INTO PEOPLE (document_number, first_name, last_name, birthdate, phone_number, type_id) VALUES (?, ?, ?, ?, ?, ?)',
                 [doc, firstName, lastName, birthDate, phone, 1]);
             peopleId = result.insertId;
         }
@@ -194,10 +194,11 @@ const OrdenContratacionService = {
             peopleId
         ];
 
+<<<<<<< HEAD
         if (existingHealth.length > 0) {
             await pool.execute('UPDATE PEOPLE_HEALT_SECURITY SET eps_id = ?, pension_id = ?, arl_id = ?, compensation_box_id = ?, bank_account = ? WHERE people_id = ?', healthParams);
         } else {
-            await pool.execute('INSERT INTO PEOPLE_HEALT_SECURITY (people_id, eps_id, pension_id, arl_id, compensation_box_id, bank_account) VALUES (?, ?, ?, ?, ?, ?)', 
+            await pool.execute('INSERT INTO PEOPLE_HEALT_SECURITY (people_id, eps_id, pension_id, arl_id, compensation_box_id, bank_account) VALUES (?, ?, ?, ?, ?, ?)',
                 [peopleId, healthParams[0], healthParams[1], healthParams[2], healthParams[3], healthParams[4]]);
         }
 
@@ -307,7 +308,7 @@ const OrdenContratacionService = {
             const fullRow = { ...row, ...resolved };
 
             await this._savePeopleData(fullRow);
-            
+
             const editableColumns = [
                 'id_job', 'user_id', 'detail_justification', 'polygraph_test',
                 'hire_date', 'probation_end_date', 'probation_days',

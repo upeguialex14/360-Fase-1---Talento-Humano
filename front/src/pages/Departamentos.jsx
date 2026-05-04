@@ -1,11 +1,10 @@
-/**
- * Página de departamentos
- */
+import React from 'react';
+
 const Departamentos = () => {
     return (
-        <div className="page departamentos-page">
+        <div className="page-container">
             <h1>Gestión de Departamentos</h1>
-            <p>Aquí podrás gestionar los departamentos de la empresa</p>
+            <p>Módulo para la administración de la estructura organizacional.</p>
         </div>
     );
 };

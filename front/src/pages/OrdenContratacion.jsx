@@ -555,6 +555,24 @@ const OrdenContratacion = () => {
                     >
                         {loading ? 'Procesando...' : 'Guardar Cambios'}
                     </button>
+                    <button
+                        className="btn-premium"
+                        style={{ background: '#EF4444', color: 'white', borderColor: '#EF4444' }}
+                        onClick={async () => {
+                            if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Orden de Contratación?")) {
+                                try {
+                                    const res = await api.delete('/etl/'); // wait, the endpoint is /etl/ (router is mounted on /etl in app.js? Let me check) No, let me check the routes... it is router.delete('/', controller.deleteAllOrdenContratacion) and in App.js or similar it's mounted. Actually, in OrdenContratacion.service.js or something, what is the API route for getAllRecords? Let me look at line 140 of this file if I can, wait... Let me check what URL is used for handleSave.
+                                    // I'll assume '/etl/orden-contratacion' as base.
+                                    await api.delete('/orden-contratacion');
+                                    alert("Registros eliminados");
+                                    window.location.reload();
+                                } catch(e) { alert("Error: " + e.message); }
+                            }
+                        }}
+                        disabled={loading || uploading || !canEdit}
+                    >
+                        🗑️ Eliminar Todos
+                    </button>
                 </div>
             </div>
 

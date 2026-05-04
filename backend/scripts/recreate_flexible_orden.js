@@ -38,6 +38,7 @@ async function recreateFlexibleOrden() {
                 fin_prueba TEXT,
                 dias_prueba TEXT,
                 salario TEXT,
+                estado_proceso TEXT,
                 arl TEXT,
                 celular TEXT,
                 correo_electronico TEXT,

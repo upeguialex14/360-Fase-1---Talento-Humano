@@ -11,6 +11,17 @@ const getRoles = async (req, res) => {
     }
 };
 
+const getUsersByRole = async (req, res) => {
+    try {
+        const { role_id } = req.params;
+        const users = await roleManagementService.getUsersByRole(role_id);
+        res.json({ success: true, data: users });
+    } catch (error) {
+        console.error('Error al obtener usuarios por rol:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener usuarios' });
+    }
+};
+
 const createRole = async (req, res) => {
     try {
         const { role_name, description } = req.body;
@@ -78,7 +89,7 @@ const revokePermissionFromRole = async (req, res) => {
 };
 
 module.exports = {
-    getRoles, createRole,
+    getRoles, createRole, getUsersByRole,
     getPermissions, createPermission,
     getRolePermissions, assignPermissionToRole, revokePermissionFromRole
 };

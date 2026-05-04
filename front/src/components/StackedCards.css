@@ -8,6 +8,36 @@
     margin-bottom: 0px; /* Removed large separation to match user request */
 }
 
+.stack-background-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    z-index: 0;
+    pointer-events: none;
+    padding: 2rem;
+}
+
+.stack-background-message h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0;
+    text-shadow: 0 4px 10px rgba(255, 205, 4, 0.3);
+    animation: pulseMessage 4s ease-in-out infinite;
+}
+
+@keyframes pulseMessage {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
 .stack-sticky {
     position: sticky;
     top: 5vh; /* Lower from top */
@@ -88,18 +118,19 @@
     color: rgba(226, 232, 255, 0.82);
 }
 
+.event-card-image {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 1rem;
+    display: block;
+}
+
 @media (max-width: 860px) {
     .event-card {
         width: calc(100% - 28px);
         min-height: 80vh;
         padding: 1.8rem;
-    }
-
-    .event-card h3 {
-        font-size: 2.4rem;
-    }
-
-    .event-card p {
-        font-size: 1rem;
     }
 }

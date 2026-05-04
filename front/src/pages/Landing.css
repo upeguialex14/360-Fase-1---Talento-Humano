@@ -96,8 +96,8 @@ body {
   line-height: 0.9;
   font-weight: 900;
   font-style: italic;
-  color: var(--primary);
-  text-shadow: 0 0 40px rgba(255, 205, 4, 0.24);
+  color: #FFCD04 !important; /* Explicitly matching engine-title */
+  text-shadow: 0 0 40px rgba(255, 205, 4, 0.42) !important;
 }
 
 .hero-copy {

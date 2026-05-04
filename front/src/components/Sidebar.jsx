@@ -102,7 +102,6 @@ const Icons = {
 // Rutas que pertenecen al menú de Parametrización
 const PARAMETRIZACION_ROUTES = [
     '/home/roles',
-    '/home/permissions',
     '/home/users',
     '/home/role-page-access',
     '/home/admin/blocked-users'
@@ -117,7 +116,8 @@ const FORMULARIOS_ROUTES = [
 // Rutas que pertenecen al menú de Bases
 const BASES_ROUTES = [
     '/home/base-inactiva',
-    '/home/base-unificada'
+    '/home/base-unificada',
+    '/home/base-datos'
 ];
 
 /**
@@ -305,25 +305,6 @@ const Sidebar = () => {
                         );
                     })}
 
-                    {/* Solicitud de Vacantes - Solo para administradores */}
-                    {user && user.role_id === 1 && (
-                        <li>
-                            <NavLink to="/home/solicitud-vacantes" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-                                <span className="sidebar-icon">{Icons.briefcase}</span>
-                                Solicitud de Vacantes
-                            </NavLink>
-                        </li>
-                    )}
-
-                    {/* Gestión de Requisiciones - Solo para administradores */}
-                    {user && user.role_id === 1 && (
-                        <li>
-                            <NavLink to="/home/gestion-requisiciones" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-                                <span className="sidebar-icon">{Icons.clipboard}</span>
-                                Gestión de Requisiciones
-                            </NavLink>
-                        </li>
-                    )}
 
                     {/* Menú Parametrización */}
                     {(isParametrizacionPagePresent || (user && user.role_id === 1)) && (
@@ -341,11 +322,6 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/home/roles" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
                                         <span className="sidebar-icon">{Icons.users}</span> Gestión de Roles
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/home/permissions" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
-                                        <span className="sidebar-icon">{Icons.shield}</span> Gestión de Permisos
                                     </NavLink>
                                 </li>
                                 <li>

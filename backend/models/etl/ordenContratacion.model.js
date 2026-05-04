@@ -72,21 +72,17 @@ const OrdenContratacion = {
     },
 
     async insert(record) {
-        const allowedColumns = [
-            'id_job', 'user_id', 'detail_justification', 'polygraph_test',
-            'hire_date', 'probation_end_date', 'probation_days', 'uploaded_by',
-            'update_by', 'cost_center_id', 'plant_id', 'office_id', 'contract_id',
-            'city_id', 'client_id', 'status_id', 'selection_confirmed',
-            'selection_hiring_confirmed', 'leader_id'
-        ];
+        const { id, identificacion, usuario_carga, usuario_edicion, ...data } = record;
 
-        const columns = [];
-        const values = [];
+        // Build dynamic insert
+        const columns = ['id', 'identificacion', 'usuario_carga', 'usuario_edicion', 'fecha_registro', 'fecha_actualizacion'];
+        const values = [id, identificacion, usuario_carga, usuario_edicion, new Date(), new Date()];
 
-        allowedColumns.forEach(col => {
-            if (record[col] !== undefined) {
-                columns.push(`\`${col}\``);
-                values.push(record[col]);
+        // Add data columns
+        Object.keys(data).forEach(key => {
+            if (data[key] !== undefined && data[key] !== null) {
+                columns.push(key);
+                values.push(data[key]);
             }
         });
 
@@ -112,7 +108,7 @@ const OrdenContratacion = {
         const updateSets = [];
         const updateValues = [];
 
-        allowedColumns.forEach(key => {
+        Object.keys(updates).forEach(key => {
             if (updates[key] !== undefined && updates[key] !== null) {
                 updateSets.push(`\`${key}\` = ?`);
                 updateValues.push(updates[key]);
