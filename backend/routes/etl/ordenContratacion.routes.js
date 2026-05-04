@@ -15,4 +15,7 @@ router.get('/', controller.getAllRecords);
 // Guardado manual masivo
 router.put('/bulk-update', controller.bulkUpdate);
 
+// Eliminar todos los registros
+router.delete('/', controller.deleteAllOrdenContratacion);
+
 module.exports = router;

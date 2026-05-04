@@ -10,4 +10,7 @@ router.post('/upload/:type', middleware.uploadExcel, controller.controllerUpload
 router.get('/cost-centers', controller.getCostCenters);
 router.get('/base-datos', controller.getBaseDatos);
 
+router.delete('/cost-centers', controller.deleteAllCostCenters);
+router.delete('/base-datos', controller.deleteAllBaseDatos);
+
 module.exports = router;

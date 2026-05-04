@@ -24,6 +24,8 @@ const OrdenContratacionService = {
         ];
 
         const dateFields = ['fecha_ingreso', 'fecha_retiro', 'fin_prueba', 'fecha_nacimiento', 'fecha_expedicion_cc'];
+        let inserted = 0;
+        let updated = 0;
 
         for (const record of records) {
             const identificacion = record.identificacion;
@@ -38,7 +40,6 @@ const OrdenContratacionService = {
                     // Defensive parsing for numeric fields
                     if (col === 'salario') {
                         if (typeof val === 'string') {
-                            // Remove currency symbols, commas and spaces
                             val = val.replace(/[^0-9.]/g, '');
                         }
                         val = parseFloat(val) || 0;
@@ -48,7 +49,6 @@ const OrdenContratacionService = {
                         }
                         val = parseInt(val) || 0;
                     } else if (dateFields.includes(col)) {
-                        // Convert date if applicable
                         val = excelDateToJS(val);
                     }
                     
@@ -56,14 +56,10 @@ const OrdenContratacionService = {
                 }
             }
 
-            // Check if record exists
             const existing = await OrdenContratacion.findByIdentificacion(identificacion);
 
             if (!existing) {
-                // INSERT
                 const newId = crypto.randomUUID();
-                console.log(`[DEBUG] Insertando nuevo registro: ${identificacion}, id: ${newId}`);
-
                 await OrdenContratacion.insert({
                     id: newId,
                     identificacion,
@@ -71,10 +67,15 @@ const OrdenContratacionService = {
                     usuario_edicion: username,
                     ...cleanRecord
                 });
+                inserted++;
             } else {
-                // UPDATE: Only selected columns
                 const updates = {};
-                for (const col of selectedColumns) {
+                // Si no hay columnas seleccionadas, actualizamos todas las que vienen en el registro
+                const colsToUpdate = (selectedColumns && selectedColumns.length > 0) 
+                    ? selectedColumns 
+                    : Object.keys(cleanRecord);
+
+                for (const col of colsToUpdate) {
                     if (validColumns.includes(col) && cleanRecord[col] !== undefined) {
                         updates[col] = cleanRecord[col];
                     }
@@ -83,11 +84,16 @@ const OrdenContratacionService = {
                 if (Object.keys(updates).length > 0) {
                     updates.editado_manualmente = 'no';
                     await OrdenContratacion.updateByIdentificacion(identificacion, updates, username);
+                    updated++;
                 }
             }
         }
 
-        return { success: true, message: 'Procesamiento de registros completado' };
+        return { 
+            success: true, 
+            message: 'Procesamiento de registros completado',
+            summary: { inserted, updated, total: records.length }
+        };
     },
 
     async getAllRecords() {

@@ -10,12 +10,18 @@ const HistorialPermisosRoles = require('../models/historialPermisosRoles.model')
  */
 class RoleManagementService {
     async getAllRoles() {
-        return await Role.getAll();
+        return await Role.getAllWithCounts();
     }
 
     async createRole(roleData) {
         const { role_name, description } = roleData;
-        return await Role.create({ role_name, description });
+        // Generate role_code if not provided (predeterminado)
+        const role_code = role_name.toUpperCase().replace(/\s+/g, '_');
+        return await Role.create({ role_name, description, role_code });
+    }
+
+    async getUsersByRole(roleId) {
+        return await Role.getUsersByRole(roleId);
     }
 
     async getAllPermissions() {

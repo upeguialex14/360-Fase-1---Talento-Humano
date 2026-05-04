@@ -25,9 +25,9 @@ const OrdenContratacion = {
         const columns = ['id', 'identificacion', 'usuario_carga', 'usuario_edicion', 'fecha_registro', 'fecha_actualizacion'];
         const values = [id, identificacion, usuario_carga, usuario_edicion, new Date(), new Date()];
 
-        // Add data columns
+        // Add data columns, avoiding duplicates already in columns list
         Object.keys(data).forEach(key => {
-            if (data[key] !== undefined && data[key] !== null) {
+            if (data[key] !== undefined && data[key] !== null && key !== 'id' && key !== 'identificacion') {
                 columns.push(key);
                 values.push(data[key]);
             }
@@ -46,7 +46,7 @@ const OrdenContratacion = {
         const updateValues = [];
 
         Object.keys(updates).forEach(key => {
-            if (updates[key] !== undefined && updates[key] !== null) {
+            if (updates[key] !== undefined && updates[key] !== null && key !== 'identificacion') {
                 updateSets.push(`\`${key}\` = ?`);
                 updateValues.push(updates[key]);
             }

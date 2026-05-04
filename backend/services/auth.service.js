@@ -110,26 +110,25 @@ class AuthService {
 
     async getUserPages(roleId, userId) {
         try {
-            if (roleId === 1) {
-                return [
-                    { page_code: 'DASHBOARD', page_name: 'Dashboard', route: '/dashboard', can_view: 1, can_edit: 1 },
-                    { page_code: 'ROLES', page_name: 'Gestión de Roles', route: '/roles', can_view: 1, can_edit: 1 },
-                    { page_code: 'PERMISSIONS', page_name: 'Gestión de Permisos', route: '/permissions', can_view: 1, can_edit: 1 },
-                    { page_code: 'USUARIOS', page_name: 'Gestión de Usuarios', route: '/users', can_view: 1, can_edit: 1 },
-                    { page_code: 'PLANTA', page_name: 'Planta Operación', route: '/planta', can_view: 1, can_edit: 1 },
-                    { page_code: 'COSTOS', page_name: 'Centro de Costos', route: '/costos', can_view: 1, can_edit: 1 },
-                    { page_code: 'ORDEN_CONTRATACION', page_name: 'Orden de Contratación', route: '/contratacion', can_view: 1, can_edit: 1 }
-                ];
-            }
+            // Fetch all pages with their access state for this role
+            const pageRows = await Page.getRolePages(roleId);
 
-            const pageRows = await Page.getPagesForRole(roleId);
-
-            const seen = new Set();
-            return pageRows.filter(p => {
-                if (seen.has(p.page_code)) return false;
-                seen.add(p.page_code);
-                return true;
-            });
+            // Filter only those that the user can at least view
+            // Note: For Gerente (roleId 1), we might want to return all by default or manage it in DB
+            // The user wants control, so let's use the DB state.
+            
+            // If it's Gerente, we should probably ensure they see everything or at least manage it via RolePageAccess.
+            // But to fix the "Gestión de Permisos" reappearing, we must rely on the DB.
+            
+            return pageRows
+                .filter(p => p.can_view === 1)
+                .map(p => ({
+                    page_code: p.page_code,
+                    page_name: p.page_name,
+                    route: p.route,
+                    can_view: p.can_view,
+                    can_edit: p.can_edit
+                }));
         } catch (err) {
             console.error('[AuthService] Error getting pages:', err);
             return [];

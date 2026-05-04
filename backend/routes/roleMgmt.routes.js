@@ -11,6 +11,7 @@ const { checkPermission } = require('../middleware/permission.middleware');
 const rolePageController = require('../controllers/rolePage.controller');
 
 router.get('/roles', verifyToken, checkPermission('MANAGE_ROLES'), roleMgmtController.getRoles);
+router.get('/roles/:role_id/users', verifyToken, checkPermission('MANAGE_ROLES'), roleMgmtController.getUsersByRole);
 router.post('/roles', verifyToken, checkPermission('MANAGE_ROLES'), roleMgmtController.createRole);
 
 router.get('/permissions', verifyToken, checkPermission('MANAGE_PERMISSIONS'), roleMgmtController.getPermissions);
