@@ -8,14 +8,26 @@ const controllerUploadExcel = async (req, res) => {
             return res.status(400).json({ success: false, message: 'No se subió ningún archivo' });
         }
 
-        const type = req.params.type;
-        const fileBuffer = req.file.buffer;
+        // Preparacion de datos
+        const data = {
+            ...req.body,
+            type: req.params.type,
+            fileBuffer: req.file.buffer,
+            mimetype: req.file.mimetype,
+            fileName: req.file.filename,
+            fileOriginalName: req.file.originalname,
+            username: req.user?.login || 'Sistema'
+        };
 
-        const result = await uploadService.uploadExcel({ fileBuffer, type });
+        //Llamada al servicio donde esta la logica pasandole el documento con la info
+        const newFile = await uploadService.uploadExcel(data);
 
-        return res.status(200).json({ success: true, ...result });
+        // respuesta exitosa del controlador
+        return res.status(201).json(newFile);
+
+
     } catch (error) {
-        console.error("Error en controllerUploadExcel:", error);
+        console.error("Error controllerUploadExcel:", error);
         return res.status(500).json({ success: false, message: error.message });
     }
 };

@@ -16,41 +16,47 @@ const process = async (rawJson) => {
         pool.execute('SELECT status_id as id, status as nombre FROM status_master').then(([rows]) => rows)
     ]);
 
-
-    // Helper encontrar ID con nombre
+    // Helper encontrar ID con nombre (Normalizado para acentos y mayúsculas)
     const findId = (list, name) => {
-        if (!name) return null;
-        const item = list.find(i =>
-            i.nombre && i.nombre.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === name.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        );
+        if (!name || name === '-' || name === 'null') return null;
+        const normalizedSearch = name.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        const item = list.find(i => {
+            if (!i.nombre) return false;
+            const normalizedItem = i.nombre.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return normalizedItem === normalizedSearch;
+        });
         return item ? item.id : null;
     };
 
-    // Transformacion de los datos
+    // Transformación de los datos
     const rowsToInsert = rawJson.map(row => {
         return {
-            //Mapeo directo desde el excel
             ptr: row['PTR'] || null,
             helisa_cc: row['C.C HELISA'] || null,
-
-            //Mapeo desde la base de datos
-            oficina_id: findId(oficinas, row['OFICINA']),
-            cliente_id: findId(clientes, row['CLIENTE']),
-            unidad_negocio_id: findId(unidadesNegocio, row['UNIDAD DE NEGOCIO']),
-            ciudad_id: findId(ciudades, row['CIUDAD']),
-            zona_id: findId(zonas, row['ZONA']),
+            office_id: findId(oficinas, row['OFICINA']),
+            client_id: findId(clientes, row['CLIENTE']),
+            unit_id: findId(unidadesNegocio, row['UNIDAD DE NEGOCIO']),
+            city_id: findId(ciudades, row['CIUDAD']),
+            area_id: findId(zonas, row['ZONA']),
             regional_id: findId(regionales, row['REGIONAL']),
-            empresa_id: findId(empresas, row['EMPRESA']),
-            lider_id: findId(lideres, row['LIDER']),
-            departamento_id: findId(departamentos, row['DEPARTAMENTO']),
-            status_id: 1, // Quemado según el original en caso de modificar a futuro
+            company_id: findId(empresas, row['EMPRESA']),
+            leader_id: findId(lideres, row['LIDER']) || findId(lideres, row['LIDER1']),
+            departament_id: findId(departamentos, row['DEPARTAMENTO']),
+            status_id: findId(status, row['ESTADO']) || 1,
             created_at: new Date(),
             updated_at: new Date()
         };
     });
 
-    // Carga masiva usando nuestra logica de inserts naticos mysql2
+    // Carga masiva
+    console.log("Total filas a insertar:", rowsToInsert.length);
+
     try {
+        if (rowsToInsert.length === 0) {
+            return { success: false, message: "No hay datos válidos para insertar" };
+        }
+
         const result = await CostCenterModel.bulkInsert(rowsToInsert);
 
         return {

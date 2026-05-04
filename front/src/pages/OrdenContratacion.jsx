@@ -13,7 +13,6 @@ const ALL_COLUMNS = [
     { key: 'cargo', label: 'Cargo', type: 'text', width: '180px' },
     { key: 'tipo_contrato', label: 'Tipo Contrato', type: 'text', width: '150px' },
     { key: 'salario', label: 'Salario', type: 'text', width: '120px' },
-    { key: 'estado_proceso', label: 'Estado', type: 'text', width: '120px' },
     { key: 'empleador', label: 'Empleador', type: 'text', width: '180px' },
     { key: 'ciudad', label: 'Ciudad', type: 'text', width: '130px' },
     { key: 'zona', label: 'Zona', type: 'text', width: '130px' },
@@ -73,7 +72,51 @@ const OrdenContratacion = () => {
         try {
             const data = await api.get('/orden-contratacion');
             if (data.success) {
-                setRecords(data.data);
+                console.log('Objeto raw del backend:', data.data[0]);
+                const mapped = data.data.map(row => ({
+                    id: row.order_id,
+                    identificacion: row.identificacion ?? '',
+                    nombre_apellido: row.nombre_apellido ?? '',
+                    fecha_ingreso: row.fecha_ingreso ?? '',
+                    cargo: row.cargo ?? '',
+                    tipo_contrato: row.tipo_contrato ?? '',
+                    salario: row.salario ?? '',
+                    empleador: row.empleador ?? '',
+                    ciudad: row.ciudad ?? '',
+                    zona: row.zona ?? '',
+                    arl: row.arl ?? '',
+                    detalle: row.detalle ?? '', // Backend alias
+                    oficina: row.oficina ?? '',
+                    unidad: row.unidad ?? '',
+                    cliente: row.cliente ?? '',
+                    centro_costos: row.centro_costos ?? '',
+                    jefe: row.jefe ?? '',
+                    correo_jefe: row.correo_jefe ?? '',
+                    analista_encargado: row.analista_encargado ?? '',
+                    poligrafia: row.poligrafia ?? '', // Backend alias
+                    confirmacion_seleccion: row.confirmacion_seleccion ?? '',
+                    anexos: row.anexos ?? '',
+                    verificacion_documentos: row.verificacion_documentos ?? '',
+                    verificacion_anexos: row.verificacion_anexos ?? '',
+                    observaciones: row.observaciones ?? '',
+                    fecha_retiro: row.fecha_retiro ?? '',
+                    fin_prueba: row.fin_prueba ?? '',
+                    dias_prueba: row.dias_prueba ?? '',
+                    celular: row.celular ?? '',
+                    correo_electronico: row.correo_electronico ?? '',
+                    direccion: row.direccion ?? '',
+                    ciudad_personal: row.ciudad_personal ?? '',
+                    fecha_nacimiento: row.fecha_nacimiento ?? '',
+                    fecha_expedicion_cc: row.fecha_expedicion_cc ?? '',
+                    rh: row.rh ?? '',
+                    eps: row.eps ?? '',
+                    ccf: row.ccf ?? '',
+                    afp: row.afp ?? '',
+                    bh: row.bh ?? '',
+                    cuenta_bancaria: row.cuenta_bancaria ?? '',
+                }));
+                console.log('Primer registro mapeado:', mapped[0]);
+                setRecords(mapped);
             } else {
                 setError(data.message);
             }
@@ -119,17 +162,33 @@ const OrdenContratacion = () => {
                     "fecha_ingreso": ["fecha de ingreso", "fecha ingreso", "ingreso", "f. ingreso"],
                     "cargo": ["cargo", "puesto", "oficio", "empresa"],
                     "tipo_contrato": ["tipo de contrato", "contrato", "tipo contrato", "especializado"],
-                    "salario": ["salario", "sueldo", "basico", "remuneracion"],
+                    "salario": ["salario", "sueldo", "basico", "remuneracion", "salario base", "sueldo base", "total devengado"],
                     "oficina": ["oficina", "sucursal", "punto", "sede"],
-                    "jefe": ["jefe", "lider", "supervisor", "jefe inmediato"],
-                    "detalle": ["detalle", "justificacion", "motivo", "detalle la justificacion"],
+                    "jefe": ["jefe", "lider", "supervisor", "jefe inmediato", "identificacion jefe", "cedula jefe"],
+                    "detalle": ["detalle", "justificacion", "motivo", "detalle la justificacion", "detalle de la vacante"],
+                    "eps": ["eps", "entidad salud", "salud"],
+                    "afp": ["afp", "pensiones", "pension", "fondo pension"],
+                    "arl": ["arl", "riesgos", "riesgos laborales"],
+                    "ccf": ["ccf", "caja", "caja de compensacion", "caja compensacion"],
+                    "rh": ["rh", "grupo sanguineo", "sangre"],
+                    "direccion": ["direccion", "residencia", "vivienda"],
+                    "celular": ["celular", "telefono", "contacto", "movil"],
+                    "fecha_nacimiento": ["fecha de nacimiento", "nacimiento", "f. nacimiento"],
+                    "empleador": ["empleador", "empresa", "empresa usuaria", "cliente externo"],
+                    "identificacion_jefe": ["identificacion jefe", "cedula jefe", "cc jefe", "documento jefe"],
+                    "observaciones": ["observaciones", "notas", "comentarios"],
+                    "fecha_retiro": ["fecha retiro", "fecha de retiro", "retiro", "f. retiro"],
+                    "fin_prueba": ["fin prueba", "fecha fin prueba", "terminacion prueba"],
+                    "dias_prueba": ["dias prueba", "dias de prueba", "periodo prueba"],
+                    "bh": ["bh", "banco", "entidad bancaria"],
+                    "cuenta_bancaria": ["cuenta bancaria", "nro cuenta", "numero de cuenta", "cuenta"],
                 };
 
                 const detectedMapping = {};
                 ALL_COLUMNS.forEach(col => {
                     const colKey = col.key;
                     const colLabel = col.label.toLowerCase();
-                    
+
                     // Buscar coincidencia exacta o por alias
                     const match = excelHeaders.find(h => {
                         const lowH = h.toLowerCase().trim();
@@ -175,17 +234,39 @@ const OrdenContratacion = () => {
 
                     // Re-aplicar mapeo a todos los registros
                     const excelHeaders = Object.keys(jsonData[0]);
+                    const colAliases = {
+                        "identificacion": ["identificacion", "id", "cedula", "cc", "documento", "ptr", "nro", "codigo"],
+                        "nombre_apellido": ["nombre y apellido", "nombre completo", "nombres y apellidos", "empleado", "nombre", "apellido"],
+                        "fecha_ingreso": ["fecha de ingreso", "fecha ingreso", "ingreso", "f. ingreso"],
+                        "cargo": ["cargo", "puesto", "oficio", "empresa"],
+                        "tipo_contrato": ["tipo de contrato", "contrato", "tipo contrato", "especializado"],
+                        "salario": ["salario", "sueldo", "basico", "remuneracion", "salario base", "sueldo base", "total devengado"],
+                        "oficina": ["oficina", "sucursal", "punto", "sede"],
+                        "jefe": ["jefe", "lider", "supervisor", "jefe inmediato", "identificacion jefe", "cedula jefe"],
+                        "detalle": ["detalle", "justificacion", "motivo", "detalle la justificacion", "detalle de la vacante"],
+                        "eps": ["eps", "entidad salud", "salud"],
+                        "afp": ["afp", "pensiones", "pension", "fondo pension"],
+                        "arl": ["arl", "riesgos", "riesgos laborales"],
+                        "ccf": ["ccf", "caja", "caja de compensacion", "caja compensacion"],
+                        "rh": ["rh", "grupo sanguineo", "sangre"],
+                        "direccion": ["direccion", "residencia", "vivienda"],
+                        "celular": ["celular", "telefono", "contacto", "movil"],
+                        "fecha_nacimiento": ["fecha de nacimiento", "nacimiento", "f. nacimiento"],
+                        "empleador": ["empleador", "empresa", "empresa usuaria", "cliente externo"],
+                        "identificacion_jefe": ["identificacion jefe", "cedula jefe", "cc jefe", "documento jefe"],
+                        "observaciones": ["observaciones", "notas", "comentarios"],
+                        "fecha_retiro": ["fecha retiro", "fecha de retiro", "retiro", "f. retiro"],
+                        "fin_prueba": ["fin prueba", "fecha fin prueba", "terminacion prueba"],
+                        "dias_prueba": ["dias prueba", "dias de prueba", "periodo prueba"],
+                        "bh": ["bh", "banco", "entidad bancaria"],
+                        "cuenta_bancaria": ["cuenta bancaria", "nro cuenta", "numero de cuenta", "cuenta"],
+                    };
+
                     const detectedMapping = {};
                     ALL_COLUMNS.forEach(col => {
                         const lowLabel = col.label.toLowerCase();
                         const match = excelHeaders.find(h => {
                             const lowH = h.toLowerCase().trim();
-                            const colAliases = {
-                                "identificacion": ["identificacion", "id", "cedula", "cc", "documento", "ptr", "nro", "codigo"],
-                                "cargo": ["cargo", "puesto", "oficio", "empresa"],
-                                "jefe": ["jefe", "lider", "supervisor"],
-                                "oficina": ["oficina", "sucursal"]
-                            };
                             if (lowH === col.key.toLowerCase() || lowH === lowLabel) return true;
                             if (colAliases[col.key] && colAliases[col.key].includes(lowH)) return true;
                             return false;
@@ -203,7 +284,7 @@ const OrdenContratacion = () => {
 
                     const response = await api.post('/orden-contratacion/upsert', { records: recordsToUpload });
                     if (response.success) {
-                        setMessage(`Carga exitosa: ${response.summary.inserted} nuevos, ${response.summary.updated} actualizados.`);
+                        setMessage(`Carga exitosa: ${response.summary?.inserted ?? 0} nuevos, ${response.summary?.updated ?? 0} actualizados.`);
                         setFile(null);
                         setPreviewData([]);
                         setIsUploadVisible(false);
@@ -458,8 +539,8 @@ const OrdenContratacion = () => {
                     <p>Gestión integral de ingresos y procesos operativos</p>
                 </div>
                 <div className="actions-group">
-                    <button 
-                        className={`btn-premium btn-upload-toggle ${isUploadVisible ? 'active' : ''}`} 
+                    <button
+                        className={`btn-premium btn-upload-toggle ${isUploadVisible ? 'active' : ''}`}
                         onClick={() => setIsUploadVisible(!isUploadVisible)}
                     >
                         <span>📊</span> {isUploadVisible ? 'Cerrar Carga' : 'Cargar Excel'}
@@ -499,7 +580,7 @@ const OrdenContratacion = () => {
                 <div className="upload-section">
                     <div className="upload-grid">
                         <div className="upload-controls">
-                            <div 
+                            <div
                                 className={`drop-zone ${dragOver ? 'active' : ''}`}
                                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                                 onDragLeave={() => setDragOver(false)}
@@ -508,18 +589,18 @@ const OrdenContratacion = () => {
                             >
                                 <span className="icon">📂</span>
                                 <p>{file ? file.name : 'Arrastra tu Excel aquí o haz clic'}</p>
-                                <input 
-                                    ref={fileInputRef} 
-                                    type="file" 
-                                    accept=".xlsx,.xls" 
-                                    style={{ display: 'none' }} 
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".xlsx,.xls"
+                                    style={{ display: 'none' }}
                                     onChange={(e) => handleFileSelect(e.target.files[0])}
                                 />
                             </div>
-                            
+
                             {file && (
-                                <button 
-                                    className="btn-premium btn-save" 
+                                <button
+                                    className="btn-premium btn-save"
                                     style={{ width: '100%', marginTop: '1rem' }}
                                     onClick={handleUpload}
                                     disabled={uploading}
