@@ -7,19 +7,12 @@ const CostCenter = {
     async bulkInsert(records) {
         if (records.length === 0) return [];
 
-        // 1. Nombres de las columnas en la TABLA de MySQL
+        // Nombres de las columnas en la TABLA de MySQL
         const columns = [
-<<<<<<< HEAD
-            'ptr', 'helisa_cc', 'office_id', 'client_id',
-            'unit_id', 'city_id', 'area_id', 'regional_id',
-            'company_id', 'leader_id', //'status_id',
-            //'created_at', 'updated_at'
-=======
             'ptr', 'helisa_cc', 'oficina_id', 'cliente_id', 
             'unidad_negocio_id', 'ciudad_id', 'zona_id', 'regional_id', 
             'empresa_id', 'lider_id', 'departamento_id', 'status_id', 
             'created_at', 'updated_at'
->>>>>>> b9f3cebe96ae0899db0e35f1e43af9b11e0bbf78
         ];
 
         let placeholders = [];
@@ -28,22 +21,21 @@ const CostCenter = {
         for (const row of records) {
             placeholders.push(`(${new Array(columns.length).fill('?').join(', ')})`);
 
-            // 2. IMPORTANTE: Los nombres después del 'row.' deben ser EXACTOS 
-            // a como salen en tu console.log("Filas a insertar")
             values.push(
                 row.ptr ?? null,
                 row.helisa_cc ?? null,
-                row.office_id ?? null,    // Antes tenías discrepancia aquí
-                row.client_id ?? null,    // Antes tenías row.cliente_id (con e)
+                row.office_id ?? null,
+                row.client_id ?? null,
                 row.unit_id ?? null,
                 row.city_id ?? null,
                 row.area_id ?? null,
                 row.regional_id ?? null,
                 row.company_id ?? null,
                 row.leader_id ?? null,
-                //row.status_id ?? 1,       // Valor por defecto si viene vacío
-                //row.created_at ?? new Date(),
-                //row.updated_at ?? new Date()
+                row.departament_id ?? null,
+                row.status_id ?? 1,
+                row.created_at ?? new Date(),
+                row.updated_at ?? new Date()
             );
         }
 

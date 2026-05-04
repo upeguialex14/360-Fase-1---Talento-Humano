@@ -1,11 +1,8 @@
 //Importamos la libreria xlsx con sus funciones
 const xlsx = require('xlsx');
 const costCenterProcessor = require('./processors/costCenterProcessor.service');
-<<<<<<< HEAD
 const hiringOrderProcessor = require('./processors/hiringOrderProcessor.service');
-=======
 const baseDatosProcessor = require('./processors/baseDatosProcessor.service');
->>>>>>> b9f3cebe96ae0899db0e35f1e43af9b11e0bbf78
 
 
 const uploadExcel = async (data) => {
