@@ -1,4 +1,5 @@
 const db = require('../../../config/db');
+const { excelDateToJS } = require('../../../helpers/excel.helper');
 
 const process = async (jsonData) => {
     let processed = 0;
@@ -18,47 +19,50 @@ const process = async (jsonData) => {
         return { original: row, normalized: normalizedRow };
     });
 
+    // 1. PRECARGA DE MAESTROS PARA SEGURIDAD SOCIAL
+    const [epsList, pensionList, arlList, ccfList] = await Promise.all([
+        db.query('SELECT eps_id as id, name_eps as nombre FROM MASTER_EPS').then(([rows]) => rows),
+        db.query('SELECT pension_id as id, name_fund as nombre FROM MASTER_PENSION').then(([rows]) => rows),
+        db.query('SELECT arl_id as id, name_arl as nombre FROM MASTER_ARL').then(([rows]) => rows),
+        db.query('SELECT compesation_box_id as id, name_compesation_box as nombre FROM MASTER_COMPENSATION_BOX').then(([rows]) => rows),
+    ]);
+
+    const findId = (list, name) => {
+        if (!name || name === '-' || name === 'null' || name === '') return null;
+        const normalizedSearch = name.toString().toLowerCase().trim()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        
+        const item = list.find(i => {
+            if (!i.nombre) return false;
+            const normalizedItem = i.nombre.toString().toLowerCase().trim()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return normalizedSearch.includes(normalizedItem) || normalizedItem.includes(normalizedSearch);
+        });
+        return item ? item.id : null;
+    };
+
     for (const item of normalizedData) {
         processed++;
         const row = item.normalized;
         const original = item.original;
 
-        // Try to find the exact column names from the raw data if the normalized one fails,
-        // or map based on expected columns.
         const cedula = row.cedula || original['CEDULA'];
-        if (!cedula) continue; // Skip if no cedula
-
-        // Helper for excel dates
-        const parseDate = (val) => {
-            if (!val) return null;
-            if (typeof val === 'number') {
-                // Excel date serial
-                return new Date(Math.round((val - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
-            }
-            if (typeof val === 'string') {
-                // assume DD/MM/YYYY
-                const parts = val.split('/');
-                if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                return null; // fallback
-            }
-            return null;
-        };
+        if (!cedula) continue; 
 
         const emailVal = row.correo_electronico || original['CORREO ELECTRONICO'];
 
-        // 1. Mapeo para la tabla PEOPLE
+        // 2. Mapeo para la tabla PEOPLE
         const peopleFields = {
             document_number: String(cedula).trim(),
             first_name: row.apellidos_y_nombres ? String(row.apellidos_y_nombres).split(' ')[0] : 'Sin Nombre',
             last_name: row.apellidos_y_nombres ? String(row.apellidos_y_nombres).split(' ').slice(1).join(' ') : 'Sin Apellido',
             email: emailVal && String(emailVal).trim() !== '' ? String(emailVal).trim() : null,
             phone_number: row.telefono || original['TELEFONO'] ? String(row.telefono || original['TELEFONO']).trim() : null,
-            birthdate: parseDate(row.fecha_nacimiento || original['FECHA NACIMIENTO']),
-            registration_date: parseDate(row.fecha_de_ingreso || original['FECHA DE INGRESO']),
+            birthdate: excelDateToJS(row.fecha_nacimiento || original['FECHA NACIMIENTO']),
+            registration_date: excelDateToJS(row.fecha_de_ingreso || original['FECHA DE INGRESO']),
         };
 
         Object.keys(peopleFields).forEach(key => { if (peopleFields[key] === null) delete peopleFields[key]; });
-
         const pKeys = Object.keys(peopleFields);
         const pValues = Object.values(peopleFields);
 
@@ -148,25 +152,84 @@ const process = async (jsonData) => {
         const fValues = Object.values(fullFields);
 
         try {
-            // Insertar en tabla transaccional (People)
-            if (pKeys.length > 0) {
-                const sqlPeople = `
-                    INSERT INTO people (${pKeys.join(', ')})
-                    VALUES (${pKeys.map(() => '?').join(', ')})
-                    ON DUPLICATE KEY UPDATE
-                    ${pKeys.map(k => `${k} = VALUES(${k})`).join(', ')}
-                `;
-                await db.query(sqlPeople, pValues);
+            // 1. Asegurar que existe en tabla PEOPLE y obtener people_id
+            const [existingPeople] = await db.query('SELECT people_id FROM people WHERE document_number = ?', [peopleFields.document_number]);
+            let peopleId;
+
+            if (existingPeople.length > 0) {
+                peopleId = existingPeople[0].people_id;
+                // Actualizar info básica en PEOPLE
+                const pKeys = Object.keys(peopleFields);
+                const pValues = Object.values(peopleFields);
+                const sqlPeople = `UPDATE people SET ${pKeys.map(k => `${k} = ?`).join(', ')} WHERE people_id = ?`;
+                await db.query(sqlPeople, [...pValues, peopleId]);
+            } else {
+                // Insertar nuevo en PEOPLE
+                const pKeys = Object.keys(peopleFields);
+                const pValues = Object.values(peopleFields);
+                const [pResult] = await db.query(`INSERT INTO people (${pKeys.join(', ')}) VALUES (${pKeys.map(() => '?').join(', ')})`, pValues);
+                peopleId = pResult.insertId;
             }
 
-            // Insertar en Base de Datos Maestra para UI y analistas
-            const sqlBase = `
-                INSERT INTO base_datos_maestra (${fKeys.join(', ')})
+            // 2. Insertar/Actualizar en people_extended_info
+            fullFields.people_id = peopleId;
+            const fKeys = Object.keys(fullFields);
+            const fValues = Object.values(fullFields);
+
+            const sqlExtended = `
+                INSERT INTO people_extended_info (${fKeys.join(', ')})
                 VALUES (${fKeys.map(() => '?').join(', ')})
                 ON DUPLICATE KEY UPDATE
-                ${fKeys.map(k => `${k} = VALUES(${k})`).join(', ')}
+                ${fKeys.map(k => `${k} = IFNULL(VALUES(${k}), ${k})`).join(', ')}
             `;
-            await db.query(sqlBase, fValues);
+            await db.query(sqlExtended, fValues);
+
+            // 3. NUEVO: Sincronizar PEOPLE_HEALT_SECURITY
+            const healthParams = {
+                people_id: peopleId,
+                eps_id: findId(epsList, row.salud || original['SALUD']),
+                pension_id: findId(pensionList, row.pension || original['PENSION']),
+                arl_id: findId(arlList, row.arl || original['ARL']),
+                compensation_box_id: findId(ccfList, row.caja || original['CAJA']),
+                bank_account: row.cuenta_bancaria || original['CUENTA BANCARIA']
+            };
+
+            const hKeys = Object.keys(healthParams).filter(k => healthParams[k] !== null);
+            const hValues = hKeys.map(k => healthParams[k]);
+
+            if (hKeys.length > 1) { // people_id + al menos uno más
+                const sqlHealth = `
+                    INSERT INTO PEOPLE_HEALT_SECURITY (${hKeys.join(', ')})
+                    VALUES (${hKeys.map(() => '?').join(', ')})
+                    ON DUPLICATE KEY UPDATE
+                    ${hKeys.map(k => `${k} = IFNULL(VALUES(${k}), ${k})`).join(', ')}
+                `;
+                await db.query(sqlHealth, hValues);
+            }
+
+            // 4. NUEVO: Intentar actualizar BUSINESS_PEOPLE_DATA
+            // Buscamos si el empleado tiene alguna orden previa para actualizar su salario/fecha ingreso
+            const [existingBusiness] = await db.query(
+                'SELECT order_id FROM HIRING_ORDER WHERE user_id = ? OR order_id IN (SELECT order_id FROM BUSINESS_PEOPLE_DATA WHERE start_date IS NOT NULL AND client_id IS NOT NULL) LIMIT 1',
+                [peopleId]
+            );
+
+            if (existingBusiness.length > 0) {
+                const orderId = existingBusiness[0].order_id;
+                const businessParams = {
+                    salary: row.sueldo_2026 || original['SUELDO 2026'],
+                    start_date: excelDateToJS(row.fecha_ingreso || original['FECHA DE INGRESO']),
+                    termination_date: excelDateToJS(row.fecha_retiro || original['FECHA DE RETIRO'])
+                };
+
+                const bKeys = Object.keys(businessParams).filter(k => businessParams[k] !== null);
+                const bValues = bKeys.map(k => businessParams[k]);
+
+                if (bKeys.length > 0) {
+                    const sqlBusiness = `UPDATE BUSINESS_PEOPLE_DATA SET ${bKeys.map(k => `${k} = ?`).join(', ')} WHERE order_id = ?`;
+                    await db.query(sqlBusiness, [...bValues, orderId]);
+                }
+            }
             
             inserted++;
         } catch (err) {

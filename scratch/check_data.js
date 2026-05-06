@@ -11,14 +11,16 @@ const pool = mysql.createPool({
     queueLimit: 0
 }).promise();
 
-async function checkSchema() {
+async function checkData() {
     try {
-        const tables = ['PEOPLE', 'HIRING_ORDER', 'BUSINESS_PEOPLE_DATA', 'PEOPLE_HEALT_SECURITY'];
-        for (const table of tables) {
-            console.log(`\nColumns for ${table}:`);
-            const [rows] = await pool.execute(`DESCRIBE ${table}`);
-            console.table(rows.map(r => ({ Field: r.Field, Type: r.Type, Null: r.Null })));
-        }
+        console.log("Sample from COST_CENTER:");
+        const [rows] = await pool.execute("SELECT * FROM COST_CENTER LIMIT 5");
+        console.table(rows);
+        
+        console.log("\nSample from MASTER_JOB_TITLES:");
+        const [jobs] = await pool.execute("SELECT * FROM MASTER_JOB_TITLES LIMIT 5");
+        console.table(jobs);
+
         process.exit(0);
     } catch (error) {
         console.error(error);
@@ -26,4 +28,4 @@ async function checkSchema() {
     }
 }
 
-checkSchema();
+checkData();

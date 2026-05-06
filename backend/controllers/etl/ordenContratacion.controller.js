@@ -1,4 +1,4 @@
-const OrdenContratacionService = require('../../services/etl/ordenContratacion.service');
+const OrdenContratacionService = require('../../services/etl/processors/hiringOrderProcessor.service');
 
 /**
  * Controller para la gestión de Orden de Contratación
@@ -58,7 +58,7 @@ const bulkUpdate = async (req, res) => {
 const deleteAllOrdenContratacion = async (req, res) => {
     try {
         const db = require('../../config/db');
-        await db.query('DELETE FROM orden_contratacion');
+        await db.query('DELETE FROM HIRING_ORDER');
         return res.status(200).json({ success: true, message: 'Registros eliminados' });
     } catch (error) {
         console.error(error);

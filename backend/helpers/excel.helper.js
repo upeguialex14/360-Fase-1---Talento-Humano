@@ -10,14 +10,31 @@ const excelDateToJS = (excelDate) => {
         return null;
     }
 
-    // Si ya es un formato de fecha tipo string (ej: '2025-01-01' o '01/01/2025')
-    if (typeof excelDate === 'string' && isNaN(excelDate)) {
-        // Intentar ver si es una fecha válida por JS
+    // Si es un string, aplicar limpieza profunda (maneja casos como '27/05/1990 CUCUTA')
+    if (typeof excelDate === 'string') {
+        const str = excelDate.trim();
+        if (str === '' || str === 'null') return null;
+
+        // Buscar patrón DD/MM/YYYY o DD-MM-YYYY
+        const matchDMY = str.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+        if (matchDMY) {
+            const [_, day, month, year] = matchDMY;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+
+        // Buscar patrón YYYY-MM-DD
+        const matchYMD = str.match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
+        if (matchYMD) {
+            const [_, year, month, day] = matchYMD;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+
+        // Intento de Date nativo como último recurso
         const d = new Date(excelDate);
         if (!isNaN(d.getTime())) {
             return d.toISOString().split('T')[0];
         }
-        return excelDate; // Devolver tal cual si no se puede parsear pero no es número
+        return null;
     }
 
     // Si es un número (formato serial de Excel)

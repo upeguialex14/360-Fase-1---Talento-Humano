@@ -66,7 +66,7 @@ const deleteAllCostCenters = async (req, res) => {
 const deleteAllBaseDatos = async (req, res) => {
     try {
         const db = require('../../config/db');
-        await db.query('DELETE FROM base_datos_maestra');
+        await db.query('DELETE FROM people_extended_info');
         return res.status(200).json({ success: true, message: 'Registros eliminados' });
     } catch (error) {
         console.error(error);

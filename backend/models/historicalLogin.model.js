@@ -4,19 +4,18 @@ class HistoricalLogin {
     static async logHistoricalLogin(userId, username, email, ip, userAgent) {
         try {
             await pool.execute(
-                'INSERT INTO historial_login (user_id, username, email, ip_address, user_agent, login_time) VALUES (?, ?, ?, ?, ?, NOW())',
+                'INSERT INTO historial_login (usuario_id, username, email, ip_address, user_agent, fecha_login) VALUES (?, ?, ?, ?, ?, NOW())',
                 [userId, username, email, ip, userAgent]
             );
         } catch (err) {
             console.error('[HistoricalLogin] Error logging historical login:', err);
-            // Don't throw - logging errors shouldn't block operations
         }
     }
 
     static async getAllUserActivity(limit = 100) {
         try {
             const [rows] = await pool.execute(
-                'SELECT * FROM historial_login ORDER BY login_time DESC LIMIT ?',
+                'SELECT * FROM historial_login ORDER BY fecha_login DESC LIMIT ?',
                 [limit]
             );
             return rows;
@@ -29,7 +28,7 @@ class HistoricalLogin {
     static async getLoginHistory(userId, limit = 50) {
         try {
             const [rows] = await pool.execute(
-                'SELECT * FROM historial_login WHERE user_id = ? ORDER BY login_time DESC LIMIT ?',
+                'SELECT * FROM historial_login WHERE usuario_id = ? ORDER BY fecha_login DESC LIMIT ?',
                 [userId, limit]
             );
             return rows;
@@ -52,7 +51,7 @@ class HistoricalLogin {
             return { success: true };
         } catch (err) {
             console.error('[HistoricalLogin] Error on logout:', err);
-            throw err;
+            return { success: false };
         }
     }
 
