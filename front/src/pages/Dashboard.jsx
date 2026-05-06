@@ -71,18 +71,18 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-page">
-            <header className="dashboard-header">
-                <h1>Dashboard General</h1>
-                <p>Bienvenido al centro de inteligencia de Talento Humano 360.</p>
+            <header className="dashboard-header mb-8">
+                <h1 className="font-display text-neon-green text-4xl font-bold uppercase tracking-wider mb-2">Dashboard General</h1>
+                <p className="font-body text-[rgba(248,248,255,0.7)] text-lg">Bienvenido al centro de inteligencia de Talento Humano 360.</p>
             </header>
 
             <div className="cards-grid">
                 {cards.map((card, idx) => (
-                    <div key={idx} className="stat-card" style={{ animationDelay: `${idx * 0.1}s`, animation: 'fadeInUp 0.6s ease-out both' }}>
-                        <div className="card-icon-wrapper">{card.icon}</div>
+                    <div key={idx} className="stat-card hologram-panel font-body relative overflow-hidden" style={{ animationDelay: `${idx * 0.1}s`, animation: 'fadeInUp 0.6s ease-out both' }}>
+                        <div className="card-icon-wrapper text-3xl mb-3">{card.icon}</div>
                         <div className="card-info">
-                            <span className="card-title">{card.title}</span>
-                            <span className="card-value">{loading ? '...' : card.value}</span>
+                            <span className="card-title text-sm text-[rgba(255,255,255,0.7)] uppercase tracking-widest">{card.title}</span>
+                            <span className="card-value font-display text-3xl font-bold text-white my-1 block">{loading ? '...' : card.value}</span>
                             <div className={`card-trend ${card.up ? 'trend-up' : 'trend-down'}`}>
                                 <span>{card.up ? '↗' : '↘'} {card.trend}</span>
                                 <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>vs mes anterior</span>
@@ -93,8 +93,8 @@ const Dashboard = () => {
             </div>
 
             <div className="charts-grid">
-                <div className="chart-card">
-                    <h3>📈 Evolución Mensual</h3>
+                <div className="chart-card hologram-panel font-body">
+                    <h3 className="font-display text-xl text-neon-green mb-4">📈 Evolución Mensual</h3>
                     <div className="chart-container">
                         {/* Custom Bar Chart */}
                         <div className="bar-chart">
@@ -109,8 +109,8 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="chart-card">
-                    <h3>🎯 Distribución por Área</h3>
+                <div className="chart-card hologram-panel font-body">
+                    <h3 className="font-display text-xl text-neon-green mb-4">🎯 Distribución por Área</h3>
                     <div className="chart-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {/* Simple CSS Circular Chart */}
                         <div style={{
@@ -150,8 +150,8 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="table-card">
-                <h3>📋 Últimas Cargas de Excel</h3>
+            <div className="table-card hologram-panel font-body mt-8">
+                <h3 className="font-display text-xl text-neon-green mb-4">📋 Últimas Cargas de Excel</h3>
                 <div className="custom-table-wrapper">
                     <table className="custom-table">
                         <thead>

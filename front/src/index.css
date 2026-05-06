@@ -7,3 +7,73 @@ body {
 #root {
   min-height: 100vh;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.font-display { font-family: 'Outfit', system-ui, -apple-system, sans-serif !important; }
+.font-body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important; }
+
+.text-neon-green {
+  color: #00e659;
+  text-shadow: 0 0 15px rgba(0, 230, 89, 0.5), 0 0 30px rgba(0, 140, 57, 0.5);
+}
+
+/* Micro-interacciones de Menú (Animación táctil) */
+.menu-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(8px);
+}
+.menu-btn.active {
+  background: linear-gradient(90deg, rgba(255, 205, 4, 0.15) 0%, transparent 100%);
+  border-left: 4px solid #FFCD04;
+  border-top: 1px solid rgba(255, 205, 4, 0.1);
+  border-bottom: 1px solid rgba(255, 205, 4, 0.1);
+  box-shadow: inset 15px 0 25px -10px rgba(255, 205, 4, 0.2);
+}
+
+/* Liquid Glass / Hologram Panel */
+.hologram-panel {
+  background: linear-gradient(135deg, rgba(26, 30, 53, 0.7) 0%, rgba(15, 19, 34, 0.85) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+.hologram-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 50px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Animaciones de Fondo Plasma Fluido (Estilo Balatro) */
+@keyframes plasma-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15vw, 15vh) scale(1.15); }
+}
+@keyframes plasma-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-15vw, 10vh) scale(0.85); }
+}
+@keyframes plasma-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10vw, -15vh) scale(1.1); }
+}
+@keyframes scanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+.animate-plasma-1 { animation: plasma-1 25s ease-in-out infinite; }
+.animate-plasma-2 { animation: plasma-2 32s ease-in-out infinite; }
+.animate-plasma-3 { animation: plasma-3 28s ease-in-out infinite; }
+.animate-scanlines { animation: scanlines 10s linear infinite; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 205, 4, 0.3); border-radius: 10px; }
+.custom-scrollbar:hover::-webkit-scrollbar-thumb { background: rgba(255, 205, 4, 0.8); }

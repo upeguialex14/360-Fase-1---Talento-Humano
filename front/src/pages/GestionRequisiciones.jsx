@@ -134,6 +134,9 @@ const GestionRequisiciones = () => {
     // Estadísticas
     const [estadisticas, setEstadisticas] = useState(null);
     const [analistas, setAnalistas] = useState([]);
+
+    const pageAccess = user?.pages?.find(p => p.page_code === 'GESTION_REQUISICIONES');
+    const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
     
     // Verificar si es analista líder o admin
     const isAdminOrLider = user?.role_id === 1 || user?.role_code === 'ANALISTA_LIDER';
@@ -202,6 +205,7 @@ const GestionRequisiciones = () => {
 
     // Actualizar requisición
     const handleUpdate = async (id, field, value) => {
+        if (!canEdit) return;
         try {
             await api.put(`/requisiciones/${id}`, { [field]: value });
             fetchRequisiciones();
@@ -213,6 +217,7 @@ const GestionRequisiciones = () => {
 
     // Asignar analista
     const handleAsignarAnalista = async (reqId, analistaId) => {
+        if (!canEdit) return;
         try {
             await api.put(`/requisiciones/${reqId}`, { analista_asignado_id: analistaId || null });
             fetchRequisiciones();
@@ -305,6 +310,14 @@ const GestionRequisiciones = () => {
                 </div>
                 <div className="header-actions">
                     <button 
+                        className="btn-new"
+                        disabled={!canEdit}
+                        style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
+                    >
+                        <span className="btn-icon">+</span>
+                        Nueva Requisición
+                    </button>
+                    <button 
                         className={`view-toggle ${viewMode === 'table' ? 'active' : ''}`}
                         onClick={() => setViewMode('table')}
                     >
@@ -323,7 +336,6 @@ const GestionRequisiciones = () => {
 
             {viewMode === 'table' ? (
                 <>
-                    {/* Barra de filtros */}
                     <div className="filters-bar">
                         <div className="search-box">
                             <span className="search-icon">{Icons.search}</span>
@@ -351,7 +363,6 @@ const GestionRequisiciones = () => {
                         </button>
                     </div>
 
-                    {/* Tabla de requisiciones */}
                     <div className="table-container">
                         <table className="requisiciones-table">
                             <thead>
@@ -417,6 +428,7 @@ const GestionRequisiciones = () => {
                                                     className="inline-select"
                                                     value={req.tipo_contrato || ''}
                                                     onChange={(e) => handleUpdate(req.id, 'tipo_contrato', e.target.value)}
+                                                    disabled={!canEdit}
                                                 >
                                                     {TIPOS_CONTRATO.map(opt => (
                                                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -429,6 +441,7 @@ const GestionRequisiciones = () => {
                                                     value={req.estado || ''}
                                                     onChange={(e) => handleUpdate(req.id, 'estado', e.target.value)}
                                                     style={{ borderColor: getEstadoColor(req.estado) }}
+                                                    disabled={!canEdit}
                                                 >
                                                     {ESTADOS.filter(e => e.value).map(opt => (
                                                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -459,6 +472,7 @@ const GestionRequisiciones = () => {
                                                         className="inline-select analista-select"
                                                         value={req.analista_asignado_id || ''}
                                                         onChange={(e) => handleAsignarAnalista(req.id, e.target.value)}
+                                                        disabled={!canEdit}
                                                     >
                                                         <option value="">Sin asignar</option>
                                                         {analistas.map(a => (
@@ -480,7 +494,6 @@ const GestionRequisiciones = () => {
                     </div>
                 </>
             ) : (
-                /* Vista Dashboard */
                 <div className="dashboard-view">
                     {stats && (
                         <>
@@ -629,7 +642,6 @@ const GestionRequisiciones = () => {
                 </div>
             )}
 
-            {/* Modal de Detalles */}
             {showModal && selectedReq && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>

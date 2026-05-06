@@ -6,9 +6,9 @@ const pool = require('../config/db');
 async function recreateFlexibleOrden() {
     try {
         console.log('--- RECREANDO orden_contratacion desde cero (Máxima flexibilidad) ---');
-        
+
         await pool.execute('DROP TABLE IF EXISTS orden_contratacion');
-        
+
         const createQuery = `
             CREATE TABLE orden_contratacion (
                 id VARCHAR(36) PRIMARY KEY,
@@ -59,7 +59,7 @@ async function recreateFlexibleOrden() {
                 fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB;
         `;
-        
+
         await pool.execute(createQuery);
         console.log('✅ Tabla recreada con éxito con todos los campos como TEXT/VARCHAR.');
     } catch (error) {

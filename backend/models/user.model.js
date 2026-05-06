@@ -23,19 +23,38 @@ const User = {
 
     async getAll() {
         const [rows] = await pool.execute(
-            'SELECT user_id, document_number, email, name, last_name, role_id, status_id, last_login, password_changed_at, created_at FROM users'
+            `SELECT 
+                u.user_id, 
+                u.document_number, 
+                u.name, 
+                u.last_name, 
+                CONCAT(u.name, ' ', u.last_name) AS full_name,
+                u.email, 
+                u.role_id, 
+                r.name_role AS role_name,
+                r.role_code,
+                u.status_id,
+                CASE WHEN u.status_id = 1 THEN 1 ELSE 0 END AS is_active,
+                u.last_login, 
+                u.password_changed_at, 
+                u.created_at 
+            FROM users u
+            LEFT JOIN roles r ON u.role_id = r.role_id`
         );
         return rows;
     },
 
     async updateFailedAttempts(userId, attempts, isLocked) {
-        // Note: System doesn't track failed_attempts. Implement if needed.
-        console.log(`[User.updateFailedAttempts] Attempted attempts=${attempts}, isLocked=${isLocked}`);
+        const statusId = isLocked ? 0 : 1;
+        await pool.execute(
+            'UPDATE users SET failed_attempts = ?, status_id = ? WHERE user_id = ?',
+            [attempts, statusId, userId]
+        );
     },
 
     async resetLoginData(userId) {
         await pool.execute(
-            'UPDATE users SET last_login = NOW() WHERE user_id = ?',
+            'UPDATE users SET last_login = NOW(), failed_attempts = 0 WHERE user_id = ?',
             [userId]
         );
     },
@@ -56,9 +75,9 @@ const User = {
     },
 
     async unlockAccount(userId) {
-        // Unlock by setting status_id to 1 (active)
+        // Unlock by setting status_id to 1 (active) and resetting attempts
         await pool.execute(
-            'UPDATE users SET status_id = 1 WHERE user_id = ?',
+            'UPDATE users SET status_id = 1, failed_attempts = 0 WHERE user_id = ?',
             [userId]
         );
     },
@@ -110,7 +129,7 @@ const User = {
 
     async getBlockedUsers() {
         const [rows] = await pool.execute(
-            'SELECT user_id, document_number, email, name, last_name, last_login FROM users WHERE status_id = 0'
+            'SELECT user_id, document_number, email, name, last_name, CONCAT(name, " ", last_name) AS full_name, document_number AS login, last_login, failed_attempts FROM users WHERE status_id = 0'
         );
         return rows;
     },

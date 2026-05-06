@@ -1,8 +1,8 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import React from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import logoImg from '../IMG/LOGO_MULTIVAL-removebg-preview.png';
 
 // Iconos SVG en línea para los módulos de Parametrización
 const Icons = {
@@ -48,6 +48,83 @@ const Icons = {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+    ),
+    // 🏭 Planta Operación
+    factory: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 20V8l6-4v4l6-4v16H2z"/>
+            <path d="M14 20V10h8v10h-8z"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+            <line x1="10" y1="20" x2="10" y2="14"/>
+            <line x1="18" y1="20" x2="18" y2="14"/>
+        </svg>
+    ),
+    // 💰 Centro de Costos
+    dollarSign: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+    ),
+    // 🗄️ Base de Datos
+    database: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/>
+            <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+        </svg>
+    ),
+    // 📋 Gestión de Requisiciones
+    clipboardList: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+            <line x1="9" y1="16" x2="15" y2="16"/>
+            <line x1="9" y1="8" x2="11" y2="8"/>
+        </svg>
+    ),
+    // 📄 Orden de Contratación
+    fileSearch: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <circle cx="11" cy="15" r="2"/>
+            <line x1="13" y1="17" x2="15" y2="19"/>
+        </svg>
+    ),
+    // 👥 Solicitud de Vacantes
+    userPlus: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="17" y1="11" x2="23" y2="11"/>
+        </svg>
+    ),
+    // 🗂️ Bases (dropdown)
+    layers: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+        </svg>
+    ),
+    // 📦 Base Inactiva
+    archive: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="21 8 21 21 3 21 3 8"/>
+            <rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+        </svg>
+    ),
+    // 🔗 Base Unificada
+    gitMerge: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="18" r="3"/>
+            <circle cx="6" cy="6" r="3"/>
+            <path d="M6 21V9a9 9 0 0 0 9 9"/>
         </svg>
     ),
     clipboard: (
@@ -125,8 +202,9 @@ const BASES_ROUTES = [
  * Incluye menú desplegable "Parametrización" para módulos de administración
  */
 const Sidebar = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const [isParametrizacionOpen, setIsParametrizacionOpen] = useState(false);
     const [isFormulariosOpen, setIsFormulariosOpen] = useState(false);
     const [isBasesOpen, setIsBasesOpen] = useState(false);
@@ -274,34 +352,66 @@ const Sidebar = () => {
     );
 
     return (
-        <aside className="app-sidebar">
+        <aside className="app-sidebar" style={{ borderRight: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'transparent' }}>
+            {/* Brand: muestra nombre y apellido del usuario logueado */}
             <div className="sidebar-brand">
-                <img src={logoImg} alt="logo" className="sidebar-logo" />
+                <div className="sidebar-brand-icon">👤</div>
+                <div className="sidebar-brand-text">
+                    <span className="brand-title">
+                        {user ? `${user.name || ''} ${user.last_name || ''}`.trim() : 'TALENTO 360'}
+                    </span>
+                    <span className="brand-subtitle">
+                        {user?.role_name || 'Multival System'}
+                    </span>
+                </div>
             </div>
 
             <nav className="sidebar-nav">
                 <ul>
+                    <li><span className="sidebar-section-label">Principal</span></li>
                     <li>
                         <NavLink to="/home" end className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
                             <span className="sidebar-icon">{Icons.home}</span>
-                            Inicio
+                            Inicio / Dashboard
                         </NavLink>
                     </li>
 
                     {uniquePages.map(page => {
                         const rawRoute = page.route || page.path || '';
-                        // Normalizar ruta: si el backend la devuelve sin /home/, agregarla
                         const pageRoute = rawRoute.startsWith('/home')
                             ? rawRoute
                             : `/home${rawRoute.startsWith('/') ? rawRoute : '/' + rawRoute}`;
                         const pageName = page.page_name || page.name;
 
+                        // Etiqueta de sección para Gestión & Selección
+                        const gestionCodes = ['GESTION_REQUISICIONES', 'ORDEN_CONTRATACION', 'SOLICITUD_VACANTES'];
+                        const showGestionLabel = page.page_code === gestionCodes[0];
+
+                        // Icono único por módulo según page_code
+                        const pageIconMap = {
+                            DASHBOARD:              Icons.home,
+                            PLANTA:                 Icons.factory,
+                            COSTOS:                 Icons.dollarSign,
+                            BASE_DATOS:             Icons.database,
+                            GESTION_REQUISICIONES:  Icons.clipboardList,
+                            ORDEN_CONTRATACION:     Icons.fileSearch,
+                            SOLICITUD_VACANTES:     Icons.userPlus,
+                            CONTRATACION:           Icons.fileSearch,
+                        };
+                        const pageIcon = pageIconMap[page.page_code] || Icons.briefcase;
+
                         return (
-                            <li key={page.page_code}>
-                                <NavLink to={pageRoute} className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-                                    {pageName}
-                                </NavLink>
-                            </li>
+                            <React.Fragment key={page.page_code}>
+                                {showGestionLabel && (
+                                    <li><span className="sidebar-section-label">Gestión &amp; Selección</span></li>
+                                )}
+                                <li>
+                                    <NavLink to={pageRoute} className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+                                        <span className="sidebar-icon">{pageIcon}</span>
+                                        {pageName}
+                                    </NavLink>
+                                </li>
+                            </React.Fragment>
                         );
                     })}
 
@@ -310,7 +420,7 @@ const Sidebar = () => {
                     {(isParametrizacionPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
                             <button 
-                                className={`sidebar-dropdown-toggle ${isParametrizacionActive ? 'active' : ''}`}
+                                className={`sidebar-dropdown-toggle menu-btn font-body ${isParametrizacionActive ? 'active' : ''}`}
                                 onClick={() => setIsParametrizacionOpen(!isParametrizacionOpen)}
                             >
                                 <span className="sidebar-icon">{Icons.settings}</span>
@@ -320,22 +430,22 @@ const Sidebar = () => {
                             
                             <ul className={`sidebar-dropdown-menu ${isParametrizacionOpen ? 'open' : ''}`}>
                                 <li>
-                                    <NavLink to="/home/roles" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/roles" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.users}</span> Gestión de Roles
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/home/users" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/users" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.key}</span> Gestión de Usuarios
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/home/role-page-access" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/role-page-access" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.link}</span> Accesos por Rol
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/home/admin/blocked-users" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/admin/blocked-users" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.userX}</span> Usuarios Bloqueados
                                     </NavLink>
                                 </li>
@@ -347,7 +457,7 @@ const Sidebar = () => {
                     {(isFormulariosPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
                             <button 
-                                className={`sidebar-dropdown-toggle ${isFormulariosActive ? 'active' : ''}`}
+                                className={`sidebar-dropdown-toggle menu-btn font-body ${isFormulariosActive ? 'active' : ''}`}
                                 onClick={() => setIsFormulariosOpen(!isFormulariosOpen)}
                             >
                                 <span className="sidebar-icon">{Icons.fileText}</span>
@@ -357,12 +467,12 @@ const Sidebar = () => {
                             
                             <ul className={`sidebar-dropdown-menu ${isFormulariosOpen ? 'open' : ''}`}>
                                 <li>
-                                    <NavLink to="/home/documentacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/documentacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.fileText}</span> Documentación
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/home/vacaciones" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
+                                    <NavLink to="/home/vacaciones" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.calendar}</span> Vacaciones
                                     </NavLink>
                                 </li>
@@ -374,23 +484,23 @@ const Sidebar = () => {
                     {(isBasesPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
                             <button 
-                                className={`sidebar-dropdown-toggle ${isBasesActive ? 'active' : ''}`}
+                                className={`sidebar-dropdown-toggle menu-btn font-body ${isBasesActive ? 'active' : ''}`}
                                 onClick={() => setIsBasesOpen(!isBasesOpen)}
                             >
-                                <span className="sidebar-icon">{Icons.briefcase}</span>
+                                <span className="sidebar-icon">{Icons.layers}</span>
                                 <span className="sidebar-link-text">Bases</span>
                                 <span className="sidebar-chevron">{Icons.chevronDown(isBasesOpen)}</span>
                             </button>
                             
                             <ul className={`sidebar-dropdown-menu ${isBasesOpen ? 'open' : ''}`}>
                                 <li>
-                                    <NavLink to="/home/base-inactiva" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
-                                        <span className="sidebar-icon">{Icons.briefcase}</span> Base inactiva
+                                    <NavLink to="/home/base-inactiva" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.archive}</span> Base inactiva
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/home/base-unificada" className={({ isActive }) => isActive ? 'sidebar-link submenu-link active' : 'sidebar-link submenu-link'}>
-                                        <span className="sidebar-icon">{Icons.briefcase}</span> Base unificada
+                                    <NavLink to="/home/base-unificada" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.gitMerge}</span> Base unificada
                                     </NavLink>
                                 </li>
                             </ul>
@@ -400,12 +510,35 @@ const Sidebar = () => {
             </nav>
 
             <div className="sidebar-footer">
-                {user && <div className="sidebar-user">{user.full_name || user.login}</div>}
-                {lastSession !== '' && (
-                    <div className="sidebar-last-session" style={{ fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                        Última sesión: {lastSession || 'Primera sesión registrada'}
+                {/* Solo muestra el rol del usuario logueado */}
+                {user && (
+                    <div className="sidebar-user-card">
+                        <span className="sidebar-user-role" style={{ fontSize: '0.82rem', letterSpacing: '0.1em' }}>
+                            {user.role_name || 'Usuario'}
+                        </span>
                     </div>
                 )}
+                {lastSession !== '' && (
+                    <div className="sidebar-last-session">
+                        Última sesión: {lastSession || 'Primera sesión'}
+                    </div>
+                )}
+                {/* Botón Cerrar Sesión */}
+                <button
+                    onClick={async () => { await logout(); navigate('/login'); }}
+                    className="sidebar-link sidebar-logout-btn"
+                    style={{ marginTop: '0.5rem', width: '100%', cursor: 'pointer', color: '#ef4444', borderLeftColor: 'transparent', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '8px' }}
+                    title="Cerrar sesión"
+                >
+                    <span className="sidebar-icon" style={{ color: '#ef4444' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </span>
+                    Cerrar Sesión
+                </button>
             </div>
         </aside>
     );

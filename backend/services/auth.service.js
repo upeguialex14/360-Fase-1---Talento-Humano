@@ -99,6 +99,28 @@ class AuthService {
     async handleFailedAttempt(user, username, ip, userAgent) {
         // Log the failed login attempt
         await LoggingService.logLogin(false, user.user_id, username, 'WRONG_PASSWORD', ip, userAgent);
+
+        // Increment attempts
+        let currentAttempts = user.failed_attempts || 0;
+        currentAttempts += 1;
+        let isLocked = false;
+
+        if (currentAttempts >= 3) {
+            isLocked = true;
+            // Also log to user_lock_history since it's a security lock
+            try {
+                const UserLockHistory = require('../models/userLockHistory.model');
+                await UserLockHistory.logLock(user.user_id, username, user.email);
+            } catch (err) {
+                console.error('[AuthService] Error logging lock history:', err);
+            }
+        }
+
+        await User.updateFailedAttempts(user.user_id, currentAttempts, isLocked);
+
+        if (isLocked) {
+            throw new Error('Cuenta bloqueada por múltiples intentos fallidos. Contacte al administrador.');
+        }
     }
 
     async logHistoricalLogin(user, ip, userAgent) {

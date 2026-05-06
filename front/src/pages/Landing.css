@@ -229,7 +229,7 @@ body {
 .xray-overlay {
   filter: brightness(1.2);
   clip-path: circle(150px at var(--x, -100%) var(--y, -100%));
-  transition: clip-path 0.12s ease;
+  /* transition eliminada para sincronización instantánea con el cursor */
 }
 
 .xray-caption {

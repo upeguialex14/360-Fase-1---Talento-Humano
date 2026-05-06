@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
+import InteractiveBackground from './InteractiveBackground';
 
 /**
  * Layout principal de la aplicación
@@ -9,17 +10,20 @@ import Sidebar from './Sidebar';
  */
 const Layout = () => {
   return (
-    <div className="app-layout">
-      <Header />
-      <div className="layout-body">
-        <div className="sidebar-container">
+    <div className="app-layout font-body custom-scrollbar" style={{ position: 'relative' }}>
+      <InteractiveBackground />
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+        <Header />
+        <div className="layout-body" style={{ position: 'relative', zIndex: 10 }}>
+        <div className="sidebar-container" style={{ backgroundColor: 'transparent' }}>
           <Sidebar />
         </div>
-        <main className="main-content">
+        <main className="main-content" style={{ backgroundColor: 'transparent', flex: 1, zIndex: 10 }}>
           <Outlet />
         </main>
       </div>
       <Footer />
+      </div>
     </div>
   );
 };
