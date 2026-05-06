@@ -2,7 +2,7 @@ const db = require('../../config/db');
 
 const getAll = async () => {
     try {
-        const sql = `SELECT * FROM base_datos_maestra ORDER BY id DESC`;
+        const sql = `SELECT *, extended_info_id as id FROM people_extended_info ORDER BY extended_info_id DESC`;
         const [rows] = await db.query(sql);
         return rows;
     } catch (error) {

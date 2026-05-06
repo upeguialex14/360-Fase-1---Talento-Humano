@@ -212,6 +212,27 @@ const BaseDatos = () => {
                             {loading ? 'Subiendo...' : '🚀 Iniciar Carga Masiva'}
                         </button>
 
+                        <button 
+                            className="btn-upload" 
+                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white' }}
+                            onClick={async () => {
+                                if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Base de Datos?")) {
+                                    try {
+                                        setLoading(true);
+                                        const res = await api.delete('/etl/base-datos');
+                                        if (res && res.success) {
+                                            alert("Registros eliminados");
+                                            fetchExistingData();
+                                        }
+                                    } catch(e) { alert("Error: " + e.message); }
+                                    finally { setLoading(false); }
+                                }
+                            }}
+                            disabled={loading}
+                        >
+                            🗑️ Eliminar Registros
+                        </button>
+
                         {result?.success && (
                             <div className="feedback-box success">
                                 <b>✅ Carga exitosa</b><br/>

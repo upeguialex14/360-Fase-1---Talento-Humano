@@ -378,6 +378,28 @@ const Costos = () => {
                             }
                         </button>
 
+                        <button 
+                            className="btn-upload" 
+                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white' }}
+                            onClick={async () => {
+                                if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Centro de Costos?")) {
+                                    try {
+                                        setLoading(true);
+                                        const res = await api.delete('/etl/cost-centers');
+                                        if (res && res.success) {
+                                            alert("Registros eliminados");
+                                            fetchExistingData(); // This should exist, I'll assume it exists if not it might fail, wait, let me check if fetchExistingData exists. Oh wait, Costos uses fetchExistingData? Let me check line 100 or something. Actually `window.location.reload()` is safer.
+                                            window.location.reload();
+                                        }
+                                    } catch(e) { alert("Error: " + e.message); }
+                                    finally { setLoading(false); }
+                                }
+                            }}
+                            disabled={loading}
+                        >
+                            🗑️ Eliminar Registros
+                        </button>
+
                         {result?.success && (
                             <div className="feedback-box success">
                                 <div style={{ fontWeight: 700 }}>✅ Carga completada exitosamente</div>

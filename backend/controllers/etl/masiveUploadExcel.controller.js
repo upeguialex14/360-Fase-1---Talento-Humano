@@ -52,4 +52,26 @@ const getBaseDatos = async (req, res) => {
     }
 };
 
-module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos };
+const deleteAllCostCenters = async (req, res) => {
+    try {
+        const db = require('../../config/db');
+        await db.query('DELETE FROM cost_center');
+        return res.status(200).json({ success: true, message: 'Registros eliminados' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const deleteAllBaseDatos = async (req, res) => {
+    try {
+        const db = require('../../config/db');
+        await db.query('DELETE FROM people_extended_info');
+        return res.status(200).json({ success: true, message: 'Registros eliminados' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos };

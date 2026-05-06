@@ -1,4 +1,4 @@
-const OrdenContratacionService = require('../../services/etl/ordenContratacion.service');
+const OrdenContratacionService = require('../../services/etl/processors/hiringOrderProcessor.service');
 
 /**
  * Controller para la gestión de Orden de Contratación
@@ -6,18 +6,25 @@ const OrdenContratacionService = require('../../services/etl/ordenContratacion.s
 
 // Upsert de registros desde carga Excel
 const upsertRecords = async (req, res) => {
-    console.log('[DEBUG] Recibida petición upsert. Registros:', req.body.records?.length);
-    const { records, selectedColumns } = req.body;
-
-    // El middleware inyecta req.user
-    const username = req.user?.login || 'Sistema';
-
     try {
+        const records = req.body?.records;
+        const selectedColumns = req.body?.selectedColumns;
+        
+        console.log('[DEBUG] Recibida petición upsert. Registros:', records?.length);
+        
+        if (!records) {
+            return res.status(400).json({ success: false, message: 'No se recibieron registros para procesar' });
+        }
+
+        const username = req.user?.login || 'Sistema';
         const result = await OrdenContratacionService.upsertRecords(records, selectedColumns, username);
         res.json(result);
     } catch (error) {
-        console.error('[ERROR] Error en upsertRecords:', error);
-        res.status(500).json({ success: false, message: 'Error interno al procesar los registros: ' + error.message });
+        console.error('[ERROR] Error crítico en upsertRecords:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error interno al procesar los registros: ' + error.message
+        });
     }
 };
 
@@ -48,8 +55,20 @@ const bulkUpdate = async (req, res) => {
 };
 
 
+const deleteAllOrdenContratacion = async (req, res) => {
+    try {
+        const db = require('../../config/db');
+        await db.query('DELETE FROM HIRING_ORDER');
+        return res.status(200).json({ success: true, message: 'Registros eliminados' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     upsertRecords,
     getAllRecords,
-    bulkUpdate
+    bulkUpdate,
+    deleteAllOrdenContratacion
 };

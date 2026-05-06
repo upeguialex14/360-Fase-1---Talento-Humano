@@ -1,17 +1,29 @@
-require('dotenv').config({ path: './backend/.env' });
-const pool = require('../backend/config/db.js');
+const mysql = require('../backend/node_modules/mysql2');
 
-async function test() {
+const pool = mysql.createPool({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "talentohumano360",
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+}).promise();
+
+async function checkSchema() {
     try {
-        console.log('DB_NAME:', process.env.DB_NAME);
-        const [rows] = await pool.query('SELECT * FROM HIRING_ORDER LIMIT 1');
-        console.log('Sample row:', rows[0]);
-        console.log('Keys:', rows[0] ? Object.keys(rows[0]) : 'No rows');
+        const tables = ['PEOPLE', 'HIRING_ORDER', 'BUSINESS_PEOPLE_DATA', 'PEOPLE_HEALT_SECURITY'];
+        for (const table of tables) {
+            console.log(`\nColumns for ${table}:`);
+            const [rows] = await pool.execute(`DESCRIBE ${table}`);
+            console.table(rows.map(r => ({ Field: r.Field, Type: r.Type, Null: r.Null })));
+        }
         process.exit(0);
-    } catch (err) {
-        console.error('Error:', err);
+    } catch (error) {
+        console.error(error);
         process.exit(1);
     }
 }
 
-test();
+checkSchema();

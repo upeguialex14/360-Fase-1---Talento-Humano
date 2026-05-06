@@ -1,22 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './StackedCards.css';
 
+import img360 from '../IMG/360.png';
+import imgNeuro from '../IMG/NeuroTalento.jpeg';
+import imgPaz from '../IMG/Paz_y_salvo.jpeg';
+import imgSmart from '../IMG/Smart30.jpeg';
+
 const cards = [
     {
-        title: 'Lanzamiento exclusivo',
-        description: 'Descubre la nueva experiencia de Talento Humano con contenido dinámico.'
+        image: imgSmart,
+        alt: 'Smart30'
     },
     {
-        title: 'Interacción fluida',
-        description: 'Cada tarjeta se desliza con un efecto suave al avanzar en el scroll.'
+        image: imgNeuro,
+        alt: 'NeuroTalento'
     },
     {
-        title: 'Contenido destacado',
-        description: 'Mantén la atención en la tarjeta superior mientras el resto aparece en el fondo.'
+        image: imgPaz,
+        alt: 'Paz y Salvo'
     },
     {
-        title: 'Diseño moderno',
-        description: 'Fondo oscuro, bordes redondeados y sombras profundas para un mayor contraste.'
+        image: img360,
+        alt: '360'
     }
 ];
 
@@ -67,6 +72,9 @@ const StackedCards = () => {
     return (
         <section className="stack-container" ref={containerRef}>
             <div className="stack-sticky">
+                <div className="stack-background-message">
+                    <h2>Proyectos que cambian el área <br /> y mejoran la empresa</h2>
+                </div>
                 {cards.map((card, index) => {
                     const segment = 1 / cards.length;
                     const start = index * segment;
@@ -92,7 +100,7 @@ const StackedCards = () => {
 
                     return (
                         <article
-                            key={card.title}
+                            key={card.alt}
                             className="event-card"
                             style={{
                                 zIndex: cards.length - index,
@@ -103,9 +111,7 @@ const StackedCards = () => {
                             }}
                         >
                             <div className="event-card-content">
-                                <span className="event-card-label">Tarjeta {index + 1}</span>
-                                <h3>{card.title}</h3>
-                                <p>{card.description}</p>
+                                <img src={card.image} alt={card.alt} className="event-card-image" />
                             </div>
                         </article>
                     );

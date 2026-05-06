@@ -102,19 +102,25 @@ class Page {
             await connection.beginTransaction();
 
             // UPSERT
-            const upsertQuery = `
-                INSERT INTO role_pages (role_id, page_code, can_view, can_edit)
-                VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                    can_view = VALUES(can_view),
-                    can_edit = VALUES(can_edit),
-                    updated_at = CURRENT_TIMESTAMP
-            `;
-
             for (const p of pages) {
+                // Fetch current page_id to maintain synergy
+                const [pageRows] = await connection.execute('SELECT page_id FROM pages WHERE page_code = ?', [p.page_code]);
+                const pageId = pageRows.length > 0 ? pageRows[0].page_id : null;
+
+                const upsertQuery = `
+                    INSERT INTO role_pages (role_id, page_code, page_id, can_view, can_edit)
+                    VALUES (?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                        page_id = VALUES(page_id),
+                        can_view = VALUES(can_view),
+                        can_edit = VALUES(can_edit),
+                        updated_at = CURRENT_TIMESTAMP
+                `;
+
                 await connection.execute(upsertQuery, [
                     roleId,
                     p.page_code,
+                    pageId,
                     p.can_view ? 1 : 0,
                     p.can_edit ? 1 : 0
                 ]);
@@ -130,13 +136,13 @@ class Page {
                     await connection.execute(
                         `INSERT INTO historial_permisos_roles (id, rol_id, nombre_rol, page, accion, realizado_por, nombre_admin, fecha_accion)
                          VALUES (?, ?, ?, ?, 'otorgado', ?, ?, NOW())`,
-                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.login]
+                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.document_number]
                     );
                 } else if (prev && currentlyCanView === 0 && previouslyCanView === 1) {
                     await connection.execute(
                         `INSERT INTO historial_permisos_roles (id, rol_id, nombre_rol, page, accion, realizado_por, nombre_admin, fecha_accion)
                          VALUES (?, ?, ?, ?, 'revocado', ?, ?, NOW())`,
-                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.login]
+                        [require('crypto').randomUUID(), roleId, roleName, p.page_code, user.user_id, user.document_number]
                     );
                 }
             }

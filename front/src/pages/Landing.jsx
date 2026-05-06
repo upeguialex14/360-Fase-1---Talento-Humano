@@ -5,12 +5,9 @@ import xrayImg from '../IMG/imagen_x_ray.png';
 import './Landing.css';
 
 // Provisional images for workers
-import w1 from '../IMG/banco_1.jpeg';
-import w2 from '../IMG/banco_3.jpeg';
-import w3 from '../IMG/banco_4.jpeg';
-import w4 from '../IMG/banco_5.jpeg';
-import w5 from '../IMG/Carrusel_1.jpeg';
-import w6 from '../IMG/Carrusel_2.jpeg';
+import evelynImg from '../IMG/evelyn_lider.png';
+import sirleyImg from '../IMG/sirley_analista.png';
+import dianaImg from '../IMG/diana_analista.png';
 
 const lerp = (start, end, amount) => start + (end - start) * amount;
 
@@ -26,12 +23,9 @@ const Landing = () => {
   const [selectedWorker, setSelectedWorker] = useState(null);
 
   const workers = [
-    { id: 1, name: 'Ana Maria', role: 'Directora RPO', image: w1, bio: 'Especialista en reclutamiento masivo y optimización de procesos de selección para grandes corporaciones.' },
-    { id: 2, name: 'Carlos Ruiz', role: 'Analítica Senior', image: w2, bio: 'Transformando datos crudos en estrategias accionables para el crecimiento sostenible de nuestros aliados.' },
-    { id: 3, name: 'Elena Gomez', role: 'Operaciones Globales', image: w3, bio: 'Gestión eficiente de recursos en entornos dinámicos, asegurando la calidad en cada fase operativa.' },
-    { id: 4, name: 'Sofia Torres', role: 'Gestión de Datos', image: w4, bio: 'Arquitecta de sistemas de información enfocados en la integridad y seguridad de la data corporativa.' },
-    { id: 5, name: 'Juan Perez', role: 'Líder Humano', image: w5, bio: 'Dedicado al desarrollo del potencial humano y la creación de culturas organizacionales de alto desempeño.' },
-    { id: 6, name: 'Laura Diaz', role: 'Especialista en Costos', image: w6, bio: 'Control financiero riguroso y optimización de presupuestos para maximizar el ROI de cada proyecto.' },
+    { id: 1, name: 'Evelyn', role: 'Líder', image: evelynImg, bio: 'Liderazgo estratégico y gestión de equipos para el éxito organizacional.' },
+    { id: 2, name: 'Sirley', role: 'Analista', image: sirleyImg, bio: 'Análisis detallado y optimización de procesos para la mejora continua.' },
+    { id: 3, name: 'Diana', role: 'Analista', image: dianaImg, bio: 'Gestión eficiente de datos y soporte analítico para la toma de decisiones.' },
   ];
 
   const pointer = useMemo(

@@ -1,11 +1,10 @@
-/**
- * Página de empleados
- */
+import React from 'react';
+
 const Empleados = () => {
     return (
-        <div className="page empleados-page">
+        <div className="page-container">
             <h1>Gestión de Empleados</h1>
-            <p>Aquí podrás gestionar la información de los empleados</p>
+            <p>Módulo para la administración de personal y nómina.</p>
         </div>
     );
 };

@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import './HomeImageGrid.css';
 
 // Using existing images temporarily since 'imagen_1' etc. were not found in the IMG folder
-import img1 from '../IMG/Carrusel_1.jpeg';
-import img2 from '../IMG/Carrusel_2.jpeg';
-import img3 from '../IMG/Carrusel_3.jpeg';
+import img1 from '../IMG/banco_8.jpeg';
+import img2 from '../IMG/Banco_2.jpeg';
+import img3 from '../IMG/banco_6.jpeg';
 // Reusing img1 for the fourth image until the actual one is provided
-import img4 from '../IMG/Carrusel_1.jpeg';
+import img4 from '../IMG/banco_7.jpeg';
 
 const HomeImageGrid = () => {
     const gridRef = useRef(null);
