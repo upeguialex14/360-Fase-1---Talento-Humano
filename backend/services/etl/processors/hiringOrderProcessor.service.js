@@ -313,8 +313,19 @@ const hiringOrderProcessor = {
         // ✅ fecha expedicion con alias del Excel "FECHA DE EXPEDICIÓN CC" → norm → "fechadeexpedicioncc"
         const expedicionDoc = cleanDate(data['fecha_expedicion_cc'] || data['fechadeexpedicioncc']) || null;
         // ✅ cuenta_bancaria y bh son campos independientes
-        const cuentaRaw = data['cuenta_bancaria'] || null;
-        const cuentaBancaria = cuentaRaw && /\d{6,}/.test(cuentaRaw.toString()) ? cuentaRaw.toString().trim() : null;
+        // ✅ FIX: agregar alias "cuentabancaria" (sin guión, que es lo que produce norm())
+        const cuentaRaw = data['cuenta_bancaria'] || data['cuentabancaria'] || null;
+
+        // ✅ Rechaza solo basura evidente, acepta cualquier cosa con al menos un dígito
+        const cuentaBancaria = (() => {
+            if (!cuentaRaw) return null;
+            const str = cuentaRaw.toString().trim();
+            // Rechaza valores claramente inválidos
+            if (/^(no|n\/a|na|sin cuenta|no s|no aplica)$/i.test(str)) return null;
+            // Rechaza si no tiene ningún dígito (ej: "CTA BOGOTA")
+            if (!/\d/.test(str)) return null;
+            return str;
+        })();
         const bh = data['bh'] || null;
         const ciudadPersonal = data['ciudad_personal'] || null;
 
