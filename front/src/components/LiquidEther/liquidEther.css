@@ -1,0 +1,8 @@
+/* Pega aquí las 8 líneas del código CSS ("Css") */
+.liquid-ether-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}

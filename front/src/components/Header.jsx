@@ -1,68 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import logoTH from '../IMG/LOGO_TH__2.png';
 
 /**
  * Componente Header de la aplicación
+ * Solo muestra el logo centrado con link al landing page.
+ * El logout fue movido al Sidebar.
  */
 const Header = () => {
-    const { isAuthenticated, logout, user } = useAuth();
-    const navigate = useNavigate();
-
-    const handleLogout = async () => {
-        await logout();
-        navigate('/login');
-    };
-
     return (
-        <header className="header">
-            <div className="header-container">
-                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <img src={logoTH} alt="Talento Humano 360" className="header-logo-image" style={{ height: '100px', width: 'auto' }} />
-                    <h1>TalentoHumano360</h1>
+        <header className="header hologram-panel" style={{ backgroundColor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="header-container" style={{ justifyContent: 'center' }}>
+                <Link to="/" className="logo header-logo-link">
+                    <img src={logoTH} alt="Talento Humano 360" className="header-logo-image" style={{ height: '120px', width: 'auto' }} />
+                    <h1 className="header-brand-title">TalentoHumano360</h1>
                 </Link>
-                {isAuthenticated && (
-                    <div className="header-actions">
-                        {user && (
-                            <span className="header-user-info">👤 {user.full_name || user.login}</span>
-                        )}
-
-                        {user?.role_id === 1 && (
-                            <button
-                                onClick={async () => {
-                                    if (window.confirm('¿Forzar expiración de contraseña para esta cuenta? (Función de demostración)')) {
-                                        try {
-                                            const token = localStorage.getItem('token');
-                                            const res = await fetch('http://localhost:3000/api/auth/force-expire-demo', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Authorization': `Bearer ${token}`,
-                                                    'Content-Type': 'application/json'
-                                                }
-                                            });
-                                            const data = await res.json();
-                                            alert(data.message);
-                                            if (data.success) {
-                                                logout();
-                                                navigate('/login');
-                                            }
-                                        } catch (err) {
-                                            alert('Error al ejecutar demo');
-                                        }
-                                    }
-                                }}
-                                className="demo-button"
-                                title="Fuerza expiración de contraseña (Demo)"
-                            >
-                                Forzar cambio (Demo)
-                            </button>
-                        )}
-
-                        <button onClick={handleLogout} className="logout-button" title="Cerrar sesión">
-                            Cerrar Sesión
-                        </button>
-                    </div>
-                )}
             </div>
         </header>
     );

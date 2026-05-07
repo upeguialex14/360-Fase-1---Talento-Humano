@@ -155,6 +155,9 @@ const SolicitudVacantes = () => {
         aprobacion: null
     });
 
+    const pageAccess = user?.pages?.find(p => p.page_code === 'SOLICITUD_VACANTES');
+    const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -315,6 +318,7 @@ const SolicitudVacantes = () => {
                                 value={formData.oficina}
                                 onChange={handleChange}
                                 className={errors.oficina ? 'error' : ''}
+                                disabled={!canEdit}
                             >
                                 {OFICINAS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -333,6 +337,7 @@ const SolicitudVacantes = () => {
                                 value={formData.ciudad}
                                 onChange={handleChange}
                                 className={errors.ciudad ? 'error' : ''}
+                                disabled={!canEdit}
                             >
                                 {CIUDADES.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -351,6 +356,7 @@ const SolicitudVacantes = () => {
                                 value={formData.cargo}
                                 onChange={handleChange}
                                 className={errors.cargo ? 'error' : ''}
+                                disabled={!canEdit}
                             >
                                 {CARGOS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -369,6 +375,7 @@ const SolicitudVacantes = () => {
                                 value={formData.cantidad}
                                 onChange={handleChange}
                                 className={errors.cantidad ? 'error' : ''}
+                                disabled={!canEdit}
                             >
                                 {CANTIDAD_RECURSOS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -387,6 +394,7 @@ const SolicitudVacantes = () => {
                                 value={formData.justificacion}
                                 onChange={handleChange}
                                 className={errors.justificacion ? 'error' : ''}
+                                disabled={!canEdit}
                             >
                                 {JUSTIFICACIONES.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -408,6 +416,7 @@ const SolicitudVacantes = () => {
                             placeholder="Describe el perfil requerido, experiencia, competencias específicas, funciones del cargo, etc."
                             rows={5}
                             className={errors.detalle ? 'error' : ''}
+                            disabled={!canEdit}
                         />
                         {errors.detalle && <span className="error-message">{errors.detalle}</span>}
                     </div>
@@ -445,8 +454,9 @@ const SolicitudVacantes = () => {
                                     <input
                                         type="file"
                                         accept=".pdf,.doc,.docx"
-                                        onChange={(e) => handleFileChange(e, 'hojaVida')}
+                                        onChange={(e) => canEdit && handleFileChange(e, 'hojaVida')}
                                         className="file-input"
+                                        disabled={!canEdit}
                                     />
                                 </>
                             )}
@@ -478,8 +488,9 @@ const SolicitudVacantes = () => {
                                     <input
                                         type="file"
                                         accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                                        onChange={(e) => handleFileChange(e, 'aprobacion')}
+                                        onChange={(e) => canEdit && handleFileChange(e, 'aprobacion')}
                                         className="file-input"
+                                        disabled={!canEdit}
                                     />
                                 </>
                             )}
@@ -508,7 +519,8 @@ const SolicitudVacantes = () => {
                     <button 
                         type="submit" 
                         className="btn btn-primary"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !canEdit}
+                        style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
                     >
                         {isSubmitting ? (
                             <>

@@ -329,8 +329,11 @@ const hiringOrderProcessor = {
         const bh = data['bh'] || null;
         const ciudadPersonal = data['ciudad_personal'] || null;
 
+        console.log(`[DEBUG] Cédula: ${cedula}, Cuenta Detectada: "${cuentaBancaria}", Dirección: "${direccion}"`);
+
         if (direccion || expedicionDoc || cuentaBancaria || ciudadPersonal ||
             rhId || email || phone || birthDate) {
+            console.log(`[DEBUG] Insertando/Actualizando people_extended_info para pId: ${pId}`);
             await pool.execute(
                 `INSERT INTO people_extended_info 
                     (people_id, direccion, expedicion_documento, cuenta_bancaria,

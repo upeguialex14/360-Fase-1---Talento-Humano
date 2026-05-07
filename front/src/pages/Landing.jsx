@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoImg from '../IMG/LOGO_MULTIVAL-removebg-preview.png';
 import xrayImg from '../IMG/imagen_x_ray.png';
+import LiquidEther from '../components/LiquidEther/liquidEther.jsx';
 import './Landing.css';
 
 // Provisional images for workers
@@ -124,6 +125,27 @@ const Landing = () => {
   return (
     <div className={`landing-page${isLeaving ? ' leaving' : ''}`} ref={pageRef}>
       <div className="custom-cursor" ref={cursorRef} />
+
+      {/* EFECTO LIQUID ETHER COMO BACKGROUND DE TODA LA PÁGINA */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
+        <LiquidEther
+          colors={['#FFCD04', '#2A2A54', '#008C39']} /* Colores corporativos: Amarillo, Azul, Verde */
+          mouseForce={30}
+          cursorSize={150}
+          isViscous={true}
+          viscous={20}
+          iterationsViscous={12}
+          iterationsPoisson={12}
+          resolution={0.25}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+        />
+      </div>
 
       <section className="hero-section section-reveal active">
         <div className="hero-inner">

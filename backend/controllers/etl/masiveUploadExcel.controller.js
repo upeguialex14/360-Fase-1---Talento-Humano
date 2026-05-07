@@ -64,13 +64,25 @@ const deleteAllCostCenters = async (req, res) => {
 };
 
 const deleteAllBaseDatos = async (req, res) => {
+    const connection = await require('../../config/db').getConnection();
     try {
-        const db = require('../../config/db');
-        await db.query('DELETE FROM people_extended_info');
-        return res.status(200).json({ success: true, message: 'Registros eliminados' });
+        await connection.beginTransaction();
+        
+        // El orden es importante para evitar errores de llaves foraneas
+        await connection.query('DELETE FROM people_extended_info');
+        await connection.query('DELETE FROM people_healt_security');
+        await connection.query('DELETE FROM people');
+        await connection.query('DELETE FROM people_details');
+        await connection.query('DELETE FROM business_people_data');
+        
+        await connection.commit();
+        return res.status(200).json({ success: true, message: 'Todos los registros de la base de datos han sido eliminados correctamente' });
     } catch (error) {
-        console.error(error);
+        await connection.rollback();
+        console.error("Error deleteAllBaseDatos:", error);
         return res.status(500).json({ success: false, message: error.message });
+    } finally {
+        connection.release();
     }
 };
 

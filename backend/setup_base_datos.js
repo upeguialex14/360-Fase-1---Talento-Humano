@@ -5,7 +5,7 @@ async function run() {
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST, user: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME
   });
-  
+
   await conn.query(`
       CREATE TABLE IF NOT EXISTS base_datos_maestra (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -96,12 +96,12 @@ async function run() {
       INSERT IGNORE INTO pages (page_code, page_name, route)
       VALUES ('BASE_DATOS', 'Base de datos', '/base-datos')
   `);
-  
+
   await conn.query(`
       INSERT IGNORE INTO role_pages (role_id, page_code, can_view, can_edit)
       VALUES (1, 'BASE_DATOS', 1, 1)
   `);
-  
+
   console.log('Done!');
   process.exit(0);
 }

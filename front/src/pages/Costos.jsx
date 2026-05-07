@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Costos = () => {
     const [file, setFile] = useState(null);
@@ -11,6 +12,10 @@ const Costos = () => {
     const [previewData, setPreviewData] = useState([]);
     const [existingData, setExistingData] = useState([]);
     const fileInputRef = useRef(null);
+
+    const { user } = useAuth();
+    const pageAccess = user?.pages?.find(p => p.page_code === 'COSTOS');
+    const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
 
     const fetchExistingData = async () => {
         try {
@@ -330,14 +335,15 @@ const Costos = () => {
                         <h3>📤 Cargar archivo Excel</h3>
 
                         <div
-                            className={`drop-zone${dragOver ? ' active' : ''}`}
-                            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                            onDragLeave={() => setDragOver(false)}
-                            onDrop={handleDrop}
-                            onClick={() => fileInputRef.current?.click()}
+                            className={`drop-zone ${dragOver && canEdit ? 'active' : ''}`}
+                            onDragOver={canEdit ? (e) => { e.preventDefault(); setDragOver(true); } : undefined}
+                            onDragLeave={canEdit ? () => setDragOver(false) : undefined}
+                            onDrop={canEdit ? handleDrop : undefined}
+                            onClick={() => canEdit && fileInputRef.current?.click()}
+                            style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
                         >
                             <div className="icon">📊</div>
-                            <p>Arrastra tu archivo aquí o <span className="link">haz clic para seleccionar</span></p>
+                            <p>{canEdit ? 'Arrastra tu archivo aquí o ' : 'No tienes permisos de edición'} {canEdit && <span className="link">haz clic para seleccionar</span>}</p>
                             <p style={{ marginTop: '0.6rem', fontSize: '0.8rem', opacity: 0.7 }}>Soportado: .xlsx, .xls — Máx 10MB</p>
                             <input
                                 ref={fileInputRef}
@@ -357,10 +363,10 @@ const Costos = () => {
                                 </span>
                                 <button
                                     className="remove-btn"
-                                    onClick={() => { 
-                                        setFile(null); 
+                                    onClick={() => {
+                                        setFile(null);
                                         setPreviewData([]);
-                                        if (fileInputRef.current) fileInputRef.current.value = ''; 
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
                                     }}
                                     title="Quitar archivo"
                                 >✕</button>
@@ -378,10 +384,11 @@ const Costos = () => {
                             }
                         </button>
 
-                        <button 
-                            className="btn-upload" 
-                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white' }}
+                        <button
+                            className="btn-upload"
+                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white', opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
                             onClick={async () => {
+                                if (!canEdit) return;
                                 if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Centro de Costos?")) {
                                     try {
                                         setLoading(true);
@@ -391,11 +398,11 @@ const Costos = () => {
                                             fetchExistingData(); // This should exist, I'll assume it exists if not it might fail, wait, let me check if fetchExistingData exists. Oh wait, Costos uses fetchExistingData? Let me check line 100 or something. Actually `window.location.reload()` is safer.
                                             window.location.reload();
                                         }
-                                    } catch(e) { alert("Error: " + e.message); }
+                                    } catch (e) { alert("Error: " + e.message); }
                                     finally { setLoading(false); }
                                 }
                             }}
-                            disabled={loading}
+                            disabled={loading || !canEdit}
                         >
                             🗑️ Eliminar Registros
                         </button>
@@ -445,7 +452,7 @@ const Costos = () => {
                                 <span>Mostrando {(file ? previewData : existingData).length} registros</span>
                             )}
                         </div>
-                        
+
                         <div className="table-container">
                             {(file ? previewData : existingData).length > 0 ? (
                                 <table className="excel-table">

@@ -58,8 +58,12 @@ const bulkUpdate = async (req, res) => {
 const deleteAllOrdenContratacion = async (req, res) => {
     try {
         const db = require('../../config/db');
+        // Desactivar temporalmente el chequeo de llaves foráneas para asegurar limpieza total
+        await db.query('SET FOREIGN_KEY_CHECKS = 0');
+        await db.query('DELETE FROM BUSINESS_PEOPLE_DATA');
         await db.query('DELETE FROM HIRING_ORDER');
-        return res.status(200).json({ success: true, message: 'Registros eliminados' });
+        await db.query('SET FOREIGN_KEY_CHECKS = 1');
+        return res.status(200).json({ success: true, message: 'Registros eliminados de forma permanente' });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: error.message });

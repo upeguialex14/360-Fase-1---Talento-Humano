@@ -54,12 +54,11 @@ const OrdenContratacion = {
                 mccf.name_compesation_box   AS ccf,
                 phs.bank_account            AS bh,
 
-                -- Datos extendidos
-                pei.direccion               AS direccion,
-                pei.expedicion_documento    AS fecha_expedicion_cc,
+                -- Datos extendidos (mapeados desde las tablas correctas)
+                pd.address                  AS direccion,
+                pd.neighborhood             AS barrio,
+                mtb.type_blood              AS rh,
                 pei.cuenta_bancaria         AS cuenta_bancaria,
-                pei.ciudad_residencia       AS ciudad_personal,
-                pei.rh                      AS rh,
 
                 -- Líder (via master_leader → USERS)
                 CONCAT(ul.name, ' ', ul.last_name) AS jefe,
@@ -72,7 +71,9 @@ const OrdenContratacion = {
             LEFT JOIN BUSINESS_PEOPLE_DATA bpd    ON ho.order_id       = bpd.order_id
             LEFT JOIN PEOPLE p                     ON TRIM(ho.user_id)  = TRIM(p.document_number)
             LEFT JOIN PEOPLE_HEALT_SECURITY phs    ON p.people_id       = phs.people_id
+            LEFT JOIN people_details pd            ON p.details_id      = pd.details_id
             LEFT JOIN people_extended_info pei     ON p.people_id       = pei.people_id
+            LEFT JOIN MASTER_TYPE_BLOOD mtb        ON pd.blood_id       = mtb.blood_id
             LEFT JOIN MASTER_JOB_TITLES mjt        ON ho.id_job         = mjt.id_job
             LEFT JOIN MASTER_CONTRACTS mc          ON ho.contract_id    = mc.contract_id
             LEFT JOIN MASTER_CLIENT mcl            ON ho.client_id      = mcl.client_id
@@ -105,6 +106,7 @@ const OrdenContratacion = {
             'leader_id', 'analyst_id'
         ];
 
+        // Build dynamic insert
         const columns = [];
         const values = [];
 

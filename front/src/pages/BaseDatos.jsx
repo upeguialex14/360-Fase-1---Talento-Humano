@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const BaseDatos = () => {
     const [file, setFile] = useState(null);
@@ -11,6 +12,10 @@ const BaseDatos = () => {
     const [previewData, setPreviewData] = useState([]);
     const [existingData, setExistingData] = useState([]);
     const fileInputRef = useRef(null);
+
+    const { user } = useAuth();
+    const pageAccess = user?.pages?.find(p => p.page_code === 'BASE_DATOS');
+    const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
 
     const COLUMNS = [
         { key: 'tipo_identificacion', label: 'TIPO ID' },
@@ -134,7 +139,13 @@ const BaseDatos = () => {
             formData.append('file', file);
             const response = await api.upload('/etl/upload/BASE_DATOS', formData);
             if (response && response.success) {
-                setResult({ success: true, totalProcessed: response.processed, inserted: response.inserted });
+                setResult({
+                    success: true,
+                    totalProcessed: response.processed,
+                    inserted: response.inserted,
+                    updated: response.updated,
+                    errors: response.errors
+                });
                 setFile(null); setPreviewData([]);
                 if (fileInputRef.current) fileInputRef.current.value = '';
                 fetchExistingData();
@@ -197,25 +208,28 @@ const BaseDatos = () => {
                     <div className="base-card">
                         <h3>📤 Carga de Archivo</h3>
                         <div
-                            className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                            onClick={() => fileInputRef.current?.click()}
+                            className={`drop-zone ${dragOver && canEdit ? 'drag-over' : ''}`}
+                            onDragOver={canEdit ? handleDragOver : undefined}
+                            onDragLeave={canEdit ? handleDragLeave : undefined}
+                            onDrop={canEdit ? handleDrop : undefined}
+                            onClick={() => canEdit && fileInputRef.current?.click()}
+                            style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
                         >
                             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📁</div>
-                            <p>{file ? file.name : 'Arrastra tu Excel aquí o haz clic'}</p>
-                            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={(e) => handleFileSelect(e.target.files[0])} />
+                            <p>{file ? file.name : (canEdit ? 'Arrastra tu Excel aquí o haz clic' : 'No tienes permisos para editar')}</p>
+                            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={(e) => canEdit && handleFileSelect(e.target.files[0])} disabled={!canEdit} />
                         </div>
 
-                        <button className="btn-upload" onClick={handleUpload} disabled={loading || !file}>
+                        <button className="btn-upload" onClick={handleUpload} disabled={loading || !file || !canEdit}>
                             {loading ? 'Subiendo...' : '🚀 Iniciar Carga Masiva'}
                         </button>
 
-                        <button 
-                            className="btn-upload" 
-                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white' }}
+                        <button
+                            className="btn-upload"
+                            style={{ marginTop: '1rem', background: '#EF4444', color: 'white', opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
+                            disabled={!canEdit || loading}
                             onClick={async () => {
+                                if (!canEdit) return;
                                 if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Base de Datos?")) {
                                     try {
                                         setLoading(true);
@@ -224,19 +238,25 @@ const BaseDatos = () => {
                                             alert("Registros eliminados");
                                             fetchExistingData();
                                         }
-                                    } catch(e) { alert("Error: " + e.message); }
+                                    } catch (e) { alert("Error: " + e.message); }
                                     finally { setLoading(false); }
                                 }
                             }}
-                            disabled={loading}
                         >
                             🗑️ Eliminar Registros
                         </button>
 
                         {result?.success && (
                             <div className="feedback-box success">
-                                <b>✅ Carga exitosa</b><br/>
-                                Registros Insertados/Actualizados: {result.inserted}
+                                <b>✅ Carga completada</b><br />
+                                Procesados: {result.totalProcessed}<br />
+                                Nuevos: {result.inserted} | Actualizados: {result.updated || 0}<br />
+                                {result.errors?.length > 0 && (
+                                    <div style={{ marginTop: '0.5rem', color: '#f87171', fontSize: '0.8rem' }}>
+                                        ⚠️ Errores en {result.errors.length} registros.<br />
+                                        <small>Ejemplo: {result.errors[0]}</small>
+                                    </div>
+                                )}
                             </div>
                         )}
                         {error && <div className="feedback-box error">❌ {error}</div>}
