@@ -23,12 +23,13 @@ const getAll = async () => {
                 pd.size_jacket as t_chaquetas,
                 pd.size_vest as t_chalecos,
                 
-                bpd.salary as sueldo,
+                bpd.salary as sueldo_2026,
                 bpd.start_date as fecha_ingreso,
                 bpd.termination_date as fecha_retiro,
                 bpd.notes as observaciones,
                 
                 mjt.job_title as cargo,
+                moff.name as oficina,
                 mc.name_contract as tipo_contrato,
                 mcl.name as cliente,
                 mci.name as ciudad,
@@ -56,6 +57,7 @@ const getAll = async () => {
             LEFT JOIN master_contracts mc ON bpd.contract_id = mc.contract_id
             LEFT JOIN master_client mcl ON bpd.client_id = mcl.client_id
             LEFT JOIN master_cities mci ON bpd.city_work_id = mci.city_id
+            LEFT JOIN master_offices moff ON bpd.office_id = moff.office_id
             LEFT JOIN cost_center cc ON bpd.cost_center_id = cc.cost_center_id
             LEFT JOIN master_company mco ON bpd.company_id = mco.company_id
             LEFT JOIN master_area ma ON bpd.area_id = ma.area_id
@@ -64,7 +66,7 @@ const getAll = async () => {
             LEFT JOIN master_pension mp ON phs.pension_id = mp.pension_id
             LEFT JOIN master_compensation_box mcb ON phs.compensation_box_id = mcb.compesation_box_id
             
-            ORDER BY p.people_id DESC
+            ORDER BY p.people_id ASC
         `;
         const [rows] = await db.query(sql);
         return rows;

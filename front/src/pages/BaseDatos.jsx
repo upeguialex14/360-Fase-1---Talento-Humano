@@ -139,7 +139,13 @@ const BaseDatos = () => {
             formData.append('file', file);
             const response = await api.upload('/etl/upload/BASE_DATOS', formData);
             if (response && response.success) {
-                setResult({ success: true, totalProcessed: response.processed, inserted: response.inserted });
+                setResult({
+                    success: true,
+                    totalProcessed: response.processed,
+                    inserted: response.inserted,
+                    updated: response.updated,
+                    errors: response.errors
+                });
                 setFile(null); setPreviewData([]);
                 if (fileInputRef.current) fileInputRef.current.value = '';
                 fetchExistingData();
@@ -236,15 +242,21 @@ const BaseDatos = () => {
                                     finally { setLoading(false); }
                                 }
                             }}
-                            disabled={loading}
                         >
                             🗑️ Eliminar Registros
                         </button>
 
                         {result?.success && (
                             <div className="feedback-box success">
-                                <b>✅ Carga exitosa</b><br />
-                                Registros Insertados/Actualizados: {result.inserted}
+                                <b>✅ Carga completada</b><br />
+                                Procesados: {result.totalProcessed}<br />
+                                Nuevos: {result.inserted} | Actualizados: {result.updated || 0}<br />
+                                {result.errors?.length > 0 && (
+                                    <div style={{ marginTop: '0.5rem', color: '#f87171', fontSize: '0.8rem' }}>
+                                        ⚠️ Errores en {result.errors.length} registros.<br />
+                                        <small>Ejemplo: {result.errors[0]}</small>
+                                    </div>
+                                )}
                             </div>
                         )}
                         {error && <div className="feedback-box error">❌ {error}</div>}
