@@ -27,6 +27,10 @@ import Vacaciones from './pages/Vacaciones';
 import Selection from './pages/Selection';
 import Upcoming from './pages/Upcoming';
 import BaseDatos from './pages/BaseDatos';
+import UsuarioSahg from './pages/UsuarioSahg';
+import CreacionUsuarioPlanta from './pages/CreacionUsuarioPlanta';
+
+
 
 
 /**
@@ -77,6 +81,8 @@ function App() {
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
             <Route path="admin/blocked-users" element={<PageProtectedRoute requiredPageCode="BLOCKED_USERS" isOptional={true}><AdminBlockedUsers /></PageProtectedRoute>} />
             <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
+            <Route path="usuario-sahg" element={<PageProtectedRoute requiredPageCode="USUARIO_SAHG" isOptional={true}><UsuarioSahg /></PageProtectedRoute>} />
+            <Route path="creacion-usuario-planta" element={<PageProtectedRoute requiredPageCode="CREACION_USUARIO_PLANTA" isOptional={true}><CreacionUsuarioPlanta /></PageProtectedRoute>} />
           </Route>
 
           {/* Redirigir cualquier ruta no encontrada a login */}

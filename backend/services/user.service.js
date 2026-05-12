@@ -41,13 +41,14 @@ class UserService {
             const salt = await bcrypt.genSalt(10);
             const passwordHash = await bcrypt.hash(userData.password, salt);
 
-            // Insert user
+            // Insert user (Mapping controller fields to model fields)
             const userId = await User.create({
-                login: userData.login,
+                document_number: userData.login,
                 password_hash: passwordHash,
                 email: userData.email,
-                full_name: userData.full_name,
-                role_code: userData.role_code
+                name: userData.name,
+                last_name: userData.last_name,
+                role_id: userData.role_id
             });
 
             return { insertId: userId };

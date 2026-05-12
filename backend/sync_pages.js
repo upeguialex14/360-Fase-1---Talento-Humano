@@ -17,6 +17,8 @@ const DEFINITIVE_PAGES = [
     { code: 'VACACIONES', name: 'Vacaciones', route: '/vacaciones', desc: 'Gestión de solicitudes y saldo de vacaciones' },
     { code: 'BASE_INACTIVA', name: 'Base Inactiva', route: '/base-inactiva', desc: 'Histórico de empleados inactivos' },
     { code: 'BASE_UNIFICADA', name: 'Base Unificada', route: '/base-unificada', desc: 'Consolidado general de información' },
+    { code: 'USUARIO_SAHG', name: 'Usuario Sahg', route: '/usuario-sahg', desc: 'Módulo de gestión Usuario Sahg' },
+    { code: 'CREACION_USUARIO_PLANTA', name: 'Creación Usuario Planta', route: '/creacion-usuario-planta', desc: 'Formulario de ingreso para planta' },
     { code: 'EMPLEADOS', name: 'Empleados', route: '/empleados', desc: 'Vista general de personal y nómina' },
     { code: 'DEPARTAMENTOS', name: 'Departamentos', route: '/departamentos', desc: 'Estructura organizacional y áreas' }
 ];
@@ -28,7 +30,7 @@ async function syncPages() {
         await connection.beginTransaction();
 
         console.log('Cleaning up pages table...');
-        
+
         // 1. Delete all current pages (we'll re-insert the definitive ones)
         // Disable foreign key checks temporarily if needed, but let's try direct delete first
         await connection.execute('SET FOREIGN_KEY_CHECKS = 0');
@@ -54,7 +56,7 @@ async function syncPages() {
         console.log('Fixing role_pages references...');
         // Fix role_pages that might have old codes (like 'USERS' instead of 'USUARIOS')
         await connection.execute("UPDATE role_pages SET page_code = 'USUARIOS' WHERE page_code = 'USERS'");
-        
+
         // Delete role_pages that don't match any page_code in the definitive list
         const codes = DEFINITIVE_PAGES.map(p => `'${p.code}'`).join(',');
         await connection.execute(`DELETE FROM role_pages WHERE page_code NOT IN (${codes})`);

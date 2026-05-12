@@ -53,78 +53,78 @@ const Icons = {
     // 🏭 Planta Operación
     factory: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 20V8l6-4v4l6-4v16H2z"/>
-            <path d="M14 20V10h8v10h-8z"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-            <line x1="10" y1="20" x2="10" y2="14"/>
-            <line x1="18" y1="20" x2="18" y2="14"/>
+            <path d="M2 20V8l6-4v4l6-4v16H2z" />
+            <path d="M14 20V10h8v10h-8z" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+            <line x1="10" y1="20" x2="10" y2="14" />
+            <line x1="18" y1="20" x2="18" y2="14" />
         </svg>
     ),
     // 💰 Centro de Costos
     dollarSign: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="1" x2="12" y2="23"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
     ),
     // 🗄️ Base de Datos
     database: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <ellipse cx="12" cy="5" rx="9" ry="3"/>
-            <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/>
-            <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12" />
+            <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
         </svg>
     ),
     // 📋 Gestión de Requisiciones
     clipboardList: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-            <line x1="9" y1="12" x2="15" y2="12"/>
-            <line x1="9" y1="16" x2="15" y2="16"/>
-            <line x1="9" y1="8" x2="11" y2="8"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            <line x1="9" y1="12" x2="15" y2="12" />
+            <line x1="9" y1="16" x2="15" y2="16" />
+            <line x1="9" y1="8" x2="11" y2="8" />
         </svg>
     ),
     // 📄 Orden de Contratación
     fileSearch: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <circle cx="11" cy="15" r="2"/>
-            <line x1="13" y1="17" x2="15" y2="19"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <circle cx="11" cy="15" r="2" />
+            <line x1="13" y1="17" x2="15" y2="19" />
         </svg>
     ),
     // 👥 Solicitud de Vacantes
     userPlus: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="8.5" cy="7" r="4"/>
-            <line x1="20" y1="8" x2="20" y2="14"/>
-            <line x1="17" y1="11" x2="23" y2="11"/>
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="17" y1="11" x2="23" y2="11" />
         </svg>
     ),
     // 🗂️ Bases (dropdown)
     layers: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-            <polyline points="2 17 12 22 22 17"/>
-            <polyline points="2 12 12 17 22 12"/>
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
         </svg>
     ),
     // 📦 Base Inactiva
     archive: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="21 8 21 21 3 21 3 8"/>
-            <rect x="1" y="3" width="22" height="5"/>
-            <line x1="10" y1="12" x2="14" y2="12"/>
+            <polyline points="21 8 21 21 3 21 3 8" />
+            <rect x="1" y="3" width="22" height="5" />
+            <line x1="10" y1="12" x2="14" y2="12" />
         </svg>
     ),
     // 🔗 Base Unificada
     gitMerge: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="18" r="3"/>
-            <circle cx="6" cy="6" r="3"/>
-            <path d="M6 21V9a9 9 0 0 0 9 9"/>
+            <circle cx="18" cy="18" r="3" />
+            <circle cx="6" cy="6" r="3" />
+            <path d="M6 21V9a9 9 0 0 0 9 9" />
         </svg>
     ),
     clipboard: (
@@ -151,16 +151,16 @@ const Icons = {
         </svg>
     ),
     chevronDown: (isOpen) => (
-        <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+        <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ 
+            style={{
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease'
             }}
@@ -211,7 +211,7 @@ const Sidebar = () => {
 
     // Verificar si alguna ruta activa pertenece a Parametrización
     useEffect(() => {
-        const isParametrizacionRoute = PARAMETRIZACION_ROUTES.some(route => 
+        const isParametrizacionRoute = PARAMETRIZACION_ROUTES.some(route =>
             location.pathname === route || location.pathname.startsWith(route + '/')
         );
         setIsParametrizacionOpen(isParametrizacionRoute);
@@ -219,7 +219,7 @@ const Sidebar = () => {
 
     // Verificar si alguna ruta activa pertenece a Formularios
     useEffect(() => {
-        const isFormulariosRoute = FORMULARIOS_ROUTES.some(route => 
+        const isFormulariosRoute = FORMULARIOS_ROUTES.some(route =>
             location.pathname === route || location.pathname.startsWith(route + '/')
         );
         setIsFormulariosOpen(isFormulariosRoute);
@@ -227,7 +227,7 @@ const Sidebar = () => {
 
     // Verificar si alguna ruta activa pertenece a Bases
     useEffect(() => {
-        const isBasesRoute = BASES_ROUTES.some(route => 
+        const isBasesRoute = BASES_ROUTES.some(route =>
             location.pathname === route || location.pathname.startsWith(route + '/')
         );
         setIsBasesOpen(isBasesRoute);
@@ -249,7 +249,7 @@ const Sidebar = () => {
 
             user.pages.forEach(page => {
                 const pageRoute = page.route || page.path || '';
-                
+
                 const matchesCategory = (routes) => routes.some(route => {
                     const cleanRoute = route.replace('/home', '');
                     const cleanPage = pageRoute.replace('/home', '');
@@ -265,9 +265,9 @@ const Sidebar = () => {
                 if (isBasesPage) hasBase = true;
 
                 if (isParametrizacionPage || isFormulariosPage || isBasesPage) {
-                    return; 
+                    return;
                 }
-                
+
                 if (seenCodes.has(page.page_code) || seenNames.has(page.page_name)) {
                     return;
                 }
@@ -275,7 +275,7 @@ const Sidebar = () => {
                 seenNames.add(page.page_name);
                 filteredPages.push(page);
             });
-            
+
             // Garantizar que "Base de Datos" siempre se muestre para asegurar visibilidad
             if (!seenCodes.has('BASE_DATOS')) {
                 filteredPages.push({
@@ -284,7 +284,7 @@ const Sidebar = () => {
                     route: '/base-datos'
                 });
             }
-            
+
             // Ordenar para que Base de datos quede cerca de Centro de Costos si es posible
             const finalPages = [];
             filteredPages.forEach(p => {
@@ -294,16 +294,18 @@ const Sidebar = () => {
                 }
             });
 
-            // Para asegurar el orden exacto: Planta -> Costos -> Base de datos -> Contratacion
+            // Para asegurar el orden exacto: Planta -> Creacion Planta -> Costos -> Base de datos -> Contratacion -> Usuario Sahg
             finalPages.sort((a, b) => {
-                const order = ['DASHBOARD', 'PLANTA', 'COSTOS', 'BASE_DATOS', 'CONTRATACION'];
+                const order = ['DASHBOARD', 'PLANTA', 'CREACION_USUARIO_PLANTA', 'COSTOS', 'BASE_DATOS', 'CONTRATACION', 'USUARIO_SAHG'];
                 let indexA = order.indexOf(a.page_code);
+
+
                 let indexB = order.indexOf(b.page_code);
                 if (indexA === -1) indexA = 99;
                 if (indexB === -1) indexB = 99;
                 return indexA - indexB;
             });
-            
+
             setUniquePages(finalPages);
             setIsParametrizacionPagePresent(hasParam);
             setIsFormulariosPagePresent(hasForm);
@@ -337,17 +339,17 @@ const Sidebar = () => {
     }, [user]);
 
     // Determinar si el menú de Parametrización está activo
-    const isParametrizacionActive = PARAMETRIZACION_ROUTES.some(route => 
+    const isParametrizacionActive = PARAMETRIZACION_ROUTES.some(route =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     );
 
     // Determinar si el menú de Formularios está activo
-    const isFormulariosActive = FORMULARIOS_ROUTES.some(route => 
+    const isFormulariosActive = FORMULARIOS_ROUTES.some(route =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     );
 
     // Determinar si el menú de Bases está activo
-    const isBasesActive = BASES_ROUTES.some(route => 
+    const isBasesActive = BASES_ROUTES.some(route =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     );
 
@@ -389,16 +391,20 @@ const Sidebar = () => {
 
                         // Icono único por módulo según page_code
                         const pageIconMap = {
-                            DASHBOARD:              Icons.home,
-                            PLANTA:                 Icons.factory,
-                            COSTOS:                 Icons.dollarSign,
-                            BASE_DATOS:             Icons.database,
-                            GESTION_REQUISICIONES:  Icons.clipboardList,
-                            ORDEN_CONTRATACION:     Icons.fileSearch,
-                            SOLICITUD_VACANTES:     Icons.userPlus,
-                            CONTRATACION:           Icons.fileSearch,
+                            DASHBOARD: Icons.home,
+                            PLANTA: Icons.factory,
+                            COSTOS: Icons.dollarSign,
+                            BASE_DATOS: Icons.database,
+                            GESTION_REQUISICIONES: Icons.clipboardList,
+                            ORDEN_CONTRATACION: Icons.fileSearch,
+                            SOLICITUD_VACANTES: Icons.userPlus,
+                            CONTRATACION: Icons.fileSearch,
+                            USUARIO_SAHG: Icons.shield,
+                            CREACION_USUARIO_PLANTA: Icons.userPlus,
                         };
                         const pageIcon = pageIconMap[page.page_code] || Icons.briefcase;
+
+
 
                         return (
                             <React.Fragment key={page.page_code}>
@@ -419,7 +425,7 @@ const Sidebar = () => {
                     {/* Menú Parametrización */}
                     {(isParametrizacionPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
-                            <button 
+                            <button
                                 className={`sidebar-dropdown-toggle menu-btn font-body ${isParametrizacionActive ? 'active' : ''}`}
                                 onClick={() => setIsParametrizacionOpen(!isParametrizacionOpen)}
                             >
@@ -427,7 +433,7 @@ const Sidebar = () => {
                                 <span className="sidebar-link-text">Parametrización</span>
                                 <span className="sidebar-chevron">{Icons.chevronDown(isParametrizacionOpen)}</span>
                             </button>
-                            
+
                             <ul className={`sidebar-dropdown-menu ${isParametrizacionOpen ? 'open' : ''}`}>
                                 <li>
                                     <NavLink to="/home/roles" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
@@ -456,7 +462,7 @@ const Sidebar = () => {
                     {/* Menú Formularios */}
                     {(isFormulariosPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
-                            <button 
+                            <button
                                 className={`sidebar-dropdown-toggle menu-btn font-body ${isFormulariosActive ? 'active' : ''}`}
                                 onClick={() => setIsFormulariosOpen(!isFormulariosOpen)}
                             >
@@ -464,7 +470,7 @@ const Sidebar = () => {
                                 <span className="sidebar-link-text">Formularios</span>
                                 <span className="sidebar-chevron">{Icons.chevronDown(isFormulariosOpen)}</span>
                             </button>
-                            
+
                             <ul className={`sidebar-dropdown-menu ${isFormulariosOpen ? 'open' : ''}`}>
                                 <li>
                                     <NavLink to="/home/documentacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
@@ -483,7 +489,7 @@ const Sidebar = () => {
                     {/* Menú Bases */}
                     {(isBasesPagePresent || (user && user.role_id === 1)) && (
                         <li className="sidebar-dropdown">
-                            <button 
+                            <button
                                 className={`sidebar-dropdown-toggle menu-btn font-body ${isBasesActive ? 'active' : ''}`}
                                 onClick={() => setIsBasesOpen(!isBasesOpen)}
                             >
@@ -491,7 +497,7 @@ const Sidebar = () => {
                                 <span className="sidebar-link-text">Bases</span>
                                 <span className="sidebar-chevron">{Icons.chevronDown(isBasesOpen)}</span>
                             </button>
-                            
+
                             <ul className={`sidebar-dropdown-menu ${isBasesOpen ? 'open' : ''}`}>
                                 <li>
                                     <NavLink to="/home/base-inactiva" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
@@ -532,9 +538,9 @@ const Sidebar = () => {
                 >
                     <span className="sidebar-icon" style={{ color: '#ef4444' }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                            <polyline points="16 17 21 12 16 7"/>
-                            <line x1="21" y1="12" x2="9" y2="12"/>
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
                         </svg>
                     </span>
                     Cerrar Sesión

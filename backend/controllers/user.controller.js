@@ -5,6 +5,7 @@
  */
 const userService = require('../services/user.service');
 const authService = require('../services/auth.service');
+const revalService = require('../services/reval.service');
 
 const getUsers = async (req, res) => {
     try {
@@ -70,4 +71,55 @@ const updateUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, getUser, updateUserPassword, updateUser };
+const createUser = async (req, res) => {
+    try {
+        console.log('🔥 CONTROLADOR CORRECTO EJECUTADO');
+        
+        // 1. Extraer los campos REALES del frontend
+        const { correo_corp, usuario_ad, ou_path, groups } = req.body;
+
+        // 2. Guardar usuario en la base de datos local
+        const localData = {
+            ...req.body,
+            login: usuario_ad,
+            email: correo_corp,
+            password: 'Temp123!'
+        };
+        
+        const localResult = await userService.createUser(localData);
+
+        // 3. Construcción del objeto para REVAL
+        const revalUserData = {
+            username: usuario_ad,
+            firstname: usuario_ad || 'Usuario',
+            lastname: 'AD',
+            password: 'Temp123!',
+            ou_path: ou_path || 'OU=Usuarios,OU=Sac,DC=reval,DC=local',
+            groups: groups || ['SG_PTR_PLUS_PRODUCCION']
+        };
+
+        console.log('📤 Datos enviados a REVAL:', revalUserData);
+
+        // 4. Consumir API externa
+        let revalResult;
+        try {
+            console.log('🚀 Llamando a REVAL');
+            revalResult = await revalService.createRevalUser(revalUserData);
+        } catch (err) {
+            console.error('[REVAL] Error en integración:', err.message);
+            revalResult = { success: false, error: err.message };
+        }
+
+        res.status(201).json({
+            success: true,
+            local: localResult,
+            reval: revalResult
+        });
+
+    } catch (error) {
+        console.error('[UserController] Create user error:', error);
+        res.status(500).json({ success: false, message: error.message || 'Error al crear usuario' });
+    }
+};
+
+module.exports = { getUsers, getUser, updateUserPassword, updateUser, createUser };

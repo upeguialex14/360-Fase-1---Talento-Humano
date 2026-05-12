@@ -10,4 +10,7 @@ router.get('/', verifyToken, checkPageAccess('USUARIOS', 'can_view'), userContro
 // Cambiar contraseña de usuario (requiere token y acceso de edición)
 router.put('/:userId/change-password', verifyToken, checkPageAccess('USUARIOS', 'can_edit'), userController.updateUserPassword);
 
+// Crear usuario (requiere token y acceso de edición)
+router.post('/', verifyToken, checkPageAccess('USUARIOS', 'can_edit'), userController.createUser);
+
 module.exports = router;
