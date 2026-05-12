@@ -219,7 +219,7 @@ const hiringOrderProcessor = {
         });
 
         // ── 1. HIRING_ORDER ────────────────────────────────────────────────────
-        let orderId = row.order_id || data.order_id;
+        let orderId = row.order_id || data.order_id || row.id || data.id;
 
         const hiringData = {
             id_job: jobId,

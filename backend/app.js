@@ -9,6 +9,7 @@ const ordenContratacionRoutes = require('./routes/etl/ordenContratacion.routes')
 const masiveUploadRoutes = require('./routes/etl/masiveUploadExcel.routes');
 const requisicionRoutes = require('./routes/requisicion.routes');
 const plantaOperacionRoutes = require('./routes/plantaOperacion.routes');
+const dotacionRoutes = require('./routes/dotacion/dotacion.routes');
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/orden-contratacion', ordenContratacionRoutes);
 app.use('/api/etl', masiveUploadRoutes);
 app.use('/api/requisiciones', requisicionRoutes);
 app.use('/api/planta-operacion', plantaOperacionRoutes);
+app.use('/api/dotacion', dotacionRoutes);
 
 
 // Manejo básico de rutas no encontradas

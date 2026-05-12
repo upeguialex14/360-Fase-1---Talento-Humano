@@ -27,6 +27,8 @@ import Vacaciones from './pages/Vacaciones';
 import Selection from './pages/Selection';
 import Upcoming from './pages/Upcoming';
 import BaseDatos from './pages/BaseDatos';
+import DotacionDashboard from './pages/DotacionDashboard';
+import PublicSignature from './pages/PublicSignature';
 
 
 /**
@@ -40,6 +42,9 @@ function App() {
         <Routes>
           {/* Landing page pública */}
           <Route path="/" element={<Landing />} />
+
+          {/* Ruta pública para firma de dotación (Empleado) */}
+          <Route path="/sign/:token" element={<PublicSignature />} />
 
           {/* Página de selección de perfil */}
           <Route path="/selection" element={<Selection />} />
@@ -77,7 +82,9 @@ function App() {
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
             <Route path="admin/blocked-users" element={<PageProtectedRoute requiredPageCode="BLOCKED_USERS" isOptional={true}><AdminBlockedUsers /></PageProtectedRoute>} />
             <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
+            <Route path="dotacion" element={<PageProtectedRoute requiredPageCode="DOTACION" isOptional={true}><DotacionDashboard /></PageProtectedRoute>} />
           </Route>
+
 
           {/* Redirigir cualquier ruta no encontrada a login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

@@ -1,27 +1,22 @@
-//Importamos la libreria xlsx con sus funciones
 const xlsx = require('xlsx');
 const costCenterProcessor = require('./processors/costCenterProcessor.service');
 const hiringOrderProcessor = require('./processors/hiringOrderProcessor.service');
 const baseDatosProcessor = require('./processors/baseDatosProcessor.service');
-
+// Importamos el nuevo procesador que armamos
+const dotacionProcessor = require('./processors/dotacion.processor.service');
 
 const uploadExcel = async (data) => {
-    //Destructuramos los datos que vienen
     const { fileBuffer, type, username } = data;
 
-    //Convertimos el buffer en JSON
     const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const rawJson = xlsx.utils.sheet_to_json(sheet);
 
-
     if (rawJson.length === 0) {
         throw new Error("El archivo Excel está vacío");
     }
 
-
-    // Transformamos y cargamos segun el tipo en el procesador correspondiente
     let result;
     switch (type) {
         case 'COST_CENTER':
@@ -33,9 +28,10 @@ const uploadExcel = async (data) => {
         case 'HIRING_ORDER':
             result = await hiringOrderProcessor.process(rawJson, username);
             break;
-        /*case 'PEOPLE':
-            // result = await orderProcessor.process(rawJson);
-            break; ARMAR LOGICA DESPUES YA QUE ESTA PEOPLE, PEOPLE_DETAILS Y PEOPLE_BUSSINES*/
+        // Nuevo caso para el inventario y dotación de las imágenes
+        case 'DOTACION':
+            result = await dotacionProcessor.process(rawJson);
+            break;
         default:
             throw new Error("Tipo de carga no soportado: " + type);
     }

@@ -173,6 +173,13 @@ const Icons = {
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
+    ),
+    shoppingBag: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
     )
 };
 
@@ -276,12 +283,19 @@ const Sidebar = () => {
                 filteredPages.push(page);
             });
             
-            // Garantizar que "Base de Datos" siempre se muestre para asegurar visibilidad
+            // Garantizar que "Base de Datos" y "Dotación" siempre se muestren para asegurar visibilidad inmediata
             if (!seenCodes.has('BASE_DATOS')) {
                 filteredPages.push({
                     page_code: 'BASE_DATOS',
                     page_name: 'Base de Datos',
                     route: '/base-datos'
+                });
+            }
+            if (!seenCodes.has('DOTACION')) {
+                filteredPages.push({
+                    page_code: 'DOTACION',
+                    page_name: 'Dotación',
+                    route: '/dotacion'
                 });
             }
             
@@ -296,7 +310,7 @@ const Sidebar = () => {
 
             // Para asegurar el orden exacto: Planta -> Costos -> Base de datos -> Contratacion
             finalPages.sort((a, b) => {
-                const order = ['DASHBOARD', 'PLANTA', 'COSTOS', 'BASE_DATOS', 'CONTRATACION'];
+                const order = ['DASHBOARD', 'PLANTA', 'COSTOS', 'BASE_DATOS', 'DOTACION', 'CONTRATACION'];
                 let indexA = order.indexOf(a.page_code);
                 let indexB = order.indexOf(b.page_code);
                 if (indexA === -1) indexA = 99;
@@ -397,6 +411,7 @@ const Sidebar = () => {
                             ORDEN_CONTRATACION:     Icons.fileSearch,
                             SOLICITUD_VACANTES:     Icons.userPlus,
                             CONTRATACION:           Icons.fileSearch,
+                            DOTACION:               Icons.shoppingBag,
                         };
                         const pageIcon = pageIconMap[page.page_code] || Icons.briefcase;
 

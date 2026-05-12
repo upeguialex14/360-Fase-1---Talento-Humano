@@ -1,0 +1,244 @@
+/* Estilos Premium para el Módulo de Dotación - Tema Oscuro/Gris Profundo con Acentos Dorados */
+
+:root {
+    --dot-primary: #FFD700; /* Gold */
+    --dot-primary-dark: #B8860B;
+    --dot-bg: #0f172a;
+    --dot-card: rgba(30, 41, 59, 0.7);
+    --dot-text: #f8fafc;
+    --dot-text-muted: #94a3b8;
+    --dot-border: rgba(255, 255, 255, 0.1);
+    --dot-accent: #38bdf8;
+    --dot-success: #10b981;
+    --dot-danger: #ef4444;
+}
+
+.dot-container {
+    padding: 2.5rem;
+    background-color: var(--dot-bg);
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--dot-text);
+}
+
+.dot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--dot-border);
+}
+
+.dot-header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(to right, #FFD700, #FFFACD);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Stats Cards with Glassmorphism */
+.dot-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.dot-stat-card {
+    background: var(--dot-card);
+    backdrop-filter: blur(12px);
+    padding: 1.8rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--dot-border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.dot-stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--dot-primary);
+    box-shadow: 0 10px 25px -5px rgba(255, 215, 0, 0.1);
+}
+
+.dot-stat-label {
+    font-size: 0.9rem;
+    color: var(--dot-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dot-stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-top: 1rem;
+    color: var(--dot-primary);
+}
+
+/* Main Content Grid */
+.dot-main-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr;
+    gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .dot-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dot-panel {
+    background: var(--dot-card);
+    backdrop-filter: blur(8px);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid var(--dot-border);
+}
+
+.dot-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dot-panel-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--dot-primary);
+}
+
+/* Modern Table */
+.dot-table-container {
+    overflow-x: auto;
+    border-radius: 1rem;
+    border: 1px solid var(--dot-border);
+}
+
+.dot-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dot-table th {
+    background: rgba(255, 255, 255, 0.03);
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--dot-text-muted);
+    border-bottom: 2px solid var(--dot-border);
+}
+
+.dot-table td {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--dot-border);
+    color: var(--dot-text);
+}
+
+.dot-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Alerts List */
+.dot-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dot-alert-item {
+    background: rgba(239, 68, 68, 0.05);
+    border-left: 4px solid var(--dot-danger);
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dot-alert-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.dot-alert-info p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--dot-text-muted);
+}
+
+/* Progress Bar for Stock */
+.stock-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.stock-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Buttons */
+.dot-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dot-btn-primary {
+    background: var(--dot-primary);
+    color: #0f172a;
+}
+
+.dot-btn-primary:hover {
+    background: #fff;
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.dot-btn-ghost {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--dot-text);
+    border: 1px solid var(--dot-border);
+}
+
+.dot-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--dot-primary);
+}
+
+/* Badges */
+.dot-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.dot-badge-low { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.dot-badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }

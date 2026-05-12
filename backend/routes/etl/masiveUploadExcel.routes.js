@@ -14,6 +14,7 @@ const checkUploadPermission = (req, res, next) => {
     if (type === 'cost-centers' || type === 'COST_CENTER') pageCode = 'COSTOS';
     else if (type === 'base-datos' || type === 'BASE_DATOS') pageCode = 'BASE_DATOS';
     else if (type === 'HIRING_ORDER') pageCode = 'ORDEN_CONTRATACION';
+    else if (type === 'DOTACION') pageCode = 'DOTACION';
 
     if (!pageCode) return res.status(400).json({ success: false, message: 'Tipo no válido' });
     return checkPageAccess(pageCode, 'can_edit')(req, res, next);
