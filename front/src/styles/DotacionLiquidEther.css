@@ -1,0 +1,332 @@
+/* NEXUS 360 - Liquid Ether Design System */
+/* Base for Dotacion Modules based on CreacionUsuarioPlanta.jsx */
+
+:root {
+    --nexus-yellow: #FFCD04;
+    --nexus-yellow-glow: rgba(255, 205, 4, 0.3);
+    --nexus-bg-dark: #0f1322;
+    --nexus-card-bg: rgba(15, 19, 34, 0.7);
+    --nexus-border: rgba(255, 255, 255, 0.08);
+    --nexus-text-muted: #94a3b8;
+}
+
+.nexus-page-container {
+    padding: 2.5rem;
+    min-height: 100vh;
+    background-color: var(--nexus-bg-dark);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.nexus-card {
+    background: var(--nexus-card-bg);
+    border: 1px solid var(--nexus-border);
+    border-radius: 24px;
+    padding: 3rem;
+    max-width: 1300px;
+    margin: 0 auto;
+    backdrop-filter: blur(25px) saturate(180%);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.nexus-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--nexus-yellow), transparent);
+}
+
+.nexus-header {
+    margin-bottom: 3.5rem;
+    position: relative;
+}
+
+.nexus-header h1 {
+    color: var(--nexus-yellow);
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px var(--nexus-yellow-glow);
+    font-family: 'Outfit', sans-serif;
+}
+
+.nexus-header p {
+    color: var(--nexus-text-muted);
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+/* Sections */
+.nexus-section {
+    margin-bottom: 4rem;
+    position: relative;
+    animation: nexusFadeIn 0.6s ease-out forwards;
+}
+
+@keyframes nexusFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nexus-section-title {
+    color: var(--nexus-yellow);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.nexus-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 205, 4, 0.3), transparent);
+}
+
+/* Grid & Inputs */
+.nexus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2.5rem;
+}
+
+.nexus-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    position: relative;
+}
+
+.nexus-form-group label {
+    color: var(--nexus-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-left: 4px;
+}
+
+.nexus-input {
+    background: rgba(15, 19, 34, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    color: #ffffff !important;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    backdrop-filter: blur(10px);
+}
+
+.nexus-input:focus {
+    outline: none;
+    border-color: var(--nexus-yellow) !important;
+    box-shadow: 0 0 25px rgba(255, 205, 4, 0.15);
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: translateY(-2px);
+}
+
+/* Stats Cards */
+.nexus-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.nexus-stat-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--nexus-border);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.nexus-stat-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--nexus-yellow);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.nexus-stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--nexus-yellow);
+    opacity: 0.6;
+}
+
+.nexus-stat-label {
+    font-size: 0.9rem;
+    color: var(--nexus-text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nexus-stat-value {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--nexus-yellow);
+    margin-top: 1rem;
+    font-family: 'Outfit', sans-serif;
+    text-shadow: 0 0 20px var(--nexus-yellow-glow);
+}
+
+/* Buttons */
+.nexus-btn {
+    padding: 1.1rem 2.5rem;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border: none;
+}
+
+.nexus-btn-primary {
+    background: linear-gradient(135deg, #FFCD04 0%, #e5b804 100%);
+    color: #000;
+    box-shadow: 0 10px 25px rgba(255, 205, 4, 0.2);
+}
+
+.nexus-btn-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(255, 205, 4, 0.4);
+}
+
+.nexus-btn-ghost {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nexus-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--nexus-yellow);
+}
+
+/* Tables */
+.nexus-table-container {
+    background: rgba(15, 19, 34, 0.5);
+    border-radius: 18px;
+    border: 1px solid var(--nexus-border);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.nexus-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.nexus-table th {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.2rem 1.5rem;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--nexus-yellow);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid var(--nexus-border);
+}
+
+.nexus-table td {
+    padding: 1.2rem 1.5rem;
+    color: #fff;
+    border-bottom: 1px solid var(--nexus-border);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.nexus-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Custom Scrollbar */
+.nexus-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.nexus-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+.nexus-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 205, 4, 0.3);
+    border-radius: 10px;
+}
+.nexus-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--nexus-yellow);
+}
+
+/* Badges */
+.nexus-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nexus-badge-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+.nexus-badge-warning { background: rgba(251, 146, 60, 0.1); color: #fb923c; }
+.nexus-badge-danger { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+.nexus-badge-info { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+
+/* Layout Utilities */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: justify-center; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-10 { margin-top: 2.5rem; }
+.w-full { width: 100%; }
+.max-w-lg { max-width: 32rem; }
+.max-w-xl { max-width: 36rem; }
+.text-center { text-align: center; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.z-50 { z-index: 50; }
+.backdrop-blur-md { backdrop-filter: blur(12px); }
+.bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
+.font-black { font-weight: 900; }
+.uppercase { text-transform: uppercase; }

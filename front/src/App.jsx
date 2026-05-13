@@ -29,8 +29,14 @@ import Upcoming from './pages/Upcoming';
 import BaseDatos from './pages/BaseDatos';
 import UsuarioSahg from './pages/UsuarioSahg';
 import CreacionUsuarioPlanta from './pages/CreacionUsuarioPlanta';
-
-
+import DotacionDashboard from './pages/DotacionDashboard';
+import PublicSignature from './pages/PublicSignature';
+// Dotación routes
+import DotacionSolicitud from './pages/dotacion/DotacionSolicitud';
+import DotacionReasignacion from './pages/dotacion/DotacionReasignacion';
+import DotacionStock from './pages/dotacion/DotacionStock';
+import DotacionTallas from './pages/dotacion/DotacionTallas';
+import DotacionFirma from './pages/dotacion/DotacionFirma';
 
 
 /**
@@ -44,6 +50,9 @@ function App() {
         <Routes>
           {/* Landing page pública */}
           <Route path="/" element={<Landing />} />
+
+          {/* Ruta pública para firma de dotación (Empleado) */}
+          <Route path="/sign/:token" element={<PublicSignature />} />
 
           {/* Página de selección de perfil */}
           <Route path="/selection" element={<Selection />} />
@@ -83,7 +92,14 @@ function App() {
             <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
             <Route path="usuario-sahg" element={<PageProtectedRoute requiredPageCode="USUARIO_SAHG" isOptional={true}><UsuarioSahg /></PageProtectedRoute>} />
             <Route path="creacion-usuario-planta" element={<PageProtectedRoute requiredPageCode="CREACION_USUARIO_PLANTA" isOptional={true}><CreacionUsuarioPlanta /></PageProtectedRoute>} />
+            <Route path="dotacion" element={<PageProtectedRoute requiredPageCode="DOTACION" isOptional={true}><DotacionDashboard /></PageProtectedRoute>} />
+            <Route path="dotacion/solicitud" element={<PageProtectedRoute requiredPageCode="DOTACION_SOLICITUD" isOptional={true}><DotacionSolicitud /></PageProtectedRoute>} />
+            <Route path="dotacion/reasignacion" element={<PageProtectedRoute requiredPageCode="DOTACION_REASIGNACION" isOptional={true}><DotacionReasignacion /></PageProtectedRoute>} />
+            <Route path="dotacion/stock" element={<PageProtectedRoute requiredPageCode="DOTACION_STOCK" isOptional={true}><DotacionStock /></PageProtectedRoute>} />
+            <Route path="dotacion/tallas" element={<PageProtectedRoute requiredPageCode="DOTACION_TALLAS" isOptional={true}><DotacionTallas /></PageProtectedRoute>} />
+            <Route path="dotacion/firma" element={<PageProtectedRoute requiredPageCode="DOTACION_FIRMA" isOptional={true}><DotacionFirma /></PageProtectedRoute>} />
           </Route>
+
 
           {/* Redirigir cualquier ruta no encontrada a login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

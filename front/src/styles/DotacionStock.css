@@ -1,0 +1,125 @@
+/* DotacionStock.css */
+
+.stock-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .stock-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.stat-icon-wrapper {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.selected-item-info {
+    background-color: #eff6ff;
+    border: 2px solid #bfdbfe;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.selected-person-info {
+    background-color: #f0fdf4;
+    border: 2px solid #bbf7d0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-results-list {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+}
+
+.search-result-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    width: 100%;
+    text-align: left;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f9fafb;
+}
+
+.sum-preview {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: white;
+    border: 1px solid #86efac;
+    border-radius: 0.25rem;
+}
+
+.text-critical { color: #dc2626; }
+.text-low { color: #ca8a04; }
+.text-normal { color: #009c3b; }
+
+.uppercase-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}

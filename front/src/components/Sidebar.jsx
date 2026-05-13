@@ -173,6 +173,24 @@ const Icons = {
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
+    ),
+    shoppingBag: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+    ),
+    ruler: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21.3 15.3l-5-5L14.3 12l2 2L15 15.3l-2-2L11.7 15l2 2-1.3 1.3-2-2L9.1 18l2 2-1.3 1.3-6.4-6.4 1.3-1.3 2 2 1.3-1.3-2-2 1.3-1.3 2 2 1.3-1.3-2-2L12 8.7l5 5 4.3 1.6z" />
+        </svg>
+    ),
+    send: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
     )
 };
 
@@ -197,6 +215,15 @@ const BASES_ROUTES = [
     '/home/base-datos'
 ];
 
+// Rutas que pertenecen al menú de Dotación
+const DOTACION_ROUTES = [
+    '/home/dotacion/solicitud',
+    '/home/dotacion/reasignacion',
+    '/home/dotacion/stock',
+    '/home/dotacion/tallas',
+    '/home/dotacion/firma'
+];
+
 /**
  * Sidebar vertical izquierdo con logo y navegación basada en páginas del usuario
  * Incluye menú desplegable "Parametrización" para módulos de administración
@@ -208,6 +235,7 @@ const Sidebar = () => {
     const [isParametrizacionOpen, setIsParametrizacionOpen] = useState(false);
     const [isFormulariosOpen, setIsFormulariosOpen] = useState(false);
     const [isBasesOpen, setIsBasesOpen] = useState(false);
+    const [isDotacionOpen, setIsDotacionOpen] = useState(false);
 
     // Verificar si alguna ruta activa pertenece a Parametrización
     useEffect(() => {
@@ -233,10 +261,19 @@ const Sidebar = () => {
         setIsBasesOpen(isBasesRoute);
     }, [location.pathname]);
 
+    // Verificar si alguna ruta activa pertenece a Dotación
+    useEffect(() => {
+        const isDotacionRoute = DOTACION_ROUTES.some(route =>
+            location.pathname === route || location.pathname.startsWith(route + '/')
+        );
+        setIsDotacionOpen(isDotacionRoute);
+    }, [location.pathname]);
+
     const [uniquePages, setUniquePages] = useState([]);
     const [isParametrizacionPagePresent, setIsParametrizacionPagePresent] = useState(false);
     const [isFormulariosPagePresent, setIsFormulariosPagePresent] = useState(false);
     const [isBasesPagePresent, setIsBasesPagePresent] = useState(false);
+    const [isDotacionPagePresent, setIsDotacionPagePresent] = useState(false);
 
     useEffect(() => {
         if (user && user.pages) {
@@ -245,6 +282,7 @@ const Sidebar = () => {
             let hasParam = false;
             let hasForm = false;
             let hasBase = false;
+            let hasDot = false;
             const filteredPages = [];
 
             user.pages.forEach(page => {
@@ -255,16 +293,17 @@ const Sidebar = () => {
                     const cleanPage = pageRoute.replace('/home', '');
                     return cleanPage === cleanRoute || cleanPage === cleanRoute.replace(/^\//, '');
                 });
-
                 const isParametrizacionPage = matchesCategory(PARAMETRIZACION_ROUTES);
                 const isFormulariosPage = matchesCategory(FORMULARIOS_ROUTES);
                 const isBasesPage = matchesCategory(BASES_ROUTES);
+                const isDotacionPage = matchesCategory(DOTACION_ROUTES) || page.page_code === 'DOTACION';
 
                 if (isParametrizacionPage) hasParam = true;
                 if (isFormulariosPage) hasForm = true;
                 if (isBasesPage) hasBase = true;
+                if (isDotacionPage) hasDot = true;
 
-                if (isParametrizacionPage || isFormulariosPage || isBasesPage) {
+                if (isParametrizacionPage || isFormulariosPage || isBasesPage || isDotacionPage) {
                     return;
                 }
 
@@ -275,8 +314,7 @@ const Sidebar = () => {
                 seenNames.add(page.page_name);
                 filteredPages.push(page);
             });
-
-            // Garantizar que "Base de Datos" siempre se muestre para asegurar visibilidad
+            // Garantizar que "Base de Datos" siempre se muestre para asegurar visibilidad inmediata
             if (!seenCodes.has('BASE_DATOS')) {
                 filteredPages.push({
                     page_code: 'BASE_DATOS',
@@ -310,6 +348,7 @@ const Sidebar = () => {
             setIsParametrizacionPagePresent(hasParam);
             setIsFormulariosPagePresent(hasForm);
             setIsBasesPagePresent(hasBase);
+            setIsDotacionPagePresent(hasDot || true); // Forzamos true para asegurar que el dropdown aparezca
         }
     }, [user]);
 
@@ -350,6 +389,11 @@ const Sidebar = () => {
 
     // Determinar si el menú de Bases está activo
     const isBasesActive = BASES_ROUTES.some(route =>
+        location.pathname === route || location.pathname.startsWith(route + '/')
+    );
+
+    // Determinar si el menú de Dotación está activo
+    const isDotacionActive = DOTACION_ROUTES.some(route =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     );
 
@@ -399,6 +443,7 @@ const Sidebar = () => {
                             ORDEN_CONTRATACION: Icons.fileSearch,
                             SOLICITUD_VACANTES: Icons.userPlus,
                             CONTRATACION: Icons.fileSearch,
+                            DOTACION: Icons.shoppingBag,
                             USUARIO_SAHG: Icons.shield,
                             CREACION_USUARIO_PLANTA: Icons.userPlus,
                         };
@@ -507,6 +552,48 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/home/base-unificada" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.gitMerge}</span> Base unificada
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        </li>
+                    )}
+
+                    {/* Menú Dotación */}
+                    {(isDotacionPagePresent || (user && user.role_id === 1)) && (
+                        <li className="sidebar-dropdown">
+                            <button
+                                className={`sidebar-dropdown-toggle menu-btn font-body ${isDotacionActive ? 'active' : ''}`}
+                                onClick={() => setIsDotacionOpen(!isDotacionOpen)}
+                            >
+                                <span className="sidebar-icon">{Icons.shoppingBag}</span>
+                                <span className="sidebar-link-text">Dotación</span>
+                                <span className="sidebar-chevron">{Icons.chevronDown(isDotacionOpen)}</span>
+                            </button>
+
+                            <ul className={`sidebar-dropdown-menu ${isDotacionOpen ? 'open' : ''}`}>
+                                <li>
+                                    <NavLink to="/home/dotacion/solicitud" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.userPlus}</span> Solicitud
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/dotacion/reasignacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.gitMerge}</span> Reasignación
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/dotacion/stock" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.archive}</span> Stock
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/dotacion/tallas" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.ruler}</span> Datos de talla
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/dotacion/firma" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.send}</span> Envío firma
                                     </NavLink>
                                 </li>
                             </ul>

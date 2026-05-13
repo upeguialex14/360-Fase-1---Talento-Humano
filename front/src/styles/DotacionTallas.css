@@ -1,0 +1,58 @@
+/* DotacionTallas.css */
+
+.bg-talla-camisa { background-color: #dbeafe; color: #1d4ed8; }
+.bg-talla-pantalon { background-color: #f3e8ff; color: #7e22ce; }
+.bg-talla-zapatos { background-color: #dcfce7; color: #15803d; }
+
+.header-personal { background-color: #D8A7B5; color: #5C1A33; }
+.header-tallas { background-color: #FFD700; color: #4D3300; }
+.header-obs { background-color: #90EE90; color: #1A5C1A; }
+
+.border-white-r { border-right: 1px solid white; }
+
+.badge-talla {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.modal-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.25rem;
+}
+
+.modal-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .modal-grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.textarea-custom {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    min-height: 80px;
+    resize: none;
+    font-size: 0.875rem;
+}
+
+.textarea-custom:focus {
+    outline: none;
+    border-color: #009C3B;
+    box-shadow: 0 0 0 2px rgba(0, 156, 59, 0.2);
+}

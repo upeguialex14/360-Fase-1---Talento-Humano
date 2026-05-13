@@ -1,0 +1,50 @@
+/* Estilos específicos para Envío Firma de Recibido */
+.dot-table-firma th.col-entrega { background-color: #D8A7B5 !important; color: #5C1A33 !important; }
+.dot-table-firma th.col-articulos { background-color: #FFD700 !important; color: #4D3300 !important; }
+.dot-table-firma th.col-seguimiento { background-color: #00D4FF !important; color: #003D4D !important; }
+.dot-table-firma th.col-acciones { background-color: #f3f4f6 !important; color: #374151 !important; }
+
+.signature-canvas-container {
+    background: white;
+    border-radius: 1.5rem;
+    border: 4px solid var(--dot-border);
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.canvas-signature {
+    width: 100%;
+    height: 250px;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.stat-card-firma {
+    border-left: 5px solid transparent;
+}
+
+.stat-card-firma.pendientes { border-left-color: #f97316; }
+.stat-card-firma.firmados { border-left-color: #22c55e; }
+.stat-card-firma.rechazados { border-left-color: #ef4444; }
+.stat-card-firma.total { border-left-color: #3b82f6; }
+
+.modal-firma-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-firma-content {
+    background: var(--dot-bg);
+    border: 1px solid var(--dot-border);
+    border-radius: 2rem;
+    width: 90%;
+    max-width: 600px;
+    padding: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
