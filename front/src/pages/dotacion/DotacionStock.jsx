@@ -4,7 +4,7 @@ import { Input } from '../../components/ui/input';
 import { Search, Download, UserPlus, X, Check, Plus, Box, Info } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toast, Toaster } from 'sonner';
-import '../styles/DotacionLiquidEther.css';
+import '../../styles/DotacionLiquidEther.css';
 
 const stockInicial = [
   // ===== CAMISAS HOMBRE =====

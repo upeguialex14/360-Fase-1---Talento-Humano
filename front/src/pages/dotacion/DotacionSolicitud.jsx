@@ -1,135 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Search, Download, Plus, Edit2, Trash2, X, Check } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { Search, Plus, Filter, Download, ChevronRight, ShoppingBag, Clock, CheckCircle } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
-import '../../styles/DotacionSolicitud.css';
+import '../../styles/DotacionLiquidEther.css';
 
-const initialData = [
-  {
-    id: 1,
-    empresa: 'MULTIVAL SAS',
-    cedula: '1234567890',
-    nombresApellidos: 'Juan Pérez García',
-    genero: 'Masculino',
-    cargo: 'Operario',
-    fechaIngreso: '2024-01-15',
-    tiempoCompania: '1 año 2 meses',
-    contrato: 'Término Indefinido',
-    tipoEmpleado: 'Directo',
-    regional: 'Bogotá',
-    zona: 'Norte',
-    ciudad: 'Bogotá',
-    unidadNegocio: 'Operaciones',
-    cliente: 'Cliente ABC',
-    empresaCliente: 'ABC Corp',
-    ptr: 'PTR-001',
-    ccHelisa: 'CC-12345',
-    oficina: 'Oficina Principal',
-    vacanteSobrante: 'Vacante',
-    plantaAprobada: 'Sí',
-    supervisorGerente: 'María González',
-    status: 'Activo',
-    tallaCamisa: 'M',
-    tallaPantalon: '32',
-    cantidadPantalones: '2',
-    cantidadCamisas: '3',
-    cantidadCamisasBlancasMangaLarga: '1',
-  }
+const solicitudesIniciales = [
+  { id: 101, fecha: '2026-05-01', colaborador: 'Roberto Gómez', cedula: '102030', articulos: '2 Camisas M, 1 Pantalón 32', estado: 'Aprobado', total: 3 },
+  { id: 102, fecha: '2026-05-05', colaborador: 'Lucía Fernández', cedula: '405060', articulos: '1 Camisa Blanca S', estado: 'Pendiente', total: 1 },
+  { id: 103, fecha: '2026-05-08', colaborador: 'Marcos Ruiz', cedula: '708090', articulos: '3 Camisas L, 2 Pantalones 34', estado: 'Enviado', total: 5 },
 ];
 
 export default function DotacionSolicitud() {
-  const [data, setData] = useState(initialData);
+  const [solicitudes, setSolicitudes] = useState(() => {
+    const saved = localStorage.getItem('multival_dotacion_solicitudes');
+    return saved ? JSON.parse(saved) : solicitudesIniciales;
+  });
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [editedData, setEditedData] = useState({});
-  
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const filteredData = data.filter(
-    (item) =>
-      item.nombresApellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.cedula.includes(searchTerm) ||
-      item.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.cargo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
-
-  const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      data.map((item) => ({
-        EMPRESA: item.empresa,
-        CÉDULA: item.cedula,
-        'NOMBRES Y APELLIDOS': item.nombresApellidos,
-        GÉNERO: item.genero,
-        CARGO: item.cargo,
-        'FECHA DE INGRESO': item.fechaIngreso,
-        'TIEMPO EN LA COMPAÑÍA MESES Y AÑOS': item.tiempoCompania,
-        CONTRATO: item.contrato,
-        'TIPO DE EMPLEADO': item.tipoEmpleado,
-        REGIONAL: item.regional,
-        ZONA: item.zona,
-        CIUDAD: item.ciudad,
-        'UNIDAD DE NEGOCIO': item.unidadNegocio,
-        CLIENTE: item.cliente,
-        'EMPRESA CLIENTE': item.empresaCliente,
-        PTR: item.ptr,
-        'C.C HELISA': item.ccHelisa,
-        OFICINA: item.oficina,
-        'VACANTE- SOBRANTE': item.vacanteSobrante,
-        'PLANTA APROBADA': item.plantaAprobada,
-        'SUPERVISOR / GERENTE': item.supervisorGerente,
-        STATUS: item.status,
-        'TALLA DE CAMISA': item.tallaCamisa,
-        'TALLA DE PANTALÓN': item.tallaPantalon,
-        'CANTIDAD DE PANTALONES': item.cantidadPantalones,
-        'CANTIDAD DE CAMISAS': item.cantidadCamisas,
-        'CANTIDAD DE CAMISAS BLANCAS - MANGA LARGA': item.cantidadCamisasBlancasMangaLarga,
-      }))
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Solicitud Dotación');
-    XLSX.writeFile(workbook, 'solicitud_dotacion.xlsx');
-    toast.success('Archivo Excel exportado correctamente');
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este registro?')) {
-        setData(data.filter((item) => item.id !== id));
-        toast.success('Registro eliminado correctamente');
-    }
-  };
-
-  const handleEdit = (item) => {
-    setEditingId(item.id);
-    setEditedData(item);
-  };
-
-  const handleSave = () => {
-    setData(data.map((item) => (item.id === editingId ? { ...item, ...editedData } : item)));
-    setEditingId(null);
-    setEditedData({});
-    toast.success('Registro actualizado correctamente');
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditedData({});
-  };
-
-  const renderCell = (item, field, type = "text") => {
-    const isEditing = editingId === item.id;
-    if (isEditing) {
-        return (
-            <Input
-                type={type}
   const [filtroEstado, setFiltroEstado] = useState('Todos');
 
   useEffect(() => {
@@ -151,140 +38,97 @@ export default function DotacionSolicitud() {
   return (
     <div className="nexus-page-container nexus-scrollbar">
       <Toaster position="top-right" richColors />
-          <Input
-            placeholder="Buscar por nombre, cédula, empresa..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-        <Button variant="outline" onClick={handleExportExcel} className="border-[#009C3B] text-[#009C3B] hover:bg-[#009C3B]/10">
-          <Download className="h-4 w-4 mr-2" /> Exportar Excel
-        </Button>
-      </div>
+      <div className="nexus-card">
+        <header className="nexus-header">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1>Solicitudes de Dotación</h1>
+                    <p>Seguimiento de requerimientos de prendas por colaborador</p>
+                </div>
+                <Button className="nexus-btn nexus-btn-primary"><Plus className="h-5 w-5" /> Nueva Solicitud</Button>
+            </div>
+        </header>
 
-      {/* TABLE */}
-      <div className="table-viewport">
-        <table className="dotacion-table">
-          <thead>
-            <tr>
-              <th className="bg-rosa">EMPRESA</th>
-              <th className="bg-rosa">CÉDULA</th>
-              <th className="bg-rosa">NOMBRES Y APELLIDOS</th>
-              <th className="bg-rosa">GÉNERO</th>
-              <th className="bg-rosa">CARGO</th>
-              <th className="bg-rosa">FECHA DE INGRESO</th>
-              <th className="bg-rosa">TIEMPO COMPAÑÍA</th>
-              <th className="bg-rosa">CONTRATO</th>
-              <th className="bg-rosa">TIPO EMPLEADO</th>
-              <th className="bg-rosa">REGIONAL</th>
-              <th className="bg-rosa">ZONA</th>
-              <th className="bg-rosa">CIUDAD</th>
-              <th className="bg-rosa">UNIDAD NEGOCIO</th>
-              <th className="bg-cyan">CLIENTE</th>
-              <th className="bg-cyan">EMPRESA CLIENTE</th>
-              <th className="bg-cyan">PTR</th>
-              <th className="bg-cyan">C.C HELISA</th>
-              <th className="bg-rosa">OFICINA</th>
-              <th className="bg-cyan">VACANTE-SOBRANTE</th>
-              <th className="bg-cyan">PLANTA APROBADA</th>
-              <th className="bg-cyan">SUPERVISOR / GERENTE</th>
-              <th className="bg-cyan">STATUS</th>
-              <th className="bg-naranja">TALLA CAMISA</th>
-              <th className="bg-naranja">TALLA PANTALÓN</th>
-              <th className="bg-naranja">CANT. PANTALONES</th>
-              <th className="bg-naranja">CANT. CAMISAS</th>
-              <th className="bg-verde-claro">CANT. CAMISAS BLANCAS</th>
-              <th className="bg-gray-header actions-cell">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((item) => (
-                <tr key={item.id}>
-                  <td>{renderCell(item, 'empresa')}</td>
-                  <td>{renderCell(item, 'cedula')}</td>
-                  <td>{renderCell(item, 'nombresApellidos')}</td>
-                  <td>{renderCell(item, 'genero')}</td>
-                  <td>{renderCell(item, 'cargo')}</td>
-                  <td>{renderCell(item, 'fechaIngreso', 'date')}</td>
-                  <td>{renderCell(item, 'tiempoCompania')}</td>
-                  <td>{renderCell(item, 'contrato')}</td>
-                  <td>{renderCell(item, 'tipoEmpleado')}</td>
-                  <td>{renderCell(item, 'regional')}</td>
-                  <td>{renderCell(item, 'zona')}</td>
-                  <td>{renderCell(item, 'ciudad')}</td>
-                  <td>{renderCell(item, 'unidadNegocio')}</td>
-                  <td>{renderCell(item, 'cliente')}</td>
-                  <td>{renderCell(item, 'empresaCliente')}</td>
-                  <td>{renderCell(item, 'ptr')}</td>
-                  <td>{renderCell(item, 'ccHelisa')}</td>
-                  <td>{renderCell(item, 'oficina')}</td>
-                  <td>{renderCell(item, 'vacanteSobrante')}</td>
-                  <td>{renderCell(item, 'plantaAprobada')}</td>
-                  <td>{renderCell(item, 'supervisorGerente')}</td>
-                  <td>{renderCell(item, 'status')}</td>
-                  <td>{renderCell(item, 'tallaCamisa')}</td>
-                  <td>{renderCell(item, 'tallaPantalon')}</td>
-                  <td>{renderCell(item, 'cantidadPantalones')}</td>
-                  <td>{renderCell(item, 'cantidadCamisas')}</td>
-                  <td>{renderCell(item, 'cantidadCamisasBlancasMangaLarga')}</td>
-                  <td className="actions-cell">
-                    <div className="flex gap-2">
-                      {editingId === item.id ? (
-                        <>
-                          <Button onClick={handleSave} className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button onClick={handleCancel} className="h-8 w-8 p-0 bg-gray-500 hover:bg-gray-600 text-white">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button onClick={() => handleEdit(item)} className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white">
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+        <div className="nexus-stats-grid">
+            <div className="nexus-stat-card">
+                <div className="nexus-stat-label flex items-center gap-2"><Clock className="h-4 w-4 text-orange-400" /> Pendientes</div>
+                <div className="nexus-stat-value" style={{ color: '#fb923c' }}>{stats.pendientes}</div>
+            </div>
+            <div className="nexus-stat-card">
+                <div className="nexus-stat-label flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-400" /> Aprobadas</div>
+                <div className="nexus-stat-value" style={{ color: '#4ade80' }}>{stats.aprobadas}</div>
+            </div>
+            <div className="nexus-stat-card">
+                <div className="nexus-stat-label flex items-center gap-2"><ShoppingBag className="h-4 w-4 text-blue-400" /> Enviadas</div>
+                <div className="nexus-stat-value" style={{ color: '#60a5fa' }}>{stats.enviadas}</div>
+            </div>
+        </div>
+
+        <div className="nexus-section">
+            <div className="nexus-section-title">Gestión de Pedidos</div>
+            <div className="nexus-grid">
+                <div className="nexus-form-group">
+                    <label>Búsqueda Rápida</label>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input placeholder="Nombre o cédula..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="nexus-input pl-10" />
                     </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={28} className="p-8 text-center text-gray-500">
-                  No se encontraron registros.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* PAGINATION */}
-      <div className="pagination-container">
-        <div>
-          Mostrando {startIndex + 1} a {Math.min(endIndex, filteredData.length)} de {filteredData.length} registros
+                </div>
+                <div className="nexus-form-group">
+                    <label>Filtrar por Estado</label>
+                    <select className="nexus-input" value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
+                        <option value="Todos">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Aprobado">Aprobado</option>
+                        <option value="Enviado">Enviado</option>
+                    </select>
+                </div>
+                <div className="nexus-form-group flex items-end">
+                    <Button variant="outline" className="nexus-btn nexus-btn-ghost w-full"><Download className="h-4 w-4 mr-2" /> Exportar PDF</Button>
+                </div>
+            </div>
         </div>
-        <div className="pagination-buttons">
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => prev - 1)}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            disabled={currentPage === totalPages || totalPages === 0}
-            onClick={() => setCurrentPage(prev => prev + 1)}
-          >
-            Siguiente
-          </Button>
+
+        <div className="nexus-table-container">
+            <table className="nexus-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Colaborador</th>
+                        <th>Artículos</th>
+                        <th>Estado</th>
+                        <th className="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filtered.map(s => (
+                        <tr key={s.id}>
+                            <td className="font-mono text-[10px] text-gray-500">#{s.id}</td>
+                            <td className="text-xs">{s.fecha}</td>
+                            <td>
+                                <p className="font-bold text-white">{s.colaborador}</p>
+                                <p className="text-[10px] text-gray-500 uppercase">CC: {s.cedula}</p>
+                            </td>
+                            <td className="text-sm italic text-gray-300">{s.articulos}</td>
+                            <td>
+                                <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${
+                                    s.estado === 'Pendiente' ? 'bg-orange-500/10 text-orange-400' :
+                                    s.estado === 'Aprobado' ? 'bg-green-500/10 text-green-400' :
+                                    'bg-blue-500/10 text-blue-400'
+                                }`}>
+                                    {s.estado}
+                                </span>
+                            </td>
+                            <td className="text-center">
+                                <button className="nexus-btn nexus-btn-ghost !p-2 !h-8 hover:bg-[#FFCD04] hover:text-black transition-all">
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
       </div>
     </div>

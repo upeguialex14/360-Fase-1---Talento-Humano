@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toast, Toaster } from 'sonner';
-import '../styles/DotacionLiquidEther.css';
+import '../../styles/DotacionLiquidEther.css';
 
 interface ArticuloEntregado {
   tipo: 'Camisa' | 'Pantalón' | 'Camisa Blanca Manga Larga';
