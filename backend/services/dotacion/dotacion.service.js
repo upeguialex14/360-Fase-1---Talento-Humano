@@ -163,6 +163,10 @@ const DotacionService = {
         return await DotacionProviderService.createOrder(orderData);
     },
 
+    async sendBulkProviderExcel(data) {
+        return await DotacionProviderService.sendBulkProviderExcel(data);
+    },
+
     async receiveProviderOrder(orderId, performedBy) {
         return await DotacionProviderService.receiveOrder(orderId, performedBy);
     },
@@ -197,6 +201,46 @@ const DotacionService = {
 
     async checkEligibility(peopleId, periodYear, periodNumber) {
         return await DotacionEligibility.checkEligibility(peopleId, periodYear, periodNumber);
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // TRASLADOS Y REASIGNACIONES
+    // ─────────────────────────────────────────────────────────────────────────
+
+    async registerTraslado(origenId, destinoId, origenNombre, destinoNombre, prendasStr, notas) {
+        const pool = require('../../config/db');
+        // Ensure table exists
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS DOTACION_TRASLADOS (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                origen_id VARCHAR(50),
+                origen_nombre VARCHAR(255),
+                destino_id VARCHAR(50),
+                destino_nombre VARCHAR(255),
+                prendas TEXT,
+                notas TEXT,
+                fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Insert traslado
+        const [result] = await pool.execute(`
+            INSERT INTO DOTACION_TRASLADOS (origen_id, origen_nombre, destino_id, destino_nombre, prendas, notas)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [String(origenId), origenNombre, String(destinoId), destinoNombre, prendasStr, notas || '']);
+        
+        return { success: true, insertId: result.insertId };
+    },
+
+    async getTraslados() {
+        const pool = require('../../config/db');
+        try {
+            const [rows] = await pool.query('SELECT * FROM DOTACION_TRASLADOS ORDER BY fecha DESC');
+            return rows;
+        } catch (err) {
+            // Si la tabla no existe aún, retornar vacío en vez de error
+            return [];
+        }
     },
 
     // ─────────────────────────────────────────────────────────────────────────

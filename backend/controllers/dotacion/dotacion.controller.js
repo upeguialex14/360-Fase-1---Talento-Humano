@@ -553,6 +553,16 @@ const createProviderOrder = async (req, res) => {
     }
 };
 
+const sendBulkProviderExcel = async (req, res) => {
+    try {
+        const result = await DotacionService.sendBulkProviderExcel(req.body);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error sendBulkProviderExcel:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 const receiveProviderOrder = async (req, res) => {
     try {
         const { id } = req.params;
@@ -597,6 +607,30 @@ const getAllSurveys = async (req, res) => {
         return res.status(200).json({ success: true, data });
     } catch (error) {
         console.error('Error getAllSurveys:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const registerTraslado = async (req, res) => {
+    try {
+        const { origenId, destinoId, origenNombre, destinoNombre, prendas, notas } = req.body;
+        if (!origenId || !destinoId) {
+            return res.status(400).json({ success: false, message: 'Se requiere origen y destino' });
+        }
+        const result = await DotacionService.registerTraslado(origenId, destinoId, origenNombre, destinoNombre, prendas, notas);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error registerTraslado:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getTraslados = async (req, res) => {
+    try {
+        const data = await DotacionService.getTraslados();
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error('Error getTraslados:', error);
         return res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -647,11 +681,15 @@ module.exports = {
     // Fase 5 — Proveedores
     getProviderOrders,
     createProviderOrder,
+    sendBulkProviderExcel,
     receiveProviderOrder,
     // Fase 5 — Encuestas
     submitSurvey,
     getSurveyStats,
-    getAllSurveys
+    getAllSurveys,
+    // Traslados y Reasignaciones
+    registerTraslado,
+    getTraslados
 };
 
 

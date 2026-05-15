@@ -1,0 +1,71 @@
+.floating-suri-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.floating-suri-container:hover {
+    transform: scale(1.1) translateY(-10px);
+    filter: drop-shadow(0 15px 30px rgba(255, 205, 4, 0.4));
+}
+
+.floating-suri-img {
+    width: 180px; /* Tamaño incrementado */
+    height: auto;
+    display: block;
+}
+
+.suri-notification-badge {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 900;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    animation: pulseBadge 2s infinite;
+}
+
+.floating-suri-container.chat-active {
+    right: 640px; /* Se mueve a la izquierda de la ventana de chat */
+    transform: scale(0.9) translateY(0);
+    filter: drop-shadow(0 0 25px rgba(255, 205, 4, 0.6));
+}
+
+.animate-think {
+    animation: bounceIn 0.5s ease-out;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulseBadge {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}

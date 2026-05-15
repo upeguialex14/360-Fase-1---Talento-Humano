@@ -2,52 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Search, Download, UserPlus, X, Check, Plus, Box, Info } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { toast, Toaster } from 'sonner';
+import api from '../../services/api';
 import '../../styles/DotacionLiquidEther.css';
 
-const stockInicial = [
-  // ===== CAMISAS HOMBRE =====
-  { id: 1, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'XS', color: 'Azul', cantidad: 15 },
-  { id: 2, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'S', color: 'Azul', cantidad: 25 },
-  { id: 3, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'M', color: 'Azul', cantidad: 40 },
-  { id: 4, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'L', color: 'Azul', cantidad: 35 },
-  { id: 5, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'XL', color: 'Azul', cantidad: 30 },
-  { id: 6, tipoArticulo: 'Camisa', genero: 'Hombre', talla: 'XXL', color: 'Azul', cantidad: 20 },
-  // ===== CAMISAS MUJER =====
-  { id: 7, tipoArticulo: 'Camisa', genero: 'Mujer', talla: 'XS', color: 'Azul', cantidad: 18 },
-  { id: 8, tipoArticulo: 'Camisa', genero: 'Mujer', talla: 'S', color: 'Azul', cantidad: 28 },
-  { id: 9, tipoArticulo: 'Camisa', genero: 'Mujer', talla: 'M', color: 'Azul', cantidad: 35 },
-  { id: 10, tipoArticulo: 'Camisa', genero: 'Mujer', talla: 'L', color: 'Azul', cantidad: 22 },
-  { id: 11, tipoArticulo: 'Camisa', genero: 'Mujer', talla: 'XL', color: 'Azul', cantidad: 15 },
-  // ===== PANTALONES HOMBRE =====
-  { id: 12, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '28', color: 'Negro', cantidad: 12 },
-  { id: 13, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '30', color: 'Negro', cantidad: 25 },
-  { id: 14, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '32', color: 'Negro', cantidad: 38 },
-  { id: 15, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '34', color: 'Negro', cantidad: 32 },
-  { id: 16, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '36', color: 'Negro', cantidad: 28 },
-  { id: 17, tipoArticulo: 'Pantalón', genero: 'Hombre', talla: '38', color: 'Negro', cantidad: 18 },
-  // ===== PANTALONES MUJER =====
-  { id: 18, tipoArticulo: 'Pantalón', genero: 'Mujer', talla: '6', color: 'Negro', cantidad: 16 },
-  { id: 19, tipoArticulo: 'Pantalón', genero: 'Mujer', talla: '8', color: 'Negro', cantidad: 24 },
-  { id: 20, tipoArticulo: 'Pantalón', genero: 'Mujer', talla: '10', color: 'Negro', cantidad: 30 },
-  { id: 21, tipoArticulo: 'Pantalón', genero: 'Mujer', talla: '12', color: 'Negro', cantidad: 20 },
-  { id: 22, tipoArticulo: 'Pantalón', genero: 'Mujer', talla: '14', color: 'Negro', cantidad: 14 },
-  // ===== CAMISAS BLANCAS HOMBRE =====
-  { id: 23, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Hombre', talla: 'S', color: 'Blanco', cantidad: 20 },
-  { id: 24, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Hombre', talla: 'M', color: 'Blanco', cantidad: 30 },
-  { id: 25, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Hombre', talla: 'L', color: 'Blanco', cantidad: 25 },
-  // ===== CAMISAS BLANCAS MUJER =====
-  { id: 26, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Mujer', talla: 'S', color: 'Blanco', cantidad: 22 },
-  { id: 27, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Mujer', talla: 'M', color: 'Blanco', cantidad: 28 },
-  { id: 28, tipoArticulo: 'Camisa Blanca Manga Larga', genero: 'Mujer', talla: 'L', color: 'Blanco', cantidad: 18 },
-];
-
 export default function DotacionStock() {
-  const [stock, setStock] = useState(() => {
-    const saved = localStorage.getItem('multival_dotacion_stock');
-    return saved ? JSON.parse(saved) : stockInicial;
-  });
+  const [stock, setStock] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroGenero, setFiltroGenero] = useState('Todos');
@@ -61,14 +22,71 @@ export default function DotacionStock() {
   const [personaSelected, setPersonaSelected] = useState(null);
   const [personas, setPersonas] = useState([]);
 
-  useEffect(() => {
-    const savedPersonas = localStorage.getItem('multival_dotacion_reasignacion');
-    if (savedPersonas) setPersonas(JSON.parse(savedPersonas));
-  }, []);
+  // Estado Modal Nuevo Artículo / Carga Stock
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [masterItems, setMasterItems] = useState([]);
+  const [newItem, setNewItem] = useState({
+    item_id: '',
+    size: '',
+    quantity: 0
+  });
 
   useEffect(() => {
-    localStorage.setItem('multival_dotacion_stock', JSON.stringify(stock));
-  }, [stock]);
+    fetchInventory();
+    fetchPersonas();
+    fetchMasterItems();
+  }, []);
+
+  const fetchMasterItems = async () => {
+    try {
+      const response = await api.get('/dotacion/items');
+      if (response && response.success) {
+        setMasterItems(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching master items:', error);
+    }
+  };
+
+  const fetchInventory = async () => {
+    try {
+      const response = await api.get('/dotacion/inventory');
+      if (response && response.success) {
+        // Mapear los datos del backend al formato que usa la vista
+        const mappedStock = response.data.map(item => ({
+            id: item.item_id,
+            inventory_id: item.inventory_id,
+            tipoArticulo: item.item_name,
+            genero: item.item_name.toLowerCase().includes('mujer') || item.item_name.toLowerCase().includes('dama') ? 'Mujer' : 
+                   (item.item_name.toLowerCase().includes('hombre') || item.item_name.toLowerCase().includes('caballero') ? 'Hombre' : 'Unisex'),
+            talla: item.size,
+            cantidad: item.quantity_available,
+            color: 'N/A' // Si el backend no tiene color
+        }));
+        setStock(mappedStock);
+      }
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+      toast.error('Error al cargar el inventario real');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPersonas = async () => {
+    try {
+      const response = await api.get('/planta-operacion');
+      if (response && response.success) {
+        setPersonas(response.data.map(p => ({
+            id: p.people_id || p.id,
+            cedula: p.cedula || p.document_number || '',
+            nombresApellidos: p.nombres_apellidos || `${p.first_name || ''} ${p.last_name || ''}`.trim()
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching personas:', error);
+    }
+  };
 
   const stats = {
     totalHombre: stock.filter(i => i.genero === 'Hombre').reduce((s, i) => s + i.cantidad, 0),
@@ -97,16 +115,62 @@ export default function DotacionStock() {
     p.cedula.includes(searchPersona)
   );
 
-  const handleConfirmAsignacion = () => {
+  const handleConfirmAsignacion = async () => {
     if (!itemSelected || !personaSelected) return;
     if (cantidadAsignar > itemSelected.cantidad) {
       toast.error('No hay suficiente stock');
       return;
     }
-    const newStock = stock.map(s => s.id === itemSelected.id ? { ...s, cantidad: s.cantidad - cantidadAsignar } : s);
-    setStock(newStock);
-    toast.success(`Asignación completada`);
-    setShowModal(false);
+    
+    try {
+        // Enviar el ajuste de inventario al backend
+        const response = await api.post('/dotacion/inventory/adjust', {
+            item_id: itemSelected.id,
+            size: itemSelected.talla,
+            quantity: -Math.abs(cantidadAsignar),
+            reason: `Asignación manual a ${personaSelected.nombresApellidos}`
+        });
+
+        if (response.success) {
+            // Actualizar estado local inmediatamente
+            const newStock = stock.map(s => s.inventory_id === itemSelected.inventory_id ? { ...s, cantidad: s.cantidad - cantidadAsignar } : s);
+            setStock(newStock);
+            toast.success(`Asignación completada con éxito en BD`);
+            setShowModal(false);
+        } else {
+            toast.error('Error al guardar la asignación: ' + response.message);
+        }
+    } catch (error) {
+        toast.error('Error de conexión al asignar dotación');
+    }
+  };
+
+  const handleAddStock = async () => {
+    if (!newItem.item_id || !newItem.size || newItem.quantity <= 0) {
+        toast.error('Complete todos los campos correctamente');
+        return;
+    }
+
+    try {
+        // Usamos upsert o adjust dependiendo de si queremos sumar o setear. 
+        // Para "Carga de stock" usualmente es un ajuste positivo.
+        const response = await api.post('/dotacion/inventory/adjust', {
+            item_id: newItem.item_id,
+            size: newItem.size,
+            quantity: parseInt(newItem.quantity),
+            reason: 'Carga manual de stock inicial/reposición'
+        });
+
+        if (response.success) {
+            toast.success('Stock actualizado correctamente');
+            setShowAddModal(false);
+            fetchInventory();
+        } else {
+            toast.error('Error al actualizar stock: ' + response.message);
+        }
+    } catch (error) {
+        toast.error('Error de conexión');
+    }
   };
 
   return (
@@ -119,7 +183,7 @@ export default function DotacionStock() {
                     <h1>Stock de Dotación</h1>
                     <p>Gestión de inventario físico y asignaciones directas</p>
                 </div>
-                <Button onClick={() => {}} className="nexus-btn nexus-btn-primary"><Plus className="h-4 w-4" /> Nuevo Artículo</Button>
+                <Button onClick={() => setShowAddModal(true)} className="nexus-btn nexus-btn-primary"><Plus className="h-4 w-4" /> Nuevo Artículo / Carga</Button>
             </div>
         </header>
 
@@ -262,6 +326,44 @@ export default function DotacionStock() {
             <div className="flex gap-4 mt-10">
                 <Button variant="outline" onClick={() => setShowModal(false)} className="nexus-btn nexus-btn-ghost flex-1">Cancelar</Button>
                 <Button disabled={!personaSelected} onClick={handleConfirmAsignacion} className="nexus-btn nexus-btn-primary flex-1">Confirmar</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="nexus-card w-full max-w-lg">
+            <header className="nexus-header mb-8">
+                <h2 className="text-[#FFCD04] font-black text-xl uppercase">Cargar Stock / Nuevo</h2>
+                <p className="text-xs">Añada unidades al inventario existente o cree uno nuevo</p>
+            </header>
+            
+            <div className="space-y-6">
+                <div className="nexus-form-group">
+                    <label>Tipo de Prenda</label>
+                    <select className="nexus-input" value={newItem.item_id} onChange={e => setNewItem({...newItem, item_id: e.target.value})}>
+                        <option value="">Seleccione prenda...</option>
+                        {masterItems.map(m => (
+                            <option key={m.item_id} value={m.item_id}>{m.item_name} ({m.category})</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="nexus-form-group">
+                    <label>Talla</label>
+                    <Input placeholder="Ej: M, 32, XL..." value={newItem.size} onChange={e => setNewItem({...newItem, size: e.target.value})} className="nexus-input" />
+                </div>
+
+                <div className="nexus-form-group">
+                    <label>Cantidad a Sumar</label>
+                    <Input type="number" min="1" value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} className="nexus-input" />
+                </div>
+            </div>
+
+            <div className="flex gap-4 mt-10">
+                <Button variant="outline" onClick={() => setShowAddModal(false)} className="nexus-btn nexus-btn-ghost flex-1">Cancelar</Button>
+                <Button onClick={handleAddStock} className="nexus-btn nexus-btn-primary flex-1">Cargar Inventario</Button>
             </div>
           </div>
         </div>

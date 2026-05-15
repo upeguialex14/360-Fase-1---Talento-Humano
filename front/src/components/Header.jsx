@@ -11,7 +11,7 @@ const Header = () => {
         <header className="header hologram-panel" style={{ backgroundColor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="header-container" style={{ justifyContent: 'center' }}>
                 <Link to="/" className="logo header-logo-link">
-                    <img src={logoTH} alt="Talento Humano 360" className="header-logo-image" style={{ height: '120px', width: 'auto' }} />
+                    <img src={logoTH} alt="Talento Humano 360" className="header-logo-image" style={{ height: '80px', width: 'auto' }} />
                     <h1 className="header-brand-title">TalentoHumano360</h1>
                 </Link>
             </div>

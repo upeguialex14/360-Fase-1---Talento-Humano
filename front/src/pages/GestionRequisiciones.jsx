@@ -130,10 +130,25 @@ const GestionRequisiciones = () => {
     // Modal de detalles
     const [selectedReq, setSelectedReq] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('general'); // 'general', 'candidatos', 'historial'
+    const [historial, setHistorial] = useState([]);
+    const [candidatos, setCandidatos] = useState([]);
+    const [loadingDetails, setLoadingDetails] = useState(false);
     
     // Estadísticas
     const [estadisticas, setEstadisticas] = useState(null);
     const [analistas, setAnalistas] = useState([]);
+    
+    // Formulario de candidatos
+    const [showCandidateForm, setShowCandidateForm] = useState(false);
+    const [candidateData, setCandidateData] = useState({
+        nombre_candidato: '',
+        cedula: '',
+        telefono: '',
+        correo: '',
+        estado: 'Enviado a Selección',
+        resultado_entrevista: ''
+    });
 
     const pageAccess = user?.pages?.find(p => p.page_code === 'GESTION_REQUISICIONES');
     const canEdit = pageAccess?.can_edit === 1 || user?.role_id === 1;
@@ -253,10 +268,57 @@ const GestionRequisiciones = () => {
         }
     };
 
-    // Abrir modal de detalles
-    const openDetails = (req) => {
+    // Abrir modal de detalles y cargar datos adicionales
+    const openDetails = async (req) => {
         setSelectedReq(req);
         setShowModal(true);
+        setActiveTab('general');
+        setShowCandidateForm(false); // Reset form state
+        
+        setLoadingDetails(true);
+        try {
+            const [histRes, candRes] = await Promise.all([
+                api.get(`/requisiciones/${req.id}/historial`),
+                api.get(`/requisiciones/${req.id}/candidatos`)
+            ]);
+            
+            if (histRes.success) setHistorial(histRes.data);
+            if (candRes.success) setCandidatos(candRes.data);
+        } catch (err) {
+            console.error('Error cargando detalles adicionales:', err);
+        } finally {
+            setLoadingDetails(false);
+        }
+    };
+
+    // Registrar candidato
+    const handleSubmitCandidato = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await api.post(`/requisiciones/${selectedReq.id}/candidatos`, candidateData);
+            if (res.success) {
+                // Refrescar lista de candidatos e historial
+                const [histRes, candRes] = await Promise.all([
+                    api.get(`/requisiciones/${selectedReq.id}/historial`),
+                    api.get(`/requisiciones/${selectedReq.id}/candidatos`)
+                ]);
+                if (histRes.success) setHistorial(histRes.data);
+                if (candRes.success) setCandidatos(candRes.data);
+                
+                // Limpiar formulario
+                setShowCandidateForm(false);
+                setCandidateData({
+                    nombre_candidato: '',
+                    cedula: '',
+                    telefono: '',
+                    correo: '',
+                    estado: 'Enviado a Selección',
+                    resultado_entrevista: ''
+                });
+            }
+        } catch (err) {
+            console.error('Error registrando candidato:', err);
+        }
     };
 
     // Formatear fecha
@@ -368,6 +430,7 @@ const GestionRequisiciones = () => {
                             <thead>
                                 <tr>
                                     <th>N° Req</th>
+                                    <th>Gestión</th>
                                     <th>F. Llegada</th>
                                     <th>Mes</th>
                                     <th>Empresa</th>
@@ -387,7 +450,6 @@ const GestionRequisiciones = () => {
                                     <th>D. Mora</th>
                                     <th>% Cump.</th>
                                     {isAdminOrLider && <th>Asignar Analista</th>}
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -407,6 +469,15 @@ const GestionRequisiciones = () => {
                                     requisiciones.map((req, index) => (
                                         <tr key={req.id} className={index % 2 === 0 ? 'row-even' : 'row-odd'}>
                                             <td className="codigo-req">{req.codigo_req}</td>
+                                            <td>
+                                                <button 
+                                                    className="btn-export" 
+                                                    style={{ padding: '5px 10px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                                                    onClick={() => openDetails(req)}
+                                                >
+                                                    Gestionar
+                                                </button>
+                                            </td>
                                             <td>{formatDate(req.fecha_llegada)}</td>
                                             <td>{req.mes || '-'}</td>
                                             <td>{req.empresa || '-'}</td>
@@ -481,11 +552,6 @@ const GestionRequisiciones = () => {
                                                     </select>
                                                 </td>
                                             )}
-                                            <td>
-                                                <button className="btn-details" onClick={() => openDetails(req)}>
-                                                    {Icons.eye}
-                                                </button>
-                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -646,144 +712,273 @@ const GestionRequisiciones = () => {
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Detalles de Requisición</h2>
+                            <div>
+                                <h2>{selectedReq.codigo_req} - {selectedReq.cargo}</h2>
+                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                                    {selectedReq.cliente} | {selectedReq.regional}
+                                </p>
+                            </div>
                             <button className="modal-close" onClick={() => setShowModal(false)}>
                                 {Icons.close}
                             </button>
                         </div>
+
+                        <div className="tabs-navigation">
+                            <button 
+                                className={`tab-btn ${activeTab === 'general' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('general')}
+                            >
+                                Información General
+                            </button>
+                            <button 
+                                className={`tab-btn ${activeTab === 'candidatos' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('candidatos')}
+                            >
+                                Candidatos ({candidatos.length})
+                            </button>
+                            <button 
+                                className={`tab-btn ${activeTab === 'historial' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('historial')}
+                            >
+                                Historial y Trazabilidad
+                            </button>
+                        </div>
                         
                         <div className="modal-body">
-                            <div className="detail-section">
-                                <h3>Información General</h3>
-                                <div className="detail-grid">
-                                    <div className="detail-item">
-                                        <label>N° Requisición</label>
-                                        <span>{selectedReq.codigo_req}</span>
+                            {activeTab === 'general' && (
+                                <>
+                                    <div className="detail-section">
+                                        <h3>Información de la Requisición</h3>
+                                        <div className="detail-grid">
+                                            <div className="detail-item">
+                                                <label>N° Requisición</label>
+                                                <span>{selectedReq.codigo_req}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Fecha de Llegada</label>
+                                                <span>{formatDate(selectedReq.fecha_llegada)}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Mes</label>
+                                                <span>{selectedReq.mes || '-'}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Estado Actual</label>
+                                                <span className="estado-tag" style={{ backgroundColor: getEstadoColor(selectedReq.estado) }}>
+                                                    {selectedReq.estado}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="detail-item">
-                                        <label>Fecha de Llegada</label>
-                                        <span>{formatDate(selectedReq.fecha_llegada)}</span>
+                                    
+                                    <div className="detail-section">
+                                        <h3>Datos del Cliente y Ubicación</h3>
+                                        <div className="detail-grid">
+                                            <div className="detail-item">
+                                                <label>Empresa</label>
+                                                <span>{selectedReq.empresa || '-'}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Cliente</label>
+                                                <span>{selectedReq.cliente || '-'}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Regional</label>
+                                                <span>{selectedReq.regional || '-'}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Ciudad / Oficina</label>
+                                                <span>{selectedReq.ciudad} - {selectedReq.oficina}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="detail-item">
-                                        <label>Mes</label>
-                                        <span>{selectedReq.mes || '-'}</span>
+                                    
+                                    <div className="detail-section">
+                                        <h3>Especificaciones</h3>
+                                        <div className="detail-grid">
+                                            <div className="detail-item">
+                                                <label>Cargo</label>
+                                                <span>{selectedReq.cargo}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Vacantes</label>
+                                                <span>{selectedReq.cantidad}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Tipo de Contrato</label>
+                                                <span>{selectedReq.tipo_contrato || 'No definido'}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <label>Solicitante</label>
+                                                <span>{selectedReq.solicitante_nombre || '-'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="detail-full">
+                                            <label>Justificación / Detalle</label>
+                                            <p>{selectedReq.justificacion || 'Sin justificación'}</p>
+                                            {selectedReq.detalle && <p style={{ marginTop: '0.5rem' }}>{selectedReq.detalle}</p>}
+                                        </div>
                                     </div>
-                                    <div className="detail-item">
-                                        <label>Estado</label>
-                                        <span className="estado-tag" style={{ backgroundColor: getEstadoColor(selectedReq.estado) }}>
-                                            {selectedReq.estado}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="detail-section">
-                                <h3>Datos del Cliente</h3>
-                                <div className="detail-grid">
-                                    <div className="detail-item">
-                                        <label>Empresa</label>
-                                        <span>{selectedReq.empresa || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Cliente</label>
-                                        <span>{selectedReq.cliente || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Regional</label>
-                                        <span>{selectedReq.regional || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Unidad de Negocio</label>
-                                        <span>{selectedReq.unidad_negocio || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Zona</label>
-                                        <span>{selectedReq.zona || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Oficina</label>
-                                        <span>{selectedReq.oficina || '-'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Ciudad</label>
-                                        <span>{selectedReq.ciudad || '-'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="detail-section">
-                                <h3>Detalles de la Vacante</h3>
-                                <div className="detail-grid">
-                                    <div className="detail-item">
-                                        <label>Cargo Solicitado</label>
-                                        <span>{selectedReq.cargo}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Cantidad</label>
-                                        <span>{selectedReq.cantidad}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Tipo de Contrato</label>
-                                        <span>{selectedReq.tipo_contrato || 'Sin asignar'}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Justificación</label>
-                                        <span>{selectedReq.justificacion || '-'}</span>
-                                    </div>
-                                </div>
-                                <div className="detail-full">
-                                    <label>Detalle</label>
-                                    <p>{selectedReq.detalle || 'Sin detalle'}</p>
-                                </div>
-                            </div>
-                            
-                            <div className="detail-section">
-                                <h3>Métricas</h3>
-                                <div className="detail-grid">
-                                    <div className="detail-item">
-                                        <label>Días Hábiles</label>
-                                        <span>{selectedReq.dias_habiles || 0}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>Días de Mora</label>
-                                        <span className={selectedReq.dias_mora > 0 ? 'text-danger' : ''}>
-                                            {selectedReq.dias_mora || 0}
-                                        </span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <label>% Cumplimiento</label>
-                                        <span>{selectedReq.porcentaje_cumplimiento || 100}%</span>
-                                    </div>
-                                    {isAdminOrLider && (
-                                        <div className="detail-item">
-                                            <label>Analista Asignado</label>
-                                            <span>{selectedReq.analista_asignado_nombre || 'Sin asignar'}</span>
+
+                                    {(selectedReq.hoja_vida_path || selectedReq.aprobacion_path) && (
+                                        <div className="detail-section">
+                                            <h3>Documentos</h3>
+                                            <div className="documents-list">
+                                                {selectedReq.hoja_vida_path && (
+                                                    <div className="document-item">
+                                                        <span className="doc-icon">{Icons.file}</span>
+                                                        <span className="doc-name">Perfil / Hoja de Vida</span>
+                                                        <button className="doc-btn">{Icons.eye} Ver</button>
+                                                    </div>
+                                                )}
+                                                {selectedReq.aprobacion_path && (
+                                                    <div className="document-item">
+                                                        <span className="doc-icon">{Icons.file}</span>
+                                                        <span className="doc-name">Aprobación Presupuesto</span>
+                                                        <button className="doc-btn">{Icons.eye} Ver</button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
-                                </div>
-                            </div>
-                            
-                            {(selectedReq.hoja_vida_path || selectedReq.aprobacion_path) && (
-                                <div className="detail-section">
-                                    <h3>Documentos Adjuntos</h3>
-                                    <div className="documents-list">
-                                        {selectedReq.hoja_vida_path && (
-                                            <div className="document-item">
-                                                <span className="doc-icon">{Icons.file}</span>
-                                                <span className="doc-name">Hoja de Vida</span>
-                                                <button className="doc-btn">{Icons.eye} Ver</button>
-                                                <button className="doc-btn">{Icons.downloadFile} Descargar</button>
-                                            </div>
-                                        )}
-                                        {selectedReq.aprobacion_path && (
-                                            <div className="document-item">
-                                                <span className="doc-icon">{Icons.file}</span>
-                                                <span className="doc-name">Aprobación de Recurso</span>
-                                                <button className="doc-btn">{Icons.eye} Ver</button>
-                                                <button className="doc-btn">{Icons.downloadFile} Descargar</button>
-                                            </div>
+                                </>
+                            )}
+
+                            {activeTab === 'candidatos' && (
+                                <div className="candidates-view">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                        <h3 style={{ margin: 0 }}>Candidatos Postulados</h3>
+                                        {!showCandidateForm && (
+                                            <button 
+                                                className="btn-export" 
+                                                style={{ padding: '0.4rem 0.8rem' }}
+                                                onClick={() => setShowCandidateForm(true)}
+                                            >
+                                                + Añadir Candidato
+                                            </button>
                                         )}
                                     </div>
+                                    
+                                    {showCandidateForm ? (
+                                        <form className="candidate-form" onSubmit={handleSubmitCandidato} style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+                                            <h4 style={{ margin: '0 0 1rem 0', color: '#1e293b' }}>Nuevo Candidato</h4>
+                                            <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <label>Nombre Completo*</label>
+                                                    <input 
+                                                        type="text" 
+                                                        required
+                                                        className="filter-select" 
+                                                        style={{ width: '100%' }}
+                                                        value={candidateData.nombre_candidato}
+                                                        onChange={(e) => setCandidateData({...candidateData, nombre_candidato: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="detail-item">
+                                                    <label>Cédula</label>
+                                                    <input 
+                                                        type="text" 
+                                                        className="filter-select" 
+                                                        style={{ width: '100%' }}
+                                                        value={candidateData.cedula}
+                                                        onChange={(e) => setCandidateData({...candidateData, cedula: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="detail-item">
+                                                    <label>Teléfono</label>
+                                                    <input 
+                                                        type="text" 
+                                                        className="filter-select" 
+                                                        style={{ width: '100%' }}
+                                                        value={candidateData.telefono}
+                                                        onChange={(e) => setCandidateData({...candidateData, telefono: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="detail-item">
+                                                    <label>Correo Electrónico</label>
+                                                    <input 
+                                                        type="email" 
+                                                        className="filter-select" 
+                                                        style={{ width: '100%' }}
+                                                        value={candidateData.correo}
+                                                        onChange={(e) => setCandidateData({...candidateData, correo: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="detail-item">
+                                                    <label>Estado Inicial</label>
+                                                    <select 
+                                                        className="filter-select" 
+                                                        style={{ width: '100%' }}
+                                                        value={candidateData.estado}
+                                                        onChange={(e) => setCandidateData({...candidateData, estado: e.target.value})}
+                                                    >
+                                                        <option>Enviado a Selección</option>
+                                                        <option>Citado a Entrevista</option>
+                                                        <option>En Pruebas</option>
+                                                        <option>Finalista</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+                                                <button type="button" className="doc-btn" onClick={() => setShowCandidateForm(false)}>Cancelar</button>
+                                                <button type="submit" className="btn-export">Guardar Candidato</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            {loadingDetails ? (
+                                                <p>Cargando candidatos...</p>
+                                            ) : candidatos.length === 0 ? (
+                                                <div className="no-data">No hay candidatos registrados para esta requisición.</div>
+                                            ) : (
+                                                <div className="candidates-grid">
+                                                    {candidatos.map(cand => (
+                                                        <div key={cand.id} className="candidate-card">
+                                                            <span className="candidate-name">{cand.nombre_candidato}</span>
+                                                            <div className="candidate-info">
+                                                                <span><strong>Cédula:</strong> {cand.cedula || 'N/A'}</span>
+                                                                <span><strong>Teléfono:</strong> {cand.telefono || 'N/A'}</span>
+                                                                <span><strong>Estado:</strong> <span style={{ color: '#2563eb', fontWeight: 600 }}>{cand.estado}</span></span>
+                                                            </div>
+                                                            <div className="candidate-actions">
+                                                                <button className="doc-btn">Perfil</button>
+                                                                <button className="doc-btn">Entrevista</button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'historial' && (
+                                <div className="history-view">
+                                    <h3>Línea de Tiempo de Gestión</h3>
+                                    {loadingDetails ? (
+                                        <p>Cargando historial...</p>
+                                    ) : historial.length === 0 ? (
+                                        <div className="no-data">No hay registros de actividad.</div>
+                                    ) : (
+                                        <div className="history-timeline">
+                                            {historial.map(item => (
+                                                <div key={item.id} className="history-item">
+                                                    <div className="history-icon">
+                                                        <div style={{ width: 8, height: 8, background: 'white', borderRadius: '50%' }} />
+                                                    </div>
+                                                    <div className="history-content">
+                                                        <div className="history-header">
+                                                            <span className="history-action">{item.accion}</span>
+                                                            <span className="history-date">{new Date(item.created_at).toLocaleString()}</span>
+                                                        </div>
+                                                        <p className="history-desc">{item.observacion}</p>
+                                                        <span className="history-user">Realizado por: {item.user_nombre}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

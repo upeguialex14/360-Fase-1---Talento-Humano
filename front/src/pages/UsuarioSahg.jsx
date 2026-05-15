@@ -10,13 +10,12 @@ const UsuarioSahg = () => {
         const fetchSahgUsers = async () => {
             setLoading(true);
             try {
-                // Por ahora usamos datos simulados ya que el backend de SAHG está pendiente
-                const mockData = [
-                    { id: 1, username: 'anieto_sahg', firstname: 'Alex', lastname: 'Nieto', status: 'Activo', last_login: '2026-05-10 09:45' },
-                    { id: 2, username: 'mlopez_sahg', firstname: 'Maria', lastname: 'Lopez', status: 'Activo', last_login: '2026-05-11 11:20' },
-                    { id: 3, username: 'jramirez_sahg', firstname: 'Juan', lastname: 'Ramirez', status: 'Inactivo', last_login: '2026-04-28 15:30' },
-                ];
-                setSahgUsers(mockData);
+                const response = await api.get('/planta-operacion');
+                if (response && response.success) {
+                    // Filtramos solo los que tienen usuario_ad (son los de SAHG/AD)
+                    const users = response.data.filter(u => u.usuario_ad);
+                    setSahgUsers(users);
+                }
             } catch (error) {
                 console.error('Error fetching Sahg users:', error);
             } finally {
@@ -28,9 +27,9 @@ const UsuarioSahg = () => {
     }, []);
 
     const filteredUsers = sahgUsers.filter(user => 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.lastname.toLowerCase().includes(searchTerm.toLowerCase())
+        (user.usuario_ad && user.usuario_ad.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.nombre && user.nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.cedula && user.cedula.toString().includes(searchTerm))
     );
 
     return (
@@ -163,31 +162,37 @@ const UsuarioSahg = () => {
                         <table className="sahg-table">
                             <thead>
                                 <tr>
-                                    <th>Usuario</th>
+                                    <th>Usuario AD (Cédula)</th>
                                     <th>Nombre Completo</th>
+                                    <th>Cargo</th>
+                                    <th>Contraseña (Hash)</th>
                                     <th>Estado</th>
-                                    <th>Última Sesión</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredUsers.map(user => (
-                                    <tr key={user.id}>
+                                    <tr key={user.id_planta}>
                                         <td>
-                                            <span style={{ color: '#FFCD04', fontWeight: '600' }}>@{user.username}</span>
+                                            <span style={{ color: '#FFCD04', fontWeight: '600' }}>@{user.usuario_ad}</span>
                                         </td>
                                         <td>
                                             <div className="name-cell">
-                                                <div className="user-avatar">{user.firstname[0]}{user.lastname[0]}</div>
-                                                {user.firstname} {user.lastname}
+                                                <div className="user-avatar">{user.nombre ? user.nombre[0] : 'U'}</div>
+                                                {user.nombre}
                                             </div>
                                         </td>
+                                        <td>{user.cargo}</td>
                                         <td>
-                                            <span className={`status-badge ${user.status.toLowerCase()}`}>
-                                                {user.status}
+                                            <code style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                                $2b$10$K9tZ8w... (Encrypted)
+                                            </code>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${(user.status || 'ACTIVO').toLowerCase()}`}>
+                                                {user.status || 'ACTIVO'}
                                             </span>
                                         </td>
-                                        <td>{user.last_login}</td>
                                         <td>
                                             <button style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⋮</button>
                                         </td>

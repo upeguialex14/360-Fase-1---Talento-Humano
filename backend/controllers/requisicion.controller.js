@@ -212,6 +212,10 @@ exports.update = async (req, res) => {
         const { id } = req.params;
         const data = req.body;
         
+        // Obtener estado anterior para el historial
+        const requisicionAnterior = await Requisicion.getById(id);
+        const estadoAnterior = requisicionAnterior ? requisicionAnterior.estado : null;
+
         const success = await Requisicion.update(id, data);
         
         if (!success) {
@@ -219,6 +223,24 @@ exports.update = async (req, res) => {
                 success: false,
                 message: 'Error al actualizar la requisición'
             });
+        }
+
+        // Registrar historial si hubo cambio de estado o asignación
+        if (data.estado || data.analista_asignado_id) {
+            let accion = 'ACTUALIZACION';
+            let observacion = 'Se actualizaron datos de la requisición';
+
+            if (data.estado && data.estado !== estadoAnterior) {
+                accion = 'CAMBIO_ESTADO';
+                observacion = `Cambio de estado: ${estadoAnterior} -> ${data.estado}`;
+            }
+
+            if (data.analista_asignado_id) {
+                accion = 'ASIGNACION';
+                observacion = `Se asignó un analista a la requisición`;
+            }
+
+            await Requisicion.registrarHistorial(id, req.user.user_id, accion, estadoAnterior, data.estado || estadoAnterior, observacion);
         }
         
         res.json({
@@ -356,5 +378,57 @@ exports.exportarCSV = async (req, res) => {
             success: false,
             message: 'Error al exportar el CSV'
         });
+    }
+};
+
+// --- Endpoints de Historial ---
+
+exports.getHistorial = async (req, res) => {
+    try {
+        const historial = await Requisicion.getHistorial(req.params.id);
+        res.json({ success: true, data: historial });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// --- Endpoints de Candidatos ---
+
+exports.addCandidato = async (req, res) => {
+    try {
+        const requisicionId = req.params.id;
+        console.log('[RequisicionController] Adding candidate to requisition:', requisicionId);
+        
+        const data = { 
+            ...req.body, 
+            requisicion_id: requisicionId 
+        };
+        
+        const insertId = await Requisicion.addCandidato(data);
+        
+        if (insertId) {
+            // Registrar en historial
+            await Requisicion.registrarHistorial(requisicionId, req.user.user_id, 'ADICION_CANDIDATO', null, null, `Se añadió al candidato: ${data.nombre_candidato}`);
+            
+            return res.status(201).json({ 
+                success: true, 
+                data: { id: insertId }, 
+                message: 'Candidato añadido con éxito' 
+            });
+        } else {
+            return res.status(400).json({ success: false, message: 'No se pudo añadir al candidato en la base de datos' });
+        }
+    } catch (err) {
+        console.error('[RequisicionController] Error in addCandidato:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.getCandidatos = async (req, res) => {
+    try {
+        const candidatos = await Requisicion.getCandidatos(req.params.id);
+        res.json({ success: true, data: candidatos });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 };

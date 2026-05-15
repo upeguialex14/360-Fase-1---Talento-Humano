@@ -205,6 +205,7 @@ const PARAMETRIZACION_ROUTES = [
 // Rutas que pertenecen al menú de Formularios
 const FORMULARIOS_ROUTES = [
     '/home/documentacion',
+    '/home/gestion-documentacion',
     '/home/vacaciones'
 ];
 
@@ -418,7 +419,7 @@ const Sidebar = () => {
                     <li>
                         <NavLink to="/home" end className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
                             <span className="sidebar-icon">{Icons.home}</span>
-                            Inicio / Dashboard
+                            Inicio
                         </NavLink>
                     </li>
 
@@ -520,6 +521,11 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/home/documentacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.fileText}</span> Documentación
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/gestion-documentacion" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.fileText}</span> Gestión de Documentación
                                     </NavLink>
                                 </li>
                                 <li>

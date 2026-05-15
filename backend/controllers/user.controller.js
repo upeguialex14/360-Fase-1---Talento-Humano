@@ -122,4 +122,14 @@ const createUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, getUser, updateUserPassword, updateUser, createUser };
+const getIntercomunicadorContacts = async (req, res) => {
+    try {
+        const contacts = await userService.getIntercomunicadorContacts();
+        res.json({ success: true, data: contacts });
+    } catch (error) {
+        console.error('[UserController] Get intercomunicador contacts error:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener contactos' });
+    }
+};
+
+module.exports = { getUsers, getUser, updateUserPassword, updateUser, createUser, getIntercomunicadorContacts };

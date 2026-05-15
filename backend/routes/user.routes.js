@@ -13,4 +13,7 @@ router.put('/:userId/change-password', verifyToken, checkPageAccess('USUARIOS', 
 // Crear usuario (requiere token y acceso de edición)
 router.post('/', verifyToken, checkPageAccess('USUARIOS', 'can_edit'), userController.createUser);
 
+// Obtener contactos para el intercomunicador (requiere token)
+router.get('/intercomunicador/contacts', verifyToken, userController.getIntercomunicadorContacts);
+
 module.exports = router;

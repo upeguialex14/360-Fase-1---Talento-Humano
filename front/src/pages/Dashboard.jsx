@@ -1,21 +1,48 @@
-/**
- * Página de Dashboard General
- * Panel principal del sistema con estética premium
- */
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { 
+    Users, 
+    FileText, 
+    Target, 
+    Package, 
+    Factory, 
+    TrendingUp, 
+    Activity, 
+    Building2,
+    Clock
+} from 'lucide-react';
+import { 
+    Chart as ChartJS, 
+    ArcElement, 
+    Tooltip, 
+    Legend, 
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    Title,
+    PointElement,
+    LineElement,
+    Filler
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import './Dashboard.css';
 
+ChartJS.register(
+    ArcElement, 
+    Tooltip, 
+    Legend, 
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    Title,
+    PointElement,
+    LineElement,
+    Filler
+);
+
 const Dashboard = () => {
-    const [stats, setStats] = useState({
-        totalWorkers: 0,
-        activeWorkers: 0,
-        inactiveWorkers: 0,
-        companiesCount: 0,
-        excelLoads: 4, // Mock until we have history
-    });
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [cargas, setCargas] = useState([]);
 
     useEffect(() => {
         fetchDashboardData();
@@ -24,36 +51,10 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/etl/base-datos');
-            
+            const response = await api.get('/main-dashboard/stats');
             if (response && response.success) {
-                const workers = response.data || [];
-                const active = workers.filter(w => w.estado?.toLowerCase() === 'activo').length;
-                const inactive = workers.length - active;
-                
-                // Extract unique companies
-                const companies = [...new Set(workers.map(w => w.empresa).filter(Boolean))];
-                
-                setStats({
-                    totalWorkers: workers.length,
-                    activeWorkers: active,
-                    inactiveWorkers: inactive,
-                    companiesCount: companies.length,
-                    excelLoads: 12, // Mocked for now
-                });
-
-                // Mocking some chart data based on real data
-                // This could be improved with real grouping from backend
+                setStats(response.data);
             }
-
-            // Mocked cargas excel for the table
-            setCargas([
-                { date: new Date().toLocaleDateString(), user: 'admin', records: 156, status: 'Completado' },
-                { date: '2026-04-28', user: 'system', records: 42, status: 'Completado' },
-                { date: '2026-04-25', user: 'admin', records: 89, status: 'Completado' },
-                { date: '2026-04-20', user: 'maria_th', records: 210, status: 'Error' },
-            ]);
-
         } catch (err) {
             console.error("Error loading dashboard data:", err);
         } finally {
@@ -61,124 +62,192 @@ const Dashboard = () => {
         }
     };
 
+    if (loading || !stats) {
+        return (
+            <div className="dashboard-loading">
+                <div className="loader-ring"><div></div><div></div><div></div><div></div></div>
+                <p>Sincronizando Sistema Nexus 360...</p>
+            </div>
+        );
+    }
+
     const cards = [
-        { title: 'Total Trabajadores', value: stats.totalWorkers, icon: '👥', trend: '+12%', up: true },
-        { title: 'Activos', value: stats.activeWorkers, icon: '✅', trend: '+5%', up: true },
-        { title: 'Inactivos', value: stats.inactiveWorkers, icon: '⛔', trend: '-2%', up: false },
-        { title: 'Aliados/Empresas', value: stats.companiesCount, icon: '🏢', trend: '+1', up: true },
-        { title: 'Cargas Realizadas', value: stats.excelLoads, icon: '📊', trend: 'Hoy', up: true },
+        { 
+            title: 'Talento Humano', 
+            value: stats.empleados.total, 
+            subtitle: `${stats.empleados.activos} Colaboradores Activos`,
+            icon: <Users size={24} />, 
+            color: 'blue',
+            badge: `${stats.empleados.empresas} Empresas`
+        },
+        { 
+            title: 'Vinculaciones', 
+            value: stats.vinculaciones.total, 
+            subtitle: `${stats.vinculaciones.pendientes} En revisión técnica`,
+            icon: <FileText size={24} />, 
+            color: 'orange',
+            badge: 'Fase de Ingreso'
+        },
+        { 
+            title: 'Vacantes Activas', 
+            value: (stats.requisiciones.recibido || 0) + (stats.requisiciones.en_proceso || 0), 
+            subtitle: `${stats.requisiciones.completado || 0} Cubiertas este periodo`,
+            icon: <Target size={24} />, 
+            color: 'green',
+            badge: 'Reclutamiento'
+        },
+        { 
+            title: 'Inventario Dotación', 
+            value: stats.dotacion.stock_total, 
+            subtitle: `${stats.dotacion.entregas_pendientes} Pendientes de entrega`,
+            icon: <Package size={24} />, 
+            color: 'purple',
+            badge: 'Logística'
+        },
+        { 
+            title: 'Personal Planta', 
+            value: stats.planta.total, 
+            subtitle: 'Operación en sitio',
+            icon: <Factory size={24} />, 
+            color: 'cyan',
+            badge: 'Planta'
+        }
     ];
 
+    // Chart Data for Requisitions
+    const barData = {
+        labels: Object.keys(stats.requisiciones).filter(k => k !== 'total').map(k => k.replace(/_/g, ' ').toUpperCase()),
+        datasets: [{
+            label: 'Requisiciones por Estado',
+            data: Object.entries(stats.requisiciones).filter(([k]) => k !== 'total').map(([,v]) => v),
+            backgroundColor: 'rgba(0, 230, 89, 0.4)',
+            borderColor: '#00e659',
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(0, 230, 89, 0.6)',
+        }]
+    };
+
+    const doughnutData = {
+        labels: ['Completados', 'Pendientes'],
+        datasets: [{
+            data: [stats.vinculaciones.completados, stats.vinculaciones.pendientes],
+            backgroundColor: ['rgba(0, 230, 89, 0.6)', 'rgba(255, 145, 0, 0.4)'],
+            borderColor: ['#00e659', '#ff9100'],
+            borderWidth: 1,
+            hoverOffset: 10
+        }]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+            }
+        }
+    };
+
     return (
-        <div className="dashboard-page">
-            <header className="dashboard-header mb-8">
-                <h1 className="font-display text-neon-green text-4xl font-bold uppercase tracking-wider mb-2">Dashboard General</h1>
-                <p className="font-body text-[rgba(248,248,255,0.7)] text-lg">Bienvenido al centro de inteligencia de Talento Humano 360.</p>
+        <div className="dashboard-page custom-scrollbar">
+            <header className="dashboard-header">
+                <div className="header-left">
+                    <div className="status-indicator">
+                        <span className="pulse"></span>
+                        LIVE SYSTEM MONITORING
+                    </div>
+                    <h1>Centro de Inteligencia <span>360</span></h1>
+                    <p>Visualización analítica de procesos operativos y estratégicos.</p>
+                </div>
+                <div className="header-right">
+                    <div className="date-display">
+                        <Clock size={16} />
+                        {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                </div>
             </header>
 
-            <div className="cards-grid">
+            <div className="stats-grid">
                 {cards.map((card, idx) => (
-                    <div key={idx} className="stat-card hologram-panel font-body relative overflow-hidden" style={{ animationDelay: `${idx * 0.1}s`, animation: 'fadeInUp 0.6s ease-out both' }}>
-                        <div className="card-icon-wrapper text-3xl mb-3">{card.icon}</div>
-                        <div className="card-info">
-                            <span className="card-title text-sm text-[rgba(255,255,255,0.7)] uppercase tracking-widest">{card.title}</span>
-                            <span className="card-value font-display text-3xl font-bold text-white my-1 block">{loading ? '...' : card.value}</span>
-                            <div className={`card-trend ${card.up ? 'trend-up' : 'trend-down'}`}>
-                                <span>{card.up ? '↗' : '↘'} {card.trend}</span>
-                                <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>vs mes anterior</span>
+                    <div key={idx} className={`glass-card stat-item ${card.color}`} style={{ animationDelay: `${idx * 0.1}s` }}>
+                        <div className="card-top">
+                            <div className="icon-box">{card.icon}</div>
+                            <span className="card-badge">{card.badge}</span>
+                        </div>
+                        <div className="card-main">
+                            <h3>{card.title}</h3>
+                            <div className="value-row">
+                                <span className="main-value">{card.value}</span>
+                                <TrendingUp size={16} className="trend-icon" />
+                            </div>
+                            <p className="subtitle">{card.subtitle}</p>
+                        </div>
+                        <div className="card-progress">
+                            <div className="progress-bar">
+                                <div className="progress-fill" style={{ width: '70%' }}></div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="charts-grid">
-                <div className="chart-card hologram-panel font-body">
-                    <h3 className="font-display text-xl text-neon-green mb-4">📈 Evolución Mensual</h3>
-                    <div className="chart-container">
-                        {/* Custom Bar Chart */}
-                        <div className="bar-chart">
-                            {[40, 65, 55, 85, 70, 95].map((h, i) => (
-                                <div key={i} className="bar-item">
-                                    <div className="bar-fill" style={{ height: `${h}%` }}>
-                                        <span className="bar-label">{['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'][i]}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+            <div className="visual-section mt-8">
+                <div className="glass-card chart-container">
+                    <div className="chart-header">
+                        <Activity size={20} className="text-neon-green" />
+                        <h3>Distribución de Requisiciones</h3>
+                    </div>
+                    <div className="chart-body">
+                        <Bar data={barData} options={chartOptions} />
                     </div>
                 </div>
 
-                <div className="chart-card hologram-panel font-body">
-                    <h3 className="font-display text-xl text-neon-green mb-4">🎯 Distribución por Área</h3>
-                    <div className="chart-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {/* Simple CSS Circular Chart */}
-                        <div style={{
-                            width: '180px',
-                            height: '180px',
-                            borderRadius: '50%',
-                            background: 'conic-gradient(#FFCD04 0% 45%, #2A2A54 45% 75%, #4ade80 75% 100%)',
-                            position: 'relative',
-                            boxShadow: '0 0 30px rgba(255, 205, 4, 0.2)'
-                        }}>
-                            <div style={{
-                                position: 'absolute',
-                                inset: '25px',
-                                background: '#0b0f1a',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}>
-                                <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>{stats.totalWorkers}</span>
-                                <span style={{ fontSize: '0.6rem', opacity: 0.5 }}>TOTAL</span>
-                            </div>
-                        </div>
-                        <div style={{ marginLeft: '2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                                <div style={{ width: '12px', height: '12px', background: '#FFCD04', borderRadius: '3px' }} /> <span>Operaciones</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                                <div style={{ width: '12px', height: '12px', background: '#2A2A54', borderRadius: '3px' }} /> <span>Administración</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                                <div style={{ width: '12px', height: '12px', background: '#4ade80', borderRadius: '3px' }} /> <span>Otros</span>
-                            </div>
-                        </div>
+                <div className="glass-card chart-container doughnut-section">
+                    <div className="chart-header">
+                        <Building2 size={20} className="text-orange-400" />
+                        <h3>Efectividad de Vinculación</h3>
+                    </div>
+                    <div className="chart-body doughnut-wrap">
+                        <Doughnut data={doughnutData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)' } } } }} />
                     </div>
                 </div>
             </div>
 
-            <div className="table-card hologram-panel font-body mt-8">
-                <h3 className="font-display text-xl text-neon-green mb-4">📋 Últimas Cargas de Excel</h3>
-                <div className="custom-table-wrapper">
-                    <table className="custom-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Usuario</th>
-                                <th>Registros</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {cargas.map((carga, i) => (
-                                <tr key={i}>
-                                    <td>{carga.date}</td>
-                                    <td>{carga.user}</td>
-                                    <td>{carga.records}</td>
-                                    <td>
-                                        <span className={`status-badge ${carga.status === 'Completado' ? 'status-completed' : 'status-error'}`}>
-                                            {carga.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <footer className="dashboard-footer mt-8">
+                <div className="footer-card glass-card">
+                    <div className="footer-icon blue"><Building2 /></div>
+                    <div className="footer-text">
+                        <h4>{stats.empleados.empresas}</h4>
+                        <p>Empresas Aliadas</p>
+                    </div>
                 </div>
-            </div>
+                <div className="footer-card glass-card">
+                    <div className="footer-icon purple"><Package /></div>
+                    <div className="footer-text">
+                        <h4>{stats.dotacion.stock_total}</h4>
+                        <p>Ítems en Inventario</p>
+                    </div>
+                </div>
+                <div className="footer-card glass-card">
+                    <div className="footer-icon green"><Activity /></div>
+                    <div className="footer-text">
+                        <h4>Real-Time</h4>
+                        <p>Sincronización Activa</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };

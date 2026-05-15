@@ -10,6 +10,10 @@ const masiveUploadRoutes = require('./routes/etl/masiveUploadExcel.routes');
 const requisicionRoutes = require('./routes/requisicion.routes');
 const plantaOperacionRoutes = require('./routes/plantaOperacion.routes');
 const dotacionRoutes = require('./routes/dotacion/dotacion.routes');
+const solicitudVacanteRoutes = require('./routes/solicitudVacante.routes');
+const documentacionRoutes = require('./routes/documentacion.routes');
+const mainDashboardRoutes = require('./routes/mainDashboard.routes');
+const path = require('path');
 
 
 const app = express();
@@ -18,6 +22,9 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Servir archivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rutas
 app.use('/api/auth', authRoutes);
@@ -30,6 +37,9 @@ app.use('/api/etl', masiveUploadRoutes);
 app.use('/api/requisiciones', requisicionRoutes);
 app.use('/api/planta-operacion', plantaOperacionRoutes);
 app.use('/api/dotacion', dotacionRoutes);
+app.use('/api/solicitud-vacantes', solicitudVacanteRoutes);
+app.use('/api/documentacion', documentacionRoutes);
+app.use('/api/main-dashboard', mainDashboardRoutes);
 
 
 // Manejo básico de rutas no encontradas

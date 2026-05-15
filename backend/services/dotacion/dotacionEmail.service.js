@@ -2,10 +2,12 @@
  * Servicio de Notificaciones por Email para Dotación
  */
 let nodemailer;
+let xlsx;
 try {
     nodemailer = require('nodemailer');
+    xlsx = require('xlsx');
 } catch (e) {
-    console.warn('[DOTACION] Nodemailer no está instalado. Los correos se registrarán solo en consola.');
+    console.warn('[DOTACION] Nodemailer o xlsx no están instalados. Los correos se registrarán solo en consola.');
 }
 
 const DotacionEmailService = {
@@ -75,6 +77,70 @@ const DotacionEmailService = {
         } catch (error) {
             console.error('[DOTACION] Error enviando email real:', error);
             return { success: false, error: error.message, url: signUrl };
+        }
+    },
+
+    /**
+     * Envía la orden en formato Excel al proveedor
+     */
+    async sendProviderExcel(email, nombre, notas, jsonDatos) {
+        if (!xlsx || !nodemailer) {
+            console.log('--------------------------------------------------');
+            console.log(`📧 [EMAIL SIMULADO] Enviado a Proveedor: ${email}`);
+            console.log(`📎 Adjunto: Excel con ${jsonDatos.length} registros simulado.`);
+            console.log('--------------------------------------------------');
+            return { success: true, simulated: true };
+        }
+
+        try {
+            // 1. Crear el buffer del Excel
+            const ws = xlsx.utils.json_to_sheet(jsonDatos);
+            const wb = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(wb, ws, "Solicitudes Dotación");
+            const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+            const subject = `Nueva Orden de Dotación - Gestion365`;
+            const html = `
+                <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px;">
+                    <h2 style="color: #2c3e50;">Solicitud de Dotación</h2>
+                    <p>Hola <strong>${nombre}</strong>,</p>
+                    <p>Adjunto a este correo encontrará un archivo Excel con la nueva orden de dotación solicitada.</p>
+                    ${notas ? `<p><strong>Notas Adicionales:</strong><br>${notas.replace(/\\n/g, '<br>')}</p>` : ''}
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="font-size: 0.8em; color: #bdc3c7;">
+                        Este es un correo automático de Gestión 365.
+                    </p>
+                </div>
+            `;
+
+            // 2. Enviar el correo con el adjunto
+            const transporter = nodemailer.createTransport({
+                host: process.env.EMAIL_HOST,
+                port: process.env.EMAIL_PORT,
+                secure: process.env.EMAIL_SECURE === 'true',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            await transporter.sendMail({
+                from: `"Gestion365 Talentum" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: subject,
+                html: html,
+                attachments: [
+                    {
+                        filename: `Orden_Dotacion_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                        content: excelBuffer
+                    }
+                ]
+            });
+
+            return { success: true, sent: true };
+        } catch (error) {
+            console.error('[DOTACION] Error enviando Excel al proveedor:', error);
+            throw new Error('No se pudo enviar el correo al proveedor: ' + error.message);
         }
     }
 };

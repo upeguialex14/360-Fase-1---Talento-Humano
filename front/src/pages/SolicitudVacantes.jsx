@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import './SolicitudVacantes.css';
 
 // Opciones predefinidas para los campos del formulario
@@ -150,6 +151,7 @@ const SolicitudVacantes = () => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState('');
     const [files, setFiles] = useState({
         hojaVida: null,
         aprobacion: null
@@ -213,48 +215,66 @@ const SolicitudVacantes = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e, typeOverride = null) => {
+        if (e) e.preventDefault();
         
-        if (!validateForm()) {
+        // Determinar el tipo de acción: 'send' (por defecto si viene del submit del form) o 'draft'
+        const actionType = typeOverride || 'send';
+        
+        if (actionType === 'send' && !validateForm()) {
             return;
         }
 
         setIsSubmitting(true);
+        setErrors({});
 
         try {
-            // Enviar datos al backend para crear requisición
-            const res = await api.post('/requisiciones', {
+            const endpoint = '/solicitud-vacantes';
+            const payload = {
                 oficina: formData.oficina,
                 ciudad: formData.ciudad,
                 cargo: formData.cargo,
-                cantidad: parseInt(formData.cantidad),
+                cantidad: parseInt(formData.cantidad) || 0,
                 justificacion: formData.justificacion,
                 detalle: formData.detalle,
                 empresa: 'MULTIVAL',
                 tipo_contrato: null,
-                estado: 'Recibido'
-            });
+                estado: 'Borrador'
+            };
+
+            const res = await api.post(endpoint, payload);
 
             if (res.success) {
+                const newCode = res.data.codigo;
+                const newId = res.data.id;
+                setGeneratedCode(newCode);
+
+                // Si es enviar, llamar al endpoint de envío
+                if (actionType === 'send') {
+                    const sendRes = await api.post(`${endpoint}/${newId}/enviar`);
+                    if (!sendRes.success) {
+                        throw new Error(sendRes.message || 'Error al enviar la solicitud');
+                    }
+                }
+
                 setIsSubmitting(false);
                 setShowSuccess(true);
                 
                 // Limpiar formulario
                 handleReset();
                 
-                // Ocultar mensaje de éxito después de 5 segundos
+                // Ocultar mensaje de éxito después de 8 segundos para dar tiempo a ver el código
                 setTimeout(() => {
                     setShowSuccess(false);
-                }, 5000);
+                }, 8000);
             } else {
                 setIsSubmitting(false);
-                setErrors({ submit: res.message || 'Error al enviar la solicitud' });
+                setErrors({ submit: res.message || 'Error al procesar la solicitud' });
             }
         } catch (err) {
             setIsSubmitting(false);
             console.error('Error enviando solicitud:', err);
-            setErrors({ submit: 'Error al enviar la solicitud. Intente nuevamente.' });
+            setErrors({ submit: err.message || 'Error al enviar la solicitud. Intente nuevamente.' });
         }
     };
 
@@ -291,8 +311,8 @@ const SolicitudVacantes = () => {
                 <div className="success-alert">
                     <span className="success-icon">{Icons.check}</span>
                     <div className="success-content">
-                        <strong>Solicitud enviada con éxito</strong>
-                        <p>Un analista revisará tu requerimiento; recibirás respuesta en un plazo aproximado de 3 a 5 días hábiles.</p>
+                        <strong>Solicitud enviada con éxito {generatedCode && <span className="code-badge">{generatedCode}</span>}</strong>
+                        <p>Tu solicitud ha sido registrada bajo el código <b>{generatedCode}</b>. Un analista revisará tu requerimiento; recibirás respuesta en un plazo aproximado de 3 a 5 días hábiles.</p>
                     </div>
                     <button className="success-close" onClick={() => setShowSuccess(false)}>
                         {Icons.x}
@@ -507,6 +527,13 @@ const SolicitudVacantes = () => {
                     </div>
                 </div>
 
+                {errors.submit && (
+                    <div className="error-alert" style={{ background: '#fef2f2', color: '#ef4444', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                        <span>{errors.submit}</span>
+                    </div>
+                )}
+
                 <div className="form-actions">
                     <button 
                         type="button" 
@@ -516,24 +543,34 @@ const SolicitudVacantes = () => {
                         <span className="btn-icon">{Icons.trash}</span>
                         Limpiar Formulario
                     </button>
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                        disabled={isSubmitting || !canEdit}
-                        style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <span className="spinner"></span>
-                                Enviando...
-                            </>
-                        ) : (
-                            <>
-                                <span className="btn-icon">{Icons.send}</span>
-                                Enviar Solicitud
-                            </>
-                        )}
-                    </button>
+                    <div className="main-actions">
+                        <button 
+                            type="button" 
+                            className="btn btn-draft"
+                            onClick={() => handleSubmit(null, 'draft')}
+                            disabled={isSubmitting || !canEdit}
+                        >
+                            {isSubmitting ? 'Procesando...' : 'Guardar Borrador'}
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={isSubmitting || !canEdit}
+                            style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <span className="spinner"></span>
+                                    Enviando...
+                                </>
+                            ) : (
+                                <>
+                                    <span className="btn-icon">{Icons.send}</span>
+                                    Enviar Solicitud
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

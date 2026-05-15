@@ -31,8 +31,8 @@ const createPlantaOperacion = async (req, res) => {
         
         // Mapeo solicitado por negocio
         const revalUserData = {
-            username: usuario_ad || cedula,
-            firstname: usuario_ad || 'Usuario',
+            username: cedula, // Forzado a cédula según nuevo requerimiento
+            firstname: nombre_completo ? nombre_completo.split(' ')[0] : 'Usuario',
             lastname: 'AD',
             password: 'Temp123!', // Valor dummy según requerimiento
             ou_path: 'OU=Usuarios,OU=Sac,DC=reval,DC=local',

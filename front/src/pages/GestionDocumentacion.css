@@ -1,0 +1,347 @@
+/* Estilos para Gestión de Documentación Premium */
+.gestion-documentacion {
+    padding: 1.5rem;
+    max-width: 100%;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard de métricas */
+.docs-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.doc-stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: transform 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.doc-stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon-wrapper.total { background: #eef2ff; color: #4f46e5; }
+.stat-icon-wrapper.pending { background: #fffbeb; color: #d97706; }
+.stat-icon-wrapper.expired { background: #fef2f2; color: #dc2626; }
+.stat-icon-wrapper.verified { background: #f0fdf4; color: #16a34a; }
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.stat-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Filtros y Controles */
+.docs-controls {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border: 1px solid #f1f5f9;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: #000000;
+}
+
+.search-wrapper input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.doc-filter-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #000000;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Grilla de Documentos */
+.docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+.doc-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    padding: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.doc-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border-color: #e2e8f0;
+}
+
+.doc-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.doc-type-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-blue { background: #e0e7ff; color: #4338ca; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-orange { background: #fef3c7; color: #b45309; }
+
+.doc-menu-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.doc-card-body h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.doc-card-body p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.doc-employee-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.employee-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.employee-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.doc-card-footer {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-doc-action {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+}
+
+.btn-doc-action:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.btn-doc-action.primary {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+}
+
+.btn-doc-action.primary:hover {
+    background: #4338ca;
+}
+
+/* Modal de Carga */
+.upload-modal {
+    max-width: 500px !important;
+}
+
+.drop-zone {
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f8fafc;
+}
+
+.drop-zone:hover {
+    border-color: #4f46e5;
+    background: #f5f3ff;
+}
+
+.drop-zone i {
+    font-size: 3rem;
+    color: #4f46e5;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.drop-zone p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.drop-zone b {
+    color: #4f46e5;
+}
+
+/* Estilos para la tabla de vinculación en el expediente */
+.docs-table-wrapper {
+    margin-top: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.vinculacion-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vinculacion-table th {
+    text-align: left;
+    padding: 1.25rem 1rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.vinculacion-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.item-code {
+    background: #FFCD04;
+    color: #000;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.75rem;
+}
+
+.detail-modal {
+    max-width: 900px !important;
+}
+
+.no-data {
+    text-align: center;
+    padding: 4rem;
+    background: white;
+    border-radius: 16px;
+    color: #64748b;
+    font-weight: 600;
+    border: 1px solid #f1f5f9;
+}
+

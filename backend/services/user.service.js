@@ -113,6 +113,15 @@ class UserService {
             throw err;
         }
     }
+
+    async getIntercomunicadorContacts() {
+        try {
+            return await User.getIntercomunicadorContacts();
+        } catch (err) {
+            console.error('[UserService] Error getting intercomunicador contacts:', err);
+            throw err;
+        }
+    }
 }
 
 module.exports = new UserService();

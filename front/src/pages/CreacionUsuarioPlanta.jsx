@@ -172,7 +172,6 @@ const CreacionUsuarioPlanta = () => {
         cedula: '',
         nombre_completo: '',
         cargo: '',
-        correo_corp: '',
         usuario_ad: '',
         fecha_ingreso: '',
         contrato: '',
@@ -244,6 +243,14 @@ const CreacionUsuarioPlanta = () => {
 
         fetchOficinaDetails();
     }, [formData.oficina]);
+
+    // Lógica para auto-llenar usuario_ad con la cédula
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            usuario_ad: prev.cedula
+        }));
+    }, [formData.cedula]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -632,17 +639,17 @@ const CreacionUsuarioPlanta = () => {
                                 onChange={handleChange} 
                             />
 
-                            <EmailAutocompleteInput 
-                                label="Correo Corp"
-                                name="correo_corp"
-                                value={formData.correo_corp}
-                                onChange={handleChange}
-                                placeholder="correo.corp@empresa.com"
-                            />
-
                             <div className="form-group">
-                                <label>Usuario AD</label>
-                                <input type="text" name="usuario_ad" className="planta-input" value={formData.usuario_ad} onChange={handleChange} placeholder="Usuario Active Directory" />
+                                <label>Usuario AD (Automático)</label>
+                                <input 
+                                    type="text" 
+                                    name="usuario_ad" 
+                                    className="planta-input" 
+                                    value={formData.usuario_ad} 
+                                    readOnly 
+                                    placeholder="Se genera desde la cédula" 
+                                    style={{ opacity: 0.8, cursor: 'not-allowed', backgroundColor: 'rgba(0,0,0,0.3)' }}
+                                />
                             </div>
                         </div>
                     </div>

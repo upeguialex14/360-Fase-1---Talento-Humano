@@ -14,4 +14,9 @@ router.post('/', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_edit
 router.put('/:id', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_edit'), requisicionController.update);
 router.delete('/:id', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_edit'), requisicionController.delete);
 
+// Rutas de Historial y Candidatos
+router.get('/:id/historial', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_view'), requisicionController.getHistorial);
+router.get('/:id/candidatos', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_view'), requisicionController.getCandidatos);
+router.post('/:id/candidatos', verifyToken, checkPageAccess('GESTION_REQUISICIONES', 'can_edit'), requisicionController.addCandidato);
+
 module.exports = router;

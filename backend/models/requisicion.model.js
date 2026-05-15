@@ -25,8 +25,9 @@ class Requisicion {
                     r.estado,
                     r.asignado_a,
                     r.analista_asignado_id,
-                    u.full_name as analista_asignado_nombre,
-                    s.full_name as solicitante_nombre,
+                    r.analista_asignado_id,
+                    CONCAT(u.name, ' ', u.last_name) as analista_asignado_nombre,
+                    CONCAT(s.name, ' ', s.last_name) as solicitante_nombre,
                     r.created_at,
                     r.updated_at,
                     r.hoja_vida_path,
@@ -72,7 +73,7 @@ class Requisicion {
             const [rows] = await pool.execute(`
                 SELECT 
                     r.*,
-                    u.full_name as analista_asignado_nombre
+                    CONCAT(u.name, ' ', u.last_name) as analista_asignado_nombre
                 FROM requisiciones r
                 LEFT JOIN users u ON r.analista_asignado_id = u.user_id
                 WHERE r.id = ?
@@ -92,13 +93,14 @@ class Requisicion {
             
             const [result] = await pool.execute(`
                 INSERT INTO requisiciones (
-                    codigo_req, fecha_llegada, mes, empresa, cliente, regional,
+                    codigo_req, solicitud_id, fecha_llegada, mes, empresa, cliente, regional,
                     unidad_negocio, zona, cargo, cantidad, justificacion, detalle,
                     tipo_contrato, estado, oficina, ciudad, hoja_vida_path, aprobacion_path,
                     solicitante_id, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             `, [
                 codigo,
+                data.solicitud_id || null,
                 data.fecha_llegada || new Date(),
                 data.mes || this.getMesActual(),
                 data.empresa || 'MULTIVAL',
@@ -119,6 +121,9 @@ class Requisicion {
                 data.solicitante_id
             ]);
             
+            // Registrar historial inicial
+            await this.registrarHistorial(result.insertId, data.solicitante_id, 'RECEPCION', null, 'Recibido', 'Requisición recibida desde Solicitud de Vacantes');
+
             return result.insertId;
         } catch (err) {
             console.error('[Requisicion] Error creating requisicion:', err);
@@ -204,32 +209,32 @@ class Requisicion {
             
             // Total requisiciones
             const [total] = await pool.execute(
-                `SELECT COUNT(*) as total FROM requisiciones ${whereClause}`,
-                params
+                `SELECT COUNT(*) as total FROM requisiciones WHERE 1=1 ${analista_id ? 'AND analista_asignado_id = ?' : ''}`,
+                analista_id ? [analista_id] : []
             );
             
             // Por estado
             const [porEstado] = await pool.execute(
-                `SELECT estado, COUNT(*) as cantidad FROM requisiciones ${whereClause} GROUP BY estado`,
-                params
+                `SELECT estado, COUNT(*) as cantidad FROM requisiciones WHERE 1=1 ${analista_id ? 'AND analista_asignado_id = ?' : ''} GROUP BY estado`,
+                analista_id ? [analista_id] : []
             );
             
             // Promedio de días de mora
             const [mora] = await pool.execute(
-                `SELECT AVG(dias_mora) as promedio FROM requisiciones ${whereClause} AND dias_mora > 0`,
-                params
+                `SELECT AVG(dias_mora) as promedio FROM requisiciones WHERE 1=1 ${analista_id ? 'AND analista_asignado_id = ?' : ''} AND dias_mora > 0`,
+                analista_id ? [analista_id] : []
             );
             
             // Total recursos solicitados
             const [recursos] = await pool.execute(
-                `SELECT SUM(cantidad) as total FROM requisiciones ${whereClause}`,
-                params
+                `SELECT SUM(cantidad) as total FROM requisiciones WHERE 1=1 ${analista_id ? 'AND analista_asignado_id = ?' : ''}`,
+                analista_id ? [analista_id] : []
             );
             
             // Cumplimiento promedio
             const [cumplimiento] = await pool.execute(
-                `SELECT AVG(porcentaje_cumplimiento) as promedio FROM requisiciones ${whereClause}`,
-                params
+                `SELECT AVG(porcentaje_cumplimiento) as promedio FROM requisiciones WHERE 1=1 ${analista_id ? 'AND analista_asignado_id = ?' : ''}`,
+                analista_id ? [analista_id] : []
             );
             
             return {
@@ -272,14 +277,83 @@ class Requisicion {
         return meses[new Date().getMonth()];
     }
     
+    // --- Métodos de Historial y Trazabilidad ---
+
+    static async registrarHistorial(requisicionId, userId, accion, estadoAnterior, estadoNuevo, observacion) {
+        try {
+            await pool.execute(`
+                INSERT INTO requisicion_historial (requisicion_id, user_id, accion, estado_anterior, estado_nuevo, observacion)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `, [requisicionId, userId, accion, estadoAnterior, estadoNuevo, observacion]);
+        } catch (err) {
+            console.error('[Requisicion] Error registering history:', err);
+        }
+    }
+
+    static async getHistorial(requisicionId) {
+        try {
+            const [rows] = await pool.execute(`
+                SELECT h.*, CONCAT(u.name, ' ', u.last_name) as user_nombre
+                FROM requisicion_historial h
+                LEFT JOIN users u ON h.user_id = u.user_id
+                WHERE h.requisicion_id = ?
+                ORDER BY h.created_at DESC
+            `, [requisicionId]);
+            return rows;
+        } catch (err) {
+            console.error('[Requisicion] Error getting history:', err);
+            return [];
+        }
+    }
+
+    // --- Métodos de Candidatos ---
+
+    static async addCandidato(data) {
+        try {
+            console.log('[Requisicion] Adding candidate with data:', data);
+            const [result] = await pool.execute(`
+                INSERT INTO requisicion_candidatos (
+                    requisicion_id, nombre_candidato, cedula, telefono, correo, 
+                    estado, hoja_vida_path, resultado_entrevista
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                data.requisicion_id, 
+                data.nombre_candidato, 
+                data.cedula, 
+                data.telefono, 
+                data.correo, 
+                data.estado || data.estado_proceso || 'Postulado', 
+                data.hoja_vida_path || null, 
+                data.resultado_entrevista || null
+            ]);
+            return result.insertId;
+        } catch (err) {
+            console.error('[Requisicion] Error adding candidate:', err);
+            throw err; // Re-throw to be caught by controller
+        }
+    }
+
+    static async getCandidatos(requisicionId) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT * FROM requisicion_candidatos WHERE requisicion_id = ? ORDER BY created_at DESC',
+                [requisicionId]
+            );
+            return rows;
+        } catch (err) {
+            console.error('[Requisicion] Error getting candidates:', err);
+            return [];
+        }
+    }
+
     // Obtener analistas disponibles
     static async getAnalistas() {
         try {
             const [rows] = await pool.execute(`
-                SELECT user_id, full_name, email 
+                SELECT user_id, CONCAT(name, ' ', last_name) as full_name, email 
                 FROM users 
-                WHERE role_code = 'ANALISTA' AND is_active = 1
-                ORDER BY full_name ASC
+                WHERE role_id = 5 AND is_active = 1
+                ORDER BY name ASC
             `);
             return rows;
         } catch (err) {

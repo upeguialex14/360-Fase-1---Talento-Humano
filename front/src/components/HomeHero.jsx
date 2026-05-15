@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import mascotImg from '../IMG/mascota_de_th.png';
+import mascotImg from '../IMG/SURI.png';
+import saludoSuriImg from '../IMG/saludo SURI.png';
+import suriSenalandoImg from '../IMG/SURI SEÑALANDO.png';
 import logoImg from '../IMG/LOGO_MULTIVAL-removebg-preview.png';
 import './HomeHero.css';
 
@@ -9,10 +11,12 @@ import './HomeHero.css';
  */
 const HomeHero = () => {
     const navigate = useNavigate();
+    const [showSuriPanel, setShowSuriPanel] = React.useState(false);
+    const [suriStep, setSuriStep] = React.useState(0);
 
     // Módulos de acceso rápido (pueden venir de un config global en el futuro)
     const quickModules = [
-        { name: 'Dashboard', path: '/dashboard', icon: '📊' },
+        { name: 'Inicio', path: '/dashboard', icon: '📊' },
         { name: 'Empleados', path: '/usuarios', icon: '👥' },
         { name: 'Costos', path: '/costos', icon: '💰' },
         { name: 'Base Datos', path: '/base-datos', icon: '📁' }
@@ -37,17 +41,60 @@ const HomeHero = () => {
             {/* Columna Derecha */}
             <div className="hero-right-col">
                 {/* Cuadro Arriba Derecha - Asistente */}
-                <div className="hero-card assistant-card">
+                <div className="hero-card assistant-card clickable" onClick={() => { setShowSuriPanel(true); setSuriStep(0); }}>
                     <div className="assistant-content-centered">
                         <div className="assistant-image-large">
-                            <img src={mascotImg} alt="Docu" />
+                            <img src={mascotImg} alt="SURI" />
                         </div>
                         <div className="assistant-text-large">
-                            <h3>Docu:</h3>
+                            <h3>SURI:</h3>
                             <p>Mascota del Área</p>
                         </div>
                     </div>
                 </div>
+
+                {/* Panel de Saludo SURI */}
+                {showSuriPanel && (
+                    <div className="suri-overlay-panel">
+                        <div className="suri-panel-content animate-slide-in">
+                            <button className="close-panel-btn" onClick={(e) => { e.stopPropagation(); setShowSuriPanel(false); }}>✕</button>
+                            
+                            <div className="suri-panel-grid animate-fade-in" key={suriStep}>
+                                <div className="suri-panel-left">
+                                    <img 
+                                        src={suriStep === 0 ? saludoSuriImg : suriSenalandoImg} 
+                                        alt="SURI" 
+                                        className="suri-saludo-img" 
+                                    />
+                                </div>
+                                <div className="suri-panel-right">
+                                    <div className="suri-message-box">
+                                        {suriStep === 0 ? (
+                                            <>
+                                                <h2>¡Hola! Me presento</h2>
+                                                <p>Soy <strong>Suri</strong>, la mascota del área de Talento Humano. Conmigo encontrarás el apartado de las notificaciones y anuncios que podrás dejar a tus compañeras.</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h2>¿Donde me encuentras?</h2>
+                                                <p>En la parte posterior derecha podras encontrarme; al momento de darme click se desplegara el chat de el aplicativo donde podras hablar con todas las analistas para poder dejar notificaciones o preguntas al respecto de tu trabajo diario.</p>
+                                            </>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="suri-panel-actions">
+                                        <button className="suri-exit-btn" onClick={() => setShowSuriPanel(false)}>Salir</button>
+                                        {suriStep === 0 ? (
+                                            <button className="suri-next-btn" onClick={() => setSuriStep(1)}>Siguiente</button>
+                                        ) : (
+                                            <button className="suri-next-btn" onClick={() => setShowSuriPanel(false)}>Entendido</button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Cuadro Abajo Derecha - Acceso Rápido */}
                 <div className="hero-card quick-access-card">

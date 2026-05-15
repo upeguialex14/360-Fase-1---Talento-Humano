@@ -91,6 +91,16 @@
     background: rgba(6, 95, 70, 0.1);
 }
 
+.code-badge {
+    background: #059669;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+    font-family: monospace;
+}
+
 /* Formulario */
 .solicitud-form {
     background: white;
@@ -363,11 +373,17 @@
 /* Botones de acción */
 .form-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; /* Ajustado para separar el botón de limpiar de las acciones principales */
+    align-items: center;
     gap: 1rem;
     padding: 1.5rem 2rem;
     background: #f9fafb;
     border-top: 1px solid #e2e8f0;
+}
+
+.main-actions {
+    display: flex;
+    gap: 1rem;
 }
 
 .btn {
@@ -415,6 +431,17 @@
 .btn-secondary:hover {
     background: #f3f4f6;
     border-color: #9ca3af;
+}
+
+.btn-draft {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+}
+
+.btn-draft:hover:not(:disabled) {
+    background: #e2e8f0;
+    border-color: #94a3b8;
 }
 
 /* Spinner */

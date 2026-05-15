@@ -146,6 +146,24 @@ const User = {
             'UPDATE users SET password_changed_at = DATE_SUB(NOW(), INTERVAL ? DAY), requires_password_change = 1 WHERE user_id = ?',
             [diasMax + 1, userId]
         );
+    },
+
+    async getIntercomunicadorContacts() {
+        const [rows] = await pool.execute(
+            `SELECT 
+                u.user_id, 
+                u.name, 
+                u.last_name, 
+                CONCAT(u.name, ' ', u.last_name) AS full_name,
+                r.name_role AS role_name,
+                r.role_id,
+                CASE WHEN u.last_login > DATE_SUB(NOW(), INTERVAL 15 MINUTE) THEN 'online' ELSE 'offline' END as status
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            WHERE r.role_code IN ('GERENTE', 'ANALISTA')
+            ORDER BY u.name ASC`
+        );
+        return rows;
     }
 };
 

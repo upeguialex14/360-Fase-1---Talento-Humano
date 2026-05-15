@@ -94,6 +94,7 @@ router.put('/deliveries/:id/shipping', checkPageAccess('DOTACION', 'can_edit'), 
 // ─────────────────────────────────────────────────────────────────────────
 router.get('/providers/orders', checkPageAccess('DOTACION', 'can_view'), controller.getProviderOrders);
 router.post('/providers/orders', checkPageAccess('DOTACION', 'can_edit'), controller.createProviderOrder);
+router.post('/providers/orders/bulk-excel', checkPageAccess('DOTACION', 'can_edit'), controller.sendBulkProviderExcel);
 router.put('/providers/orders/:id/receive', checkPageAccess('DOTACION', 'can_edit'), controller.receiveProviderOrder);
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -106,5 +107,11 @@ router.get('/surveys/stats', checkPageAccess('DOTACION', 'can_view'), controller
 // DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────
 router.get('/dashboard', checkPageAccess('DOTACION', 'can_view'), controller.getDashboardStats);
+
+// ─────────────────────────────────────────────────────────────────────────
+// TRASLADOS Y REASIGNACIONES
+// ─────────────────────────────────────────────────────────────────────────
+router.post('/traslados', checkPageAccess('DOTACION', 'can_edit'), controller.registerTraslado);
+router.get('/traslados', checkPageAccess('DOTACION', 'can_view'), controller.getTraslados);
 
 module.exports = router;

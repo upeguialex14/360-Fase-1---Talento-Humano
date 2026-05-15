@@ -21,6 +21,7 @@ import OrdenContratacion from './pages/OrdenContratacion';
 import SolicitudVacantes from './pages/SolicitudVacantes';
 import GestionRequisiciones from './pages/GestionRequisiciones';
 import Documentacion from './pages/Documentacion';
+import GestionDocumentacion from './pages/GestionDocumentacion';
 import BaseInactiva from './pages/BaseInactiva';
 import BaseUnificada from './pages/BaseUnificada';
 import Vacaciones from './pages/Vacaciones';
@@ -84,6 +85,7 @@ function App() {
             <Route path="solicitud-vacantes" element={<PageProtectedRoute requiredPageCode="SOLICITUD_VACANTES" isOptional={true}><SolicitudVacantes /></PageProtectedRoute>} />
             <Route path="gestion-requisiciones" element={<PageProtectedRoute requiredPageCode="GESTION_REQUISICIONES" isOptional={true}><GestionRequisiciones /></PageProtectedRoute>} />
             <Route path="documentacion" element={<PageProtectedRoute requiredPageCode="DOCUMENTACION" isOptional={true}><Documentacion /></PageProtectedRoute>} />
+            <Route path="gestion-documentacion" element={<PageProtectedRoute requiredPageCode="GESTION_DOCUMENTACION" isOptional={true}><GestionDocumentacion /></PageProtectedRoute>} />
             <Route path="vacaciones" element={<PageProtectedRoute requiredPageCode="VACACIONES" isOptional={true}><Vacaciones /></PageProtectedRoute>} />
             <Route path="base-inactiva" element={<PageProtectedRoute requiredPageCode="BASE_INACTIVA" isOptional={true}><BaseInactiva /></PageProtectedRoute>} />
             <Route path="base-unificada" element={<PageProtectedRoute requiredPageCode="BASE_UNIFICADA" isOptional={true}><BaseUnificada /></PageProtectedRoute>} />
