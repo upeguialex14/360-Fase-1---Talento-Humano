@@ -148,6 +148,8 @@ const Planta = () => {
         { key: 'observacion', label: 'Observación' },
         { key: 'jornada', label: 'Jornada' },
         { key: 'correo', label: 'Correo' },
+        { key: 'correo_corp', label: 'Correo Corporativo' },
+        { key: 'usuario_ad', label: 'Usuario AD' },
         { key: 'estado', label: 'Estado' },
         { key: 'banco', label: 'Banco' },
         { key: 'cuenta_bancaria', label: 'Cuenta' },

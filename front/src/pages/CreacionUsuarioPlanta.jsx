@@ -170,6 +170,10 @@ const CreacionUsuarioPlanta = () => {
     const [formData, setFormData] = useState({
         empleador: '',
         cedula: '',
+        primer_nombre: '',
+        segundo_nombre: '',
+        primer_apellido: '',
+        segundo_apellido: '',
         nombre_completo: '',
         cargo: '',
         usuario_ad: '',
@@ -202,7 +206,10 @@ const CreacionUsuarioPlanta = () => {
         estado: '',
         banco: '',
         cuenta: '',
-        tipo_cuenta: ''
+        tipo_cuenta: '',
+        requiere_correo: 'no',
+        correo_corp: '',
+        dominio_correo: ''
     });
 
     const [loading, setLoading] = useState(false);
@@ -215,6 +222,75 @@ const CreacionUsuarioPlanta = () => {
             [name]: value
         }));
     };
+
+    // Helper para limpiar el texto de tildes, caracteres especiales y dejarlo en minúsculas
+    const cleanText = (text) => {
+        if (!text) return '';
+        return text
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // remove accents
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, "") // remove special characters except spaces
+            .trim();
+    };
+
+    // Lógica para componer automáticamente el nombre completo a partir de los campos individuales
+    useEffect(() => {
+        const fullname = [
+            formData.primer_nombre,
+            formData.segundo_nombre,
+            formData.primer_apellido,
+            formData.segundo_apellido
+        ].filter(Boolean).map(s => s.trim()).join(' ');
+
+        setFormData(prev => ({
+            ...prev,
+            nombre_completo: fullname
+        }));
+    }, [formData.primer_nombre, formData.segundo_nombre, formData.primer_apellido, formData.segundo_apellido]);
+
+    // Lógica para sugerir dominio al cambiar de empresa
+    useEffect(() => {
+        if (formData.empresa) {
+            let dom = '@reval.com.co';
+            if (formData.empresa.toUpperCase() === 'MULTIPAGAS') {
+                dom = '@multipagas.com';
+            } else if (formData.empresa.toUpperCase() === 'MULTIVAL') {
+                dom = '@multival.com.co';
+            }
+            setFormData(prev => ({
+                ...prev,
+                dominio_correo: dom
+            }));
+        }
+    }, [formData.empresa]);
+
+    // Lógica para auto-generación del correo corporativo
+    useEffect(() => {
+        if (formData.requiere_correo === 'si' && formData.primer_nombre && formData.primer_apellido) {
+            const pNombre = cleanText(formData.primer_nombre);
+            const pApellido = cleanText(formData.primer_apellido);
+
+            if (pNombre && pApellido) {
+                const dom = formData.dominio_correo || '@reval.com.co';
+                const email = `${pNombre}.${pApellido}${dom}`;
+                setFormData(prev => ({
+                    ...prev,
+                    correo_corp: email
+                }));
+            } else {
+                setFormData(prev => ({
+                    ...prev,
+                    correo_corp: ''
+                }));
+            }
+        } else if (formData.requiere_correo === 'no') {
+            setFormData(prev => ({
+                ...prev,
+                correo_corp: ''
+            }));
+        }
+    }, [formData.requiere_correo, formData.primer_nombre, formData.primer_apellido, formData.dominio_correo]);
 
     // Lógica para auto-llenado al seleccionar oficina
     useEffect(() => {
@@ -244,13 +320,27 @@ const CreacionUsuarioPlanta = () => {
         fetchOficinaDetails();
     }, [formData.oficina]);
 
-    // Lógica para auto-llenar usuario_ad con la cédula
+    // Lógica para auto-llenar usuario_ad con la inicial del primer nombre, segundo nombre (si aplica) y el primer apellido
     useEffect(() => {
-        setFormData(prev => ({
-            ...prev,
-            usuario_ad: prev.cedula
-        }));
-    }, [formData.cedula]);
+        const pNombre = cleanText(formData.primer_nombre);
+        const sNombre = cleanText(formData.segundo_nombre);
+        const pApellido = cleanText(formData.primer_apellido);
+        
+        if (pNombre && pApellido) {
+            const initial1 = pNombre.charAt(0);
+            const initial2 = sNombre ? sNombre.charAt(0) : '';
+            const usernameAd = `${initial1}${initial2}${pApellido}`.toLowerCase();
+            setFormData(prev => ({
+                ...prev,
+                usuario_ad: usernameAd
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                usuario_ad: ''
+            }));
+        }
+    }, [formData.primer_nombre, formData.segundo_nombre, formData.primer_apellido]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -261,7 +351,16 @@ const CreacionUsuarioPlanta = () => {
             const response = await api.post('/planta-operacion', formData);
             
             if (response && response.success) {
-                setMessage({ type: 'success', text: 'Colaborador registrado exitosamente en la base de datos de planta.' });
+                const mailMsg = formData.requiere_correo === 'si' && formData.correo_corp
+                    ? ` | 📧 Correo: ${formData.correo_corp}` 
+                    : '';
+                const osticketMsg = response.osticket?.temporary_password
+                    ? ` | 🎫 Clave osTicket: ${response.osticket.temporary_password}`
+                    : '';
+                setMessage({ 
+                    type: 'success', 
+                    text: `✅ Colaborador registrado exitosamente${mailMsg}${osticketMsg}` 
+                });
             } else {
                 throw new Error(response?.message || 'Error desconocido al registrar');
             }
@@ -562,6 +661,61 @@ const CreacionUsuarioPlanta = () => {
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #FFCD04;
                 }
+
+                /* Segmented toggle for Requires Email */
+                .requires-email-toggle {
+                    display: flex;
+                    background: rgba(15, 19, 34, 0.9);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                    padding: 4px;
+                    gap: 4px;
+                }
+                .toggle-btn {
+                    flex: 1;
+                    padding: 0.6rem;
+                    border: none;
+                    background: transparent;
+                    color: rgba(255, 255, 255, 0.6);
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-transform: uppercase;
+                }
+                .toggle-btn:hover {
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.05);
+                }
+                .toggle-btn.btn-no.active {
+                    background: rgba(239, 68, 68, 0.2);
+                    color: #f87171;
+                    border: 1px solid rgba(239, 68, 68, 0.4);
+                    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+                }
+                .toggle-btn.btn-yes.active {
+                    background: rgba(34, 197, 94, 0.2);
+                    color: #4ade80;
+                    border: 1px solid rgba(34, 197, 94, 0.4);
+                    text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+                }
+                .corporate-email-input {
+                    background: rgba(255, 205, 4, 0.05) !important;
+                }
+                .info-text {
+                    font-size: 0.75rem;
+                    color: #64748b;
+                    margin-top: -2px;
+                    padding-left: 4px;
+                }
+                .correo-corp-group {
+                    animation: fadeInSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                @keyframes fadeInSlideDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
             `}</style>
 
             <div className="planta-form-card">
@@ -591,9 +745,24 @@ const CreacionUsuarioPlanta = () => {
                                 <input type="text" name="cedula" className="planta-input" value={formData.cedula} onChange={handleChange} required placeholder="Número de identificación" />
                             </div>
 
-                            <div className="form-group full-width">
-                                <label>Nombre Completo</label>
-                                <input type="text" name="nombre_completo" className="planta-input" value={formData.nombre_completo} onChange={handleChange} required placeholder="Nombre completo del colaborador" />
+                            <div className="form-group">
+                                <label>Primer Nombre</label>
+                                <input type="text" name="primer_nombre" className="planta-input" value={formData.primer_nombre} onChange={handleChange} required placeholder="Primer nombre" />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Segundo Nombre</label>
+                                <input type="text" name="segundo_nombre" className="planta-input" value={formData.segundo_nombre} onChange={handleChange} placeholder="Segundo nombre (Opcional)" />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Primer Apellido</label>
+                                <input type="text" name="primer_apellido" className="planta-input" value={formData.primer_apellido} onChange={handleChange} required placeholder="Primer apellido" />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Segundo Apellido</label>
+                                <input type="text" name="segundo_apellido" className="planta-input" value={formData.segundo_apellido} onChange={handleChange} placeholder="Segundo apellido (Opcional)" />
                             </div>
 
                             <CustomDropdown 
@@ -759,7 +928,7 @@ const CreacionUsuarioPlanta = () => {
                                 label="Empresa" 
                                 name="empresa" 
                                 value={formData.empresa} 
-                                options={["REVAL", "MULTIPAGAS"]} 
+                                options={["REVAL", "MULTIPAGAS", "MULTIVAL"]} 
                                 onChange={handleChange} 
                             />
 
@@ -906,9 +1075,54 @@ const CreacionUsuarioPlanta = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Correo</label>
-                                <input type="email" name="correo" className="planta-input" value={formData.correo} onChange={handleChange} placeholder="correo@empresa.com" />
+                                <label>Correo Personal</label>
+                                <input type="email" name="correo" className="planta-input" value={formData.correo} onChange={handleChange} placeholder="correo@personal.com" />
                             </div>
+
+                            <div className="form-group">
+                                <label>¿Requiere Correo Corp.?</label>
+                                <div className="requires-email-toggle">
+                                    <button 
+                                        type="button" 
+                                        className={`toggle-btn btn-no ${formData.requiere_correo === 'no' ? 'active' : ''}`}
+                                        onClick={() => setFormData(prev => ({ ...prev, requiere_correo: 'no' }))}
+                                    >
+                                        ❌ NO
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className={`toggle-btn btn-yes ${formData.requiere_correo === 'si' ? 'active' : ''}`}
+                                        onClick={() => setFormData(prev => ({ ...prev, requiere_correo: 'si' }))}
+                                    >
+                                        ✅ SÍ
+                                    </button>
+                                </div>
+                            </div>
+
+                            {formData.requiere_correo === 'si' && (
+                                <>
+                                    <CustomDropdown 
+                                        label="Dominio de Correo" 
+                                        name="dominio_correo" 
+                                        value={formData.dominio_correo} 
+                                        options={["@reval.com.co", "@multipagas.com", "@multival.com.co"]} 
+                                        onChange={handleChange} 
+                                    />
+                                    <div className="form-group correo-corp-group">
+                                        <label>Correo Corporativo Generado</label>
+                                        <input 
+                                            type="email" 
+                                            name="correo_corp" 
+                                            className="planta-input corporate-email-input" 
+                                            value={formData.correo_corp} 
+                                            onChange={handleChange} 
+                                            placeholder="Se generará automáticamente..."
+                                            style={{ borderColor: '#FFCD04', boxShadow: '0 0 15px rgba(255, 205, 4, 0.1)' }}
+                                        />
+                                        <span className="info-text">Se creará en el directorio de correos (Puerto 8003)</span>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="form-group">
                                 <label>Estado</label>

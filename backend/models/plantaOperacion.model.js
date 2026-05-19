@@ -10,6 +10,15 @@ class PlantaOperacion {
         }
     }
 
+    static async getByUsername(username) {
+        try {
+            const [rows] = await pool.execute('SELECT * FROM planta_operaciones WHERE usuario_ad = ? LIMIT 1', [username]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async create(data) {
         const query = `
             INSERT INTO planta_operaciones (
