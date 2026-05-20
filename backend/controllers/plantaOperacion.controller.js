@@ -1,5 +1,32 @@
 const PlantaOperacion = require('../models/plantaOperacion.model');
 const revalService = require('../services/reval.service');
+const pool = require('../config/db');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+// Utilidad para Encriptación Simétrica (Clave de 32 bytes)
+const ENCRYPTION_KEY = process.env.JWT_SECRET ? process.env.JWT_SECRET.padEnd(32, '0').substring(0, 32) : 'talento_humano_secret_key_123456';
+const IV_LENGTH = 16;
+
+function encryptText(text) {
+    if (!text) return null;
+    let iv = crypto.randomBytes(IV_LENGTH);
+    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+}
+
+function decryptText(text) {
+    if (!text) return null;
+    let textParts = text.split(':');
+    let iv = Buffer.from(textParts.shift(), 'hex');
+    let encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+}
 
 // Helper to remove accents, convert to lowercase, and remove special characters
 const cleanText = (text) => {
@@ -236,6 +263,10 @@ const createPlantaOperacion = async (req, res) => {
                 console.log('📥 [PASO 3] Respuesta de osTicket API:', osticketResult);
                 if (osticketResult?.temporary_password) {
                     console.log(`🔐 [OSTICKET] Contraseña temporal generada para ${osticketData.username}: ${osticketResult.temporary_password}`);
+                    
+                    // Encriptar y guardar la contraseña de osTicket en la base de datos
+                    const encryptedPass = encryptText(osticketResult.temporary_password);
+                    await pool.query('UPDATE planta_operaciones SET clave_osticket = ? WHERE id_planta = ?', [encryptedPass, result.insertId]);
                 }
             } catch (err) {
                 console.error('[OSTICKET] Error en integración paso 3 (Puerto 8001):', err.message);
@@ -255,6 +286,47 @@ const createPlantaOperacion = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al registrar: ' + error.message,
+            error: error.message
+        });
+    }
+};
+
+const updatePlantaOperacion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+        
+        // Evitamos actualizar el ID o campos de auditoría por ahora
+        delete data.id_planta;
+        delete data.created_at;
+        delete data.updated_at;
+
+        const result = await PlantaOperacion.update(id, data);
+        
+        if (!result) {
+            return res.status(400).json({
+                success: false,
+                message: 'No hay datos para actualizar'
+            });
+        }
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Registro no encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Registro actualizado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error in updatePlantaOperacion:', error);
+        require('fs').appendFileSync('error_log.txt', 'UPDATE ERROR:\n' + error.stack + '\n\n');
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el registro',
             error: error.message
         });
     }
@@ -286,8 +358,95 @@ const getOficinaDetails = async (req, res) => {
     }
 };
 
+const enviarCredencialesSahg = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { via } = req.body; // 'correo' o 'celular'
+
+        // 1. Obtener la data del usuario
+        const [rows] = await pool.query('SELECT nombre, usuario_ad, correo, clave_osticket FROM planta_operaciones WHERE id_planta = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        
+        const user = rows[0];
+        if (!user.clave_osticket) {
+            return res.status(400).json({ success: false, message: 'El usuario no tiene una contraseña de osTicket registrada.' });
+        }
+
+        // 2. Desencriptar contraseña
+        let clavePlana;
+        try {
+            clavePlana = decryptText(user.clave_osticket);
+        } catch (e) {
+            console.error('Error desencriptando la clave:', e);
+            return res.status(500).json({ success: false, message: 'Error interno al procesar la contraseña de seguridad.' });
+        }
+
+        // 3. Enviar según el medio
+        if (via === 'correo') {
+            if (!user.correo) return res.status(400).json({ success: false, message: 'El usuario no tiene un correo personal asignado.' });
+
+            const transporter = nodemailer.createTransport({
+                host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+                port: parseInt(process.env.EMAIL_PORT) || 465,
+                secure: process.env.EMAIL_SECURE === 'true',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            const mailOptions = {
+                from: `"Gestión 365" <${process.env.EMAIL_USER}>`,
+                to: user.correo,
+                subject: '🔐 Credenciales de Acceso a SAHG / osTicket',
+                html: `
+                    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
+                        <h2 style="color: #2A2A54;">Hola, ${user.nombre}</h2>
+                        <p>Tus credenciales de acceso para el portal de soporte técnico (SAHG / osTicket) han sido generadas exitosamente:</p>
+                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 20px 0;">
+                            <p><strong>Usuario:</strong> ${user.usuario_ad}</p>
+                            <p><strong>Contraseña Temporal:</strong> ${clavePlana}</p>
+                        </div>
+                        <p style="color: #666; font-size: 0.9em;">Por favor, ingresa al portal y cambia tu contraseña lo antes posible por seguridad.</p>
+                        <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
+                    </div>
+                `
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+                return res.status(200).json({ success: true, message: 'Credenciales enviadas al correo registrado.' });
+            } catch (mailError) {
+                console.error('[NODEMAILER] Error de envío:', mailError.message);
+                if (mailError.message.includes('535-5.7.8')) {
+                    return res.status(401).json({ 
+                        success: false, 
+                        message: 'Google bloqueó el envío por seguridad. Debes generar una "Contraseña de Aplicación" en tu cuenta de Gmail.' 
+                    });
+                }
+                return res.status(502).json({ success: false, message: 'Fallo al conectar con el servidor de correo: ' + mailError.message });
+            }
+
+        } else if (via === 'celular') {
+            if (!user.celular) return res.status(400).json({ success: false, message: 'El usuario no tiene un número de celular asignado.' });
+            
+            // Aquí iría la integración con SMS o WhatsApp si es necesario.
+            console.log(`[SMS MOCK] Enviando credenciales a celular ${user.celular}: Usuario ${user.usuario_ad} / Clave: ${clavePlana}`);
+            return res.status(200).json({ success: true, message: 'Credenciales enviadas vía celular (Simulado).' });
+        } else {
+            return res.status(400).json({ success: false, message: 'Método de envío no válido. Use "correo" o "celular".' });
+        }
+        
+    } catch (error) {
+        console.error('Error in enviarCredencialesSahg:', error);
+        res.status(500).json({ success: false, message: 'Error al enviar credenciales', error: error.message });
+    }
+};
+
 module.exports = {
     getAllPlantaOperaciones,
     createPlantaOperacion,
-    getOficinaDetails
+    updatePlantaOperacion,
+    getOficinaDetails,
+    enviarCredencialesSahg
 };

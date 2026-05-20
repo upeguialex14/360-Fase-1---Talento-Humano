@@ -78,6 +78,45 @@ class PlantaOperacion {
         }
     }
 
+    static async update(id, data) {
+        // Obtenemos los campos que vienen en data (filtrando los undefined)
+        const fields = [];
+        const values = [];
+        
+        for (const [key, value] of Object.entries(data)) {
+            if (value !== undefined) {
+                fields.push(`\`${key}\` = ?`);
+                
+                let finalValue = value;
+                // Manejar fechas ISO y convertirlas al formato de MySQL
+                if (typeof value === 'string' && value.includes('T') && value.endsWith('Z')) {
+                    if (key.startsWith('fecha')) {
+                        finalValue = value.split('T')[0];
+                    } else {
+                        // Para DATETIME, convertir a "YYYY-MM-DD HH:MM:SS"
+                        finalValue = value.replace('T', ' ').substring(0, 19);
+                    }
+                }
+                
+                values.push(finalValue === '' ? null : finalValue);
+            }
+        }
+
+        if (fields.length === 0) {
+            return null; // Nada que actualizar
+        }
+
+        const query = `UPDATE planta_operaciones SET ${fields.join(', ')} WHERE id_planta = ?`;
+        values.push(id);
+
+        try {
+            const [result] = await pool.execute(query, values);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async getOficinaDetails(oficinaName) {
         const query = `
             SELECT 

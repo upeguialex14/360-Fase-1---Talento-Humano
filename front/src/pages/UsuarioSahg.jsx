@@ -5,6 +5,8 @@ const UsuarioSahg = () => {
     const [sahgUsers, setSahgUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [sendingId, setSendingId] = useState(null); // Track which user is currently sending
+    const [showSendMenu, setShowSendMenu] = useState(null); // Track which user's dropdown is open
 
     useEffect(() => {
         const fetchSahgUsers = async () => {
@@ -25,6 +27,24 @@ const UsuarioSahg = () => {
 
         fetchSahgUsers();
     }, []);
+
+    const handleSendCredentials = async (userId, via) => {
+        setSendingId(userId);
+        setShowSendMenu(null);
+        try {
+            const response = await api.post(`/planta-operacion/${userId}/enviar-credenciales`, { via });
+            if (response && response.success) {
+                alert(`✅ Credenciales enviadas exitosamente al ${via} del usuario.`);
+            } else {
+                alert(`⚠️ Error: ${response?.message || 'No se pudo enviar la credencial.'}`);
+            }
+        } catch (error) {
+            console.error('Error enviando credenciales:', error);
+            alert('❌ Ocurrió un error al enviar las credenciales. Verifica que el usuario tenga correo/celular configurado.');
+        } finally {
+            setSendingId(null);
+        }
+    };
 
     const filteredUsers = sahgUsers.filter(user => 
         (user.usuario_ad && user.usuario_ad.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -138,6 +158,60 @@ const UsuarioSahg = () => {
                     align-items: center;
                     gap: 12px;
                 }
+                .send-btn-container {
+                    position: relative;
+                    display: inline-block;
+                }
+                .send-btn {
+                    background: rgba(34, 197, 94, 0.1);
+                    border: 1px solid rgba(34, 197, 94, 0.3);
+                    color: #4ade80;
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    transition: all 0.2s ease;
+                }
+                .send-btn:hover {
+                    background: rgba(34, 197, 94, 0.2);
+                }
+                .send-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+                .send-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    margin-top: 5px;
+                    background: #111827;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    padding: 4px;
+                    z-index: 10;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                    min-width: 160px;
+                }
+                .send-menu-item {
+                    display: block;
+                    width: 100%;
+                    text-align: left;
+                    padding: 8px 12px;
+                    background: none;
+                    border: none;
+                    color: #e2e8f0;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    border-radius: 4px;
+                }
+                .send-menu-item:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #FFCD04;
+                }
             `}</style>
 
             <div className="sahg-panel">
@@ -162,10 +236,10 @@ const UsuarioSahg = () => {
                         <table className="sahg-table">
                             <thead>
                                 <tr>
-                                    <th>Usuario AD (Cédula)</th>
+                                    <th>Usuario AD</th>
                                     <th>Nombre Completo</th>
                                     <th>Cargo</th>
-                                    <th>Contraseña (Hash)</th>
+                                    <th>Acceso SAHG (osTicket)</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -184,9 +258,20 @@ const UsuarioSahg = () => {
                                         </td>
                                         <td>{user.cargo}</td>
                                         <td>
-                                            <code style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
-                                                $2b$10$K9tZ8w... (Encrypted)
-                                            </code>
+                                            <div style={{ 
+                                                background: 'rgba(255, 205, 4, 0.05)', 
+                                                border: '1px solid rgba(255, 205, 4, 0.3)', 
+                                                padding: '6px 12px', 
+                                                borderRadius: '6px', 
+                                                display: 'inline-block' 
+                                            }}>
+                                                <div style={{ color: '#FFCD04', fontWeight: '600', fontSize: '0.9rem', marginBottom: '2px' }}>
+                                                    👤 {user.usuario_ad}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                    🔑 ••••••••••
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <span className={`status-badge ${(user.status || 'ACTIVO').toLowerCase()}`}>
@@ -194,7 +279,35 @@ const UsuarioSahg = () => {
                                             </span>
                                         </td>
                                         <td>
-                                            <button style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⋮</button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div className="send-btn-container">
+                                                    <button 
+                                                        className="send-btn" 
+                                                        onClick={() => setShowSendMenu(showSendMenu === user.id_planta ? null : user.id_planta)}
+                                                        disabled={sendingId === user.id_planta}
+                                                    >
+                                                        {sendingId === user.id_planta ? '⏳' : '📤'} Enviar
+                                                    </button>
+                                                    
+                                                    {showSendMenu === user.id_planta && (
+                                                        <div className="send-menu">
+                                                            <button 
+                                                                className="send-menu-item"
+                                                                onClick={() => handleSendCredentials(user.id_planta, 'correo')}
+                                                            >
+                                                                📧 Al correo registrado
+                                                            </button>
+                                                            <button 
+                                                                className="send-menu-item"
+                                                                onClick={() => handleSendCredentials(user.id_planta, 'celular')}
+                                                            >
+                                                                📱 Al número registrado
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}>⋮</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
