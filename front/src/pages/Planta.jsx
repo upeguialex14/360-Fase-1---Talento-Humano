@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Toaster, toast } from 'sonner';
 import './Planta.css';
 const Planta = () => {
     const [data, setData] = useState([]);
@@ -7,6 +8,12 @@ const Planta = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
+
+    // Estados para edición
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editingRow, setEditingRow] = useState(null);
+    const [editFormData, setEditFormData] = useState({});
+    const [isSaving, setIsSaving] = useState(false);
 
     // Estados para los filtros
     const [filters, setFilters] = useState({
@@ -115,8 +122,41 @@ const Planta = () => {
         });
     };
 
+    // Funciones para edición
+    const handleEdit = (row) => {
+        setEditingRow(row);
+        setEditFormData({ ...row });
+        setEditModalOpen(true);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveEdit = async () => {
+        setIsSaving(true);
+        try {
+            const response = await api.put(`/planta-operacion/${editingRow.id_planta}`, editFormData);
+            if (response.success) {
+                const updatedData = data.map(item => item.id_planta === editingRow.id_planta ? { ...item, ...editFormData } : item);
+                setData(updatedData);
+                setEditModalOpen(false);
+                toast.success('¡Registro actualizado exitosamente!');
+            } else {
+                toast.error('Error al guardar: ' + (response.message || 'Error desconocido'));
+            }
+        } catch (err) {
+            console.error("Error updating record:", err);
+            toast.error('Error de conexión con el servidor al guardar');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // Columnas basadas en la estructura real de la tabla planta_operaciones
     const columns = [
+        { key: 'acciones', label: 'Acciones' },
         { key: 'id_planta', label: 'ID' },
         { key: 'empleador', label: 'Empleador' },
         { key: 'cedula', label: 'Cédula' },
@@ -148,6 +188,8 @@ const Planta = () => {
         { key: 'observacion', label: 'Observación' },
         { key: 'jornada', label: 'Jornada' },
         { key: 'correo', label: 'Correo' },
+        { key: 'correo_corp', label: 'Correo Corporativo' },
+        { key: 'usuario_ad', label: 'Usuario AD' },
         { key: 'estado', label: 'Estado' },
         { key: 'banco', label: 'Banco' },
         { key: 'cuenta_bancaria', label: 'Cuenta' },
@@ -167,6 +209,7 @@ const Planta = () => {
 
     return (
         <div className="page page-container">
+            <Toaster position="top-center" richColors />
             <div className="planta-header">
                 <h2>🏭 Planta de Operación</h2>
                 <p>Visualización detallada de todo el personal operativo en formato Excel.</p>
@@ -307,7 +350,16 @@ const Planta = () => {
                                                 const isDate = col.key.startsWith('fecha');
                                                 return (
                                                     <td key={col.key}>
-                                                        {isDate ? formatDate(value) : (value ?? '-')}
+                                                        {col.key === 'acciones' ? (
+                                                            <button 
+                                                                className="btn-edit" 
+                                                                style={{ padding: '0.3rem 0.5rem', background: '#FFCD04', color: '#2A2A54', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                                                onClick={() => handleEdit(row)}
+                                                                title="Editar registro"
+                                                            >
+                                                                ✏️
+                                                            </button>
+                                                        ) : isDate ? formatDate(value) : (value ?? '-')}
                                                     </td>
                                                 );
                                             })}
@@ -325,6 +377,50 @@ const Planta = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de Edición */}
+            {editModalOpen && (
+                <div className="edit-modal-overlay">
+                    <div className="edit-modal-content">
+                        <div className="edit-modal-header">
+                            <h3>✏️ Editar Registro</h3>
+                            <button className="btn-close-modal" onClick={() => setEditModalOpen(false)}>×</button>
+                        </div>
+                        <div className="edit-form-grid">
+                            {columns.filter(c => c.key !== 'acciones' && c.key !== 'id_planta').map(col => (
+                                <div key={col.key} className="edit-form-group">
+                                    <label>{col.label}</label>
+                                    <input 
+                                        type={col.key.startsWith('fecha') ? 'date' : 'text'}
+                                        name={col.key}
+                                        value={editFormData[col.key] ? (col.key.startsWith('fecha') && editFormData[col.key] ? new Date(editFormData[col.key]).toISOString().split('T')[0] : editFormData[col.key]) : ''}
+                                        onChange={handleEditChange}
+                                        className="edit-input"
+                                        placeholder={`Ingresa ${col.label.toLowerCase()}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="edit-modal-actions">
+                            <button 
+                                className="btn-edit-cancel"
+                                onClick={() => setEditModalOpen(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                className={`btn-edit-save ${isSaving ? 'saving' : ''}`}
+                                onClick={handleSaveEdit}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? (
+                                    <><span className="save-spinner"></span> Guardando...</>
+                                ) : 'Guardar Cambios'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

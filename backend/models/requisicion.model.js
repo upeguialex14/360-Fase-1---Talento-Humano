@@ -88,8 +88,22 @@ class Requisicion {
     // Crear requisición desde Solicitud de Vacantes
     static async create(data) {
         try {
-            // Generar código único
-            const codigo = await this.generarCodigo();
+            let codigo;
+
+            // Si viene de una solicitud, heredamos su código (cambiando SOL- por REQ-)
+            if (data.solicitud_id) {
+                const [solRows] = await pool.execute(
+                    'SELECT codigo_solicitud FROM solicitud_vacantes WHERE id = ?',
+                    [data.solicitud_id]
+                );
+                if (solRows.length > 0 && solRows[0].codigo_solicitud) {
+                    codigo = solRows[0].codigo_solicitud.replace('SOL-', 'REQ-');
+                } else {
+                    codigo = await this.generarCodigo();
+                }
+            } else {
+                codigo = await this.generarCodigo();
+            }
             
             const [result] = await pool.execute(`
                 INSERT INTO requisiciones (

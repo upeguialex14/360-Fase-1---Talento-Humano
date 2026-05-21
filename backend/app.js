@@ -40,6 +40,7 @@ app.use('/api/dotacion', dotacionRoutes);
 app.use('/api/solicitud-vacantes', solicitudVacanteRoutes);
 app.use('/api/documentacion', documentacionRoutes);
 app.use('/api/main-dashboard', mainDashboardRoutes);
+app.use('/api/chat', require('./routes/chat.routes'));
 
 
 // Manejo básico de rutas no encontradas

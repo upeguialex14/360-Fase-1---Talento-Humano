@@ -14,6 +14,12 @@ let tokenCache = {
   expiresAt: null,
 };
 
+// Token cache para la API de Correo (Puerto 8003)
+let emailTokenCache = {
+  token: null,
+  expiresAt: null,
+};
+
 /**
  * Obtiene un token válido de la API externa (con cache temporal)
  */
@@ -42,13 +48,13 @@ async function getRevalToken() {
 }
 
 /**
- * Crea un usuario en la API externa de REVAL
+ * Crea un usuario en la API externa de REVAL (Puerto 8000)
  * @param {Object} userData - Datos del usuario
  * @returns {Object} Respuesta de la API externa
  */
 async function createRevalUser(userData) {
   try {
-    console.log('🌐 REVAL SERVICE EJECUTADO');
+    console.log('🌐 REVAL SERVICE EJECUTADO (Puerto 8000)');
     const token = await getRevalToken();
     const response = await axios.post(
       `${REVAL_URL}/usuarios/crear`,
@@ -72,7 +78,143 @@ async function createRevalUser(userData) {
   }
 }
 
+/**
+ * Obtiene un token válido de la API de Correo externa en Puerto 8003 (con cache temporal)
+ */
+async function getRevalEmailToken() {
+  const now = Date.now();
+  if (emailTokenCache.token && emailTokenCache.expiresAt && now < emailTokenCache.expiresAt) {
+    return emailTokenCache.token;
+  }
+
+  const emailUrl = process.env.REVAL_EMAIL_URL || 'http://10.70.41.102:8003';
+  const emailUser = process.env.REVAL_EMAIL_USER || process.env.REVAL_USER || 'admin_reval';
+  const emailPass = process.env.REVAL_EMAIL_PASS || process.env.REVAL_PASS || 'Seguridad2026!';
+
+  try {
+    console.log(`🔑 Obteniendo token de Correo en ${emailUrl}/token`);
+    const response = await axios.post(`${emailUrl}/token`,
+      new URLSearchParams({
+        username: emailUser,
+        password: emailPass,
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    const { access_token } = response.data;
+    emailTokenCache.token = access_token;
+    emailTokenCache.expiresAt = now + 10 * 60 * 1000;
+    return access_token;
+  } catch (error) {
+    console.error('[REVAL_EMAIL][Token] Error al obtener token:', error.response?.data || error.message);
+    throw new Error('No se pudo obtener token de la API de Correo (Puerto 8003)');
+  }
+}
+
+/**
+ * Crea un usuario en la API de Correo externa de REVAL en Puerto 8003 (Con creación de correo)
+ * @param {Object} userData - Datos del usuario
+ * @returns {Object} Respuesta de la API externa
+ */
+async function createRevalEmailUser(userData) {
+  try {
+    console.log('🌐 REVAL EMAIL SERVICE EJECUTADO (Puerto 8003)');
+    const token = await getRevalEmailToken();
+    const emailUrl = process.env.REVAL_EMAIL_URL || 'http://10.70.41.102:8003';
+    const response = await axios.post(
+      `${emailUrl}/crear-usuario`,
+      null,
+      {
+        params: userData,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: 10000,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[REVAL_EMAIL][CreateUser] Error al crear usuario con correo:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
+// Token cache para la API de osTicket (Puerto 8001)
+let osticketTokenCache = {
+  token: null,
+  expiresAt: null,
+};
+
+/**
+ * Obtiene un token válido de la API de osTicket (Puerto 8001)
+ */
+async function getOsticketToken() {
+  const now = Date.now();
+  if (osticketTokenCache.token && osticketTokenCache.expiresAt && now < osticketTokenCache.expiresAt) {
+    return osticketTokenCache.token;
+  }
+
+  const osticketUrl = process.env.OSTICKET_URL || 'http://10.70.41.102:8001';
+  const osticketUser = process.env.OSTICKET_USER || 'admin';
+  const osticketPass = process.env.OSTICKET_PASS || 'admin123';
+
+  try {
+    console.log(`🔑 Obteniendo token de osTicket en ${osticketUrl}/token`);
+    const response = await axios.post(`${osticketUrl}/token`,
+      new URLSearchParams({
+        username: osticketUser,
+        password: osticketPass,
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    const { access_token } = response.data;
+    osticketTokenCache.token = access_token;
+    osticketTokenCache.expiresAt = now + 10 * 60 * 1000;
+    return access_token;
+  } catch (error) {
+    console.error('[OSTICKET][Token] Error al obtener token:', error.response?.data || error.message);
+    throw new Error('No se pudo obtener token de la API de osTicket (Puerto 8001)');
+  }
+}
+
+/**
+ * Crea un usuario en osTicket (Puerto 8001)
+ * @param {Object} userData - { username, email, name }
+ * @returns {Object} Respuesta incluyendo temporary_password
+ */
+async function createOsticketUser(userData) {
+  try {
+    console.log('🎫 OSTICKET SERVICE EJECUTADO (Puerto 8001)');
+    const token = await getOsticketToken();
+    const osticketUrl = process.env.OSTICKET_URL || 'http://10.70.41.102:8001';
+    const response = await axios.post(
+      `${osticketUrl}/users/create`,
+      userData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: 10000,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[OSTICKET][CreateUser] Error al crear usuario:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
 module.exports = {
   getRevalToken,
   createRevalUser,
+  getRevalEmailToken,
+  createRevalEmailUser,
+  getOsticketToken,
+  createOsticketUser,
 };

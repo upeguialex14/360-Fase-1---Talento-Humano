@@ -132,6 +132,7 @@
     overflow: auto;
     border: 1px solid #e2e8f0;
     margin-top: 1rem;
+    max-height: calc(100vh - 220px);
 }
 
 .requisiciones-table {
@@ -147,6 +148,10 @@
 }
 
 .requisiciones-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8fafc;
     padding: 1rem 0.75rem;
     text-align: left;
     font-weight: 700;
@@ -155,6 +160,7 @@
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     white-space: nowrap;
+    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
 }
 
 .requisiciones-table td {
