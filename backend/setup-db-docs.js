@@ -15,7 +15,7 @@ async function setupTables() {
                 ciudad VARCHAR(100),
                 direccion VARCHAR(255),
                 barrio VARCHAR(100),
-                estado EN_PROCESO ENUM('Pendiente', 'Revision', 'Aprobado', 'Rechazado') DEFAULT 'Pendiente',
+                estado ENUM('Pendiente', 'Revision', 'Aprobado', 'Rechazado') DEFAULT 'Pendiente',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )

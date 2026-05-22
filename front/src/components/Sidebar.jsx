@@ -223,7 +223,8 @@ const DOTACION_ROUTES = [
     '/home/dotacion/reasignacion',
     '/home/dotacion/stock',
     '/home/dotacion/tallas',
-    '/home/dotacion/firma'
+    '/home/dotacion/firma',
+    '/home/dotacion/historial'
 ];
 
 /**
@@ -606,6 +607,16 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/home/dotacion/firma" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.send}</span> Envío firma
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/dotacion/historial" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </span> Historial
                                     </NavLink>
                                 </li>
                             </ul>

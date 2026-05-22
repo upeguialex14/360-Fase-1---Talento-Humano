@@ -114,4 +114,11 @@ router.get('/dashboard', checkPageAccess('DOTACION', 'can_view'), controller.get
 router.post('/traslados', checkPageAccess('DOTACION', 'can_edit'), controller.registerTraslado);
 router.get('/traslados', checkPageAccess('DOTACION', 'can_view'), controller.getTraslados);
 
+// ─────────────────────────────────────────────────────────────────────────
+// HISTORIAL POR PERSONA (Ledger)
+// ─────────────────────────────────────────────────────────────────────────
+router.get('/employees', checkPageAccess('DOTACION', 'can_view'), controller.getEmployeesList);
+router.get('/employees/:peopleId/ledger', checkPageAccess('DOTACION', 'can_view'), controller.getEmployeeLedger);
+
 module.exports = router;
+

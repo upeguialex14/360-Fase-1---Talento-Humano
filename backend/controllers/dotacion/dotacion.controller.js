@@ -635,6 +635,38 @@ const getTraslados = async (req, res) => {
     }
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// HISTORIAL POR PERSONA (Ledger)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const getEmployeesList = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        const data = await DotacionService.getEmployeesList(search);
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error('Error getEmployeesList:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getEmployeeLedger = async (req, res) => {
+    try {
+        const peopleId = parseInt(req.params.peopleId);
+        if (!peopleId || isNaN(peopleId)) {
+            return res.status(400).json({ success: false, message: 'peopleId inválido' });
+        }
+        const data = await DotacionService.getEmployeeLedger(peopleId);
+        if (!data) {
+            return res.status(404).json({ success: false, message: 'Colaborador no encontrado' });
+        }
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error('Error getEmployeeLedger:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     // Fase 1
     getItems,
@@ -689,7 +721,10 @@ module.exports = {
     getAllSurveys,
     // Traslados y Reasignaciones
     registerTraslado,
-    getTraslados
+    getTraslados,
+    // Historial por Persona
+    getEmployeesList,
+    getEmployeeLedger
 };
 
 
