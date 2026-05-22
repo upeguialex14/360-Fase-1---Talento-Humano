@@ -3,8 +3,11 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const verifyToken = require('../middleware/auth.middleware');
 
-// Endpoint de login (público)
+// Endpoint de login con usuario y contraseña (público) - MANTENIDO para compatibilidad interna
 router.post('/login', authController.login);
+
+// Endpoint de login con Google (público)
+router.post('/google', authController.googleLogin);
 
 // Endpoint de cambio de contraseña (protegido)
 router.post('/change-password', verifyToken, authController.changePassword);

@@ -199,7 +199,8 @@ const PARAMETRIZACION_ROUTES = [
     '/home/roles',
     '/home/users',
     '/home/role-page-access',
-    '/home/admin/blocked-users'
+    '/home/admin/blocked-users',
+    '/home/aprobacion-accesos'
 ];
 
 // Rutas que pertenecen al menú de Formularios
@@ -499,6 +500,11 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/home/admin/blocked-users" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.userX}</span> Usuarios Bloqueados
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/home/aprobacion-accesos" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
+                                        <span className="sidebar-icon">{Icons.shield}</span> Aprobar Accesos
                                     </NavLink>
                                 </li>
                             </ul>

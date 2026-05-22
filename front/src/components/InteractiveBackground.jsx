@@ -16,7 +16,7 @@ const InteractiveBackground = () => {
     }, []);
 
     return (
-        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 0, overflow: 'hidden', backgroundColor: '#05070d' }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 0, overflow: 'hidden', backgroundColor: '#0b2329' }}>
             {/* 3 Orbes animados */}
             <div 
                 className="animate-plasma-1"
@@ -56,7 +56,7 @@ const InteractiveBackground = () => {
                     height: '70vw',
                     borderRadius: '50%',
                     mixBlendMode: 'screen',
-                    background: 'radial-gradient(circle, rgba(36,42,84,0.5) 0%, rgba(36,42,84,0) 70%)',
+                    background: 'radial-gradient(circle, rgba(0,255,239,0.2) 0%, rgba(0,255,239,0) 70%)',
                     filter: 'blur(100px)',
                     bottom: '-30%',
                     left: '20%',

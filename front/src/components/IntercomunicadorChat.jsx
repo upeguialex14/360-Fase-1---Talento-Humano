@@ -1,292 +1,124 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { io } from 'socket.io-client';
 import './IntercomunicadorChat.css';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:3000';
-
-const IntercomunicadorChat = ({ onClose, sharedSocket, onlineUsers = [], unreadPerContact = {}, onClearUnread }) => {
+const IntercomunicadorChat = ({ onClose }) => {
     const { user } = useAuth();
-    const [contacts, setContacts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedChat, setSelectedChat] = useState(null); // 'group' or userId
+    const [spaceId, setSpaceId] = useState('');
     const [message, setMessage] = useState('');
-    const [messages, setMessages] = useState([]);
-    const [uploading, setUploading] = useState(false);
+    const [messages, setMessages] = useState([]); // Historial local de la sesión
+    const [sending, setSending] = useState(false);
     const messagesEndRef = useRef(null);
-    const fileInputRef = useRef(null);
-    const selectedChatRef = useRef(selectedChat);
 
-    // Mantener la referencia actualizada para el socket
-    useEffect(() => {
-        selectedChatRef.current = selectedChat;
-    }, [selectedChat]);
-
-    // Conectar a Socket.io usando el socket compartido
-    useEffect(() => {
-        if (!user || !sharedSocket) return;
-
-        // Este listener maneja la recepción de mensajes cuando el chat está abierto
-        const handleReceiveMessage = (newMsg) => {
-            setMessages(prev => {
-                const currentSelected = selectedChatRef.current;
-                const myId = user.user_id || user.id;
-                
-                const isRelevant = 
-                    (newMsg.is_group && currentSelected === 'group') || 
-                    (!newMsg.is_group && (
-                        newMsg.sender_id === currentSelected || 
-                        (newMsg.sender_id === myId && newMsg.receiver_id === currentSelected)
-                    ));
-                
-                if (isRelevant) {
-                    if (!prev.some(m => m.id === newMsg.id)) {
-                        return [...prev, newMsg];
-                    }
-                }
-                return prev;
-            });
-        };
-
-        sharedSocket.on('receiveMessage', handleReceiveMessage);
-
-        fetchContacts();
-
-        return () => {
-            sharedSocket.off('receiveMessage', handleReceiveMessage);
-        };
-    }, [user, sharedSocket]);
-
-    // Limpiar no leídos cuando se selecciona un chat
-    useEffect(() => {
-        if (selectedChat && onClearUnread) {
-            onClearUnread(selectedChat);
-        }
-    }, [selectedChat, onClearUnread]);
-
-    // Scroll hacia abajo cuando llegan mensajes
+    // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Cargar historial cuando seleccionas un chat
-    useEffect(() => {
-        if (!selectedChat || !user) return;
-        
-        const fetchHistory = async () => {
-            try {
-                const myId = user.user_id || user.id;
-                const endpoint = selectedChat === 'group' 
-                    ? `/chat/history/group` 
-                    : `/chat/history/${myId}/${selectedChat}`;
-                
-                const res = await api.get(endpoint);
-                if (res.success) {
-                    setMessages(res.data);
-                }
-            } catch (err) {
-                console.error('Error fetching history:', err);
-            }
-        };
-
-        fetchHistory();
-    }, [selectedChat, user]);
-
-    const fetchContacts = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get('/users/intercomunicador/contacts');
-            if (res.success) {
-                setContacts(res.data);
-            }
-        } catch (err) {
-            console.error('Error fetching contacts:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSendMessage = (e, fileData = null) => {
+    const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
         
-        if ((!message.trim() && !fileData) || !selectedChat) return;
+        if (!message.trim() || !spaceId.trim()) return;
 
-        const myId = user.user_id || user.id;
-        const msgData = {
-            sender_id: myId,
-            receiver_id: selectedChat === 'group' ? null : selectedChat,
-            is_group: selectedChat === 'group',
-            message: message.trim(),
-            file_url: fileData ? fileData.fileUrl : null,
-            file_type: fileData ? fileData.fileType : null
+        const myEmail = user.email || 'usuario@multipagas.com';
+        const msgText = message.trim();
+        
+        // Optimistic UI
+        const tempMsg = {
+            id: Date.now(),
+            text: msgText,
+            sender: myEmail,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'Enviando...'
         };
-
-        sharedSocket.emit('sendMessage', msgData);
+        
+        setMessages(prev => [...prev, tempMsg]);
         setMessage('');
-    };
-
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
+        setSending(true);
 
         try {
-            // Se asume que api.post formatea correctamente o usamos fetch directo si falla
-            const token = localStorage.getItem('token');
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-            const res = await fetch(`${baseUrl}/chat/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
+            const res = await api.post('/chat/send', {
+                userEmail: myEmail,
+                spaceId: spaceId.trim(),
+                messageText: msgText
             });
-            const data = await res.json();
-            
-            if (data.success) {
-                handleSendMessage(null, { fileUrl: data.fileUrl, fileType: data.fileType });
+
+            if (res.success) {
+                setMessages(prev => prev.map(m => m.id === tempMsg.id ? { ...m, status: 'Enviado ✔' } : m));
+            } else {
+                throw new Error('Error en respuesta');
             }
         } catch (err) {
-            console.error('Error subiendo archivo:', err);
+            console.error('Error enviando a Google Chat:', err);
+            setMessages(prev => prev.map(m => m.id === tempMsg.id ? { ...m, status: 'Error ❌' } : m));
         } finally {
-            setUploading(false);
-            e.target.value = null; // reset
+            setSending(false);
         }
-    };
-
-    const renderMessageContent = (msg) => {
-        const myId = user.user_id || user.id;
-        const isMine = msg.sender_id === myId;
-        
-        return (
-            <div key={msg.id || Math.random()} className={`message-bubble ${isMine ? 'me' : 'other'}`}>
-                {Boolean(msg.is_group) && !isMine && (
-                    <div className="message-sender-name">
-                        {contacts.find(c => c.user_id === msg.sender_id)?.name || 'Usuario'}
-                    </div>
-                )}
-                {msg.message && <div className="message-text">{msg.message}</div>}
-                
-                {msg.file_url && (
-                    <div className="message-attachment">
-                        {msg.file_type?.startsWith('image/') ? (
-                            <img src={`${SOCKET_URL}${msg.file_url}`} alt="adjunto" className="chat-image-preview" />
-                        ) : (
-                            <a href={`${SOCKET_URL}${msg.file_url}`} target="_blank" rel="noopener noreferrer" className="chat-file-link">
-                                📎 Descargar archivo
-                            </a>
-                        )}
-                    </div>
-                )}
-                <div className="message-time">
-                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-            </div>
-        );
     };
 
     return (
-        <div className="intercomunicador-chat-window animate-slide-up">
+        <div className="intercomunicador-chat-window animate-slide-up" style={{ width: '450px' }}>
             <div className="chat-header">
                 <div className="header-info">
-                    <span className="header-icon">💬</span>
-                    <h3>Suri Intercomunicador</h3>
+                    <span className="header-icon">🤖</span>
+                    <h3>Google Chat (Bot)</h3>
                 </div>
                 <button className="chat-close-btn" onClick={onClose}>✕</button>
             </div>
 
-            <div className="chat-body">
-                <div className="chat-sidebar">
-                    <div 
-                        className={`contact-item group-chat ${selectedChat === 'group' ? 'active' : ''}`}
-                        onClick={() => setSelectedChat('group')}
-                    >
-                        <div className="contact-avatar group-avatar">👥</div>
-                        <div className="contact-info">
-                            <span className="contact-name">Grupo Analistas/Gerentes</span>
-                            <span className="contact-status">Canal Grupal</span>
-                        </div>
-                        {unreadPerContact['group'] > 0 && (
-                            <span className="unread-badge">{unreadPerContact['group']}</span>
-                        )}
-                    </div>
-
-                    <div className="sidebar-divider">Contactos</div>
-
-                    {loading ? (
-                        <div className="chat-loading">Cargando...</div>
-                    ) : (
-                        contacts.map(contact => {
-                            const isOnline = onlineUsers.includes(contact.user_id?.toString());
-                            const unread = unreadPerContact[contact.user_id] || 0;
-                            return (
-                                <div 
-                                    key={contact.user_id} 
-                                    className={`contact-item ${selectedChat === contact.user_id ? 'active' : ''}`}
-                                    onClick={() => setSelectedChat(contact.user_id)}
-                                >
-                                    <div className={`contact-avatar ${isOnline ? 'online' : 'offline'}`}>
-                                        {contact.name?.charAt(0) || '?'}
-                                    </div>
-                                    <div className="contact-info">
-                                        <span className="contact-name">{contact.full_name}</span>
-                                        <span className="contact-role">{contact.role_name}</span>
-                                    </div>
-                                    {isOnline && <span className="online-indicator"></span>}
-                                    {unread > 0 && <span className="unread-badge">{unread}</span>}
-                                </div>
-                            );
-                        })
-                    )}
+            <div className="chat-body" style={{ flexDirection: 'column' }}>
+                <div className="space-id-container" style={{ padding: '1rem', background: 'rgba(0, 255, 239, 0.05)', borderBottom: '1px solid rgba(0,255,239,0.1)' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#00FFEF', marginBottom: '0.5rem', fontWeight: 'bold' }}>SPACE ID DESTINO</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ej: spaces/AAAAA123456" 
+                        value={spaceId}
+                        onChange={(e) => setSpaceId(e.target.value)}
+                        style={{ 
+                            width: '100%', 
+                            padding: '0.6rem', 
+                            borderRadius: '8px', 
+                            background: 'rgba(3, 10, 13, 0.8)', 
+                            border: '1px solid rgba(0,255,239,0.2)',
+                            color: '#e0fffe',
+                            outline: 'none'
+                        }}
+                    />
                 </div>
 
-                <div className="chat-main">
-                    {selectedChat ? (
-                        <div className="chat-conversation">
-                            <div className="conversation-header">
-                                {selectedChat === 'group' 
-                                    ? 'Chat Grupal' 
-                                    : `Chat con ${contacts.find(c => c.user_id === selectedChat)?.name || ''}`}
+                <div className="chat-main" style={{ flex: 1 }}>
+                    <div className="chat-conversation">
+                        <div className="conversation-messages custom-scrollbar">
+                            <div className="system-message">
+                                <span className="suri-mini-icon">ℹ️</span>
+                                <p style={{ fontSize: '0.85rem', margin: 0 }}>
+                                    Ingresa el Space ID donde el Bot ha sido invitado. Tus mensajes llegarán con tu correo ({user?.email || 'Autenticado'}) como prefijo.
+                                </p>
                             </div>
                             
-                            <div className="conversation-messages custom-scrollbar">
-                                <div className="system-message">
-                                    <span className="suri-mini-icon">🤖</span>
-                                    <p>¡Hola! Aquí podrás dejar notificaciones y anuncios a tus compañeros.</p>
+                            {messages.map((msg) => (
+                                <div key={msg.id} className="message-bubble me">
+                                    <div className="message-text">{msg.text}</div>
+                                    <div className="message-time">
+                                        {msg.time} • <span style={{ color: msg.status.includes('Error') ? '#ef4444' : '#00FFEF' }}>{msg.status}</span>
+                                    </div>
                                 </div>
-                                
-                                {messages.map(renderMessageContent)}
-                                <div ref={messagesEndRef} />
-                            </div>
+                            ))}
+                            <div ref={messagesEndRef} />
+                        </div>
 
-                            <form className="conversation-input" onSubmit={(e) => handleSendMessage(e)}>
-                                <button type="button" className="attach-btn" onClick={() => fileInputRef.current.click()} disabled={uploading}>
-                                    {uploading ? '⏳' : '📎'}
-                                </button>
-                                <input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    style={{ display: 'none' }} 
-                                    onChange={handleFileUpload}
-                                />
-                                <input 
-                                    type="text" 
-                                    placeholder="Escribe un mensaje..." 
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    disabled={uploading}
-                                />
-                                <button className="send-btn" type="submit" disabled={uploading || (!message.trim())}>➤</button>
-                            </form>
-                        </div>
-                    ) : (
-                        <div className="chat-empty-state">
-                            <div className="empty-icon">SURI</div>
-                            <p>Selecciona un contacto o grupo para iniciar la comunicación</p>
-                        </div>
-                    )}
+                        <form className="conversation-input" onSubmit={handleSendMessage}>
+                            <input 
+                                type="text" 
+                                placeholder="Escribe un mensaje al Bot..." 
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                disabled={sending || !spaceId.trim()}
+                            />
+                            <button className="send-btn" type="submit" disabled={sending || !message.trim() || !spaceId.trim()}>➤</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
