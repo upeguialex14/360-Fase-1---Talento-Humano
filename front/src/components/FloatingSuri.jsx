@@ -34,7 +34,7 @@ const FloatingSuri = () => {
         }).catch(() => { /* ignorar si el endpoint aún no está listo */ });
 
         socketRef.current = io(SOCKET_URL);
-        
+
         socketRef.current.on('connect', () => {
             socketRef.current.emit('register', user.user_id || user.id);
         });
@@ -76,15 +76,15 @@ const FloatingSuri = () => {
 
     return (
         <>
-            <div 
+            <div
                 className={`floating-suri-container ${isChatOpen ? 'chat-active' : ''}`}
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 title={isChatOpen ? "Cerrar Intercomunicador" : "Abrir Intercomunicador"}
             >
-                <img 
-                    src={isChatOpen ? suriThinkImg : suriFullImg} 
-                    alt="SURI" 
-                    className={`floating-suri-img ${isChatOpen ? 'animate-think' : 'animate-idle'}`} 
+                <img
+                    src={isChatOpen ? suriThinkImg : suriFullImg}
+                    alt="SURI"
+                    className={`floating-suri-img ${isChatOpen ? 'animate-think' : 'animate-idle'}`}
                 />
                 {!isChatOpen && totalUnread > 0 && (
                     <div className="suri-notification-badge">{totalUnread > 99 ? '99+' : totalUnread}</div>
@@ -92,8 +92,8 @@ const FloatingSuri = () => {
             </div>
 
             {isChatOpen && (
-                <IntercomunicadorChat 
-                    onClose={() => setIsChatOpen(false)} 
+                <IntercomunicadorChat
+                    onClose={() => setIsChatOpen(false)}
                     sharedSocket={socketRef.current}
                     onlineUsers={onlineUsers}
                     unreadPerContact={unreadPerContact}

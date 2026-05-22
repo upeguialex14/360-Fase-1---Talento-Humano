@@ -57,7 +57,13 @@ const dotacionService = {
         // Usamos el endpoint genérico de ETL con el tipo DOTACION
         const response = await api.upload('/etl/upload/DOTACION', formData);
         return response;
-    }
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HISTORIAL POR PERSONA (Ledger)
+    // ═══════════════════════════════════════════════════════════════════════════
+    getEmployeesList: (search = '') => api.get(`/dotacion/employees?search=${encodeURIComponent(search)}`),
+    getEmployeeLedger: (peopleId) => api.get(`/dotacion/employees/${peopleId}/ledger`),
 };
 
 export default dotacionService;

@@ -38,6 +38,7 @@ import DotacionReasignacion from './pages/dotacion/DotacionReasignacion';
 import DotacionStock from './pages/dotacion/DotacionStock';
 import DotacionTallas from './pages/dotacion/DotacionTallas';
 import DotacionFirma from './pages/dotacion/DotacionFirma';
+import DotacionHistorial from './pages/dotacion/DotacionHistorial';
 
 
 /**
@@ -100,6 +101,7 @@ function App() {
             <Route path="dotacion/stock" element={<PageProtectedRoute requiredPageCode="DOTACION_STOCK" isOptional={true}><DotacionStock /></PageProtectedRoute>} />
             <Route path="dotacion/tallas" element={<PageProtectedRoute requiredPageCode="DOTACION_TALLAS" isOptional={true}><DotacionTallas /></PageProtectedRoute>} />
             <Route path="dotacion/firma" element={<PageProtectedRoute requiredPageCode="DOTACION_FIRMA" isOptional={true}><DotacionFirma /></PageProtectedRoute>} />
+            <Route path="dotacion/historial" element={<PageProtectedRoute requiredPageCode="DOTACION" isOptional={true}><DotacionHistorial /></PageProtectedRoute>} />
           </Route>
 
 
