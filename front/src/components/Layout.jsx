@@ -16,15 +16,15 @@ const Layout = () => {
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
         <Header />
         <div className="layout-body" style={{ position: 'relative' }}>
-        <div className="sidebar-container" style={{ backgroundColor: 'transparent' }}>
-          <Sidebar />
+          <div className="sidebar-container" style={{ backgroundColor: 'transparent' }}>
+            <Sidebar />
+          </div>
+          <main className="main-content" style={{ backgroundColor: 'transparent', flex: 1 }}>
+            <Outlet />
+          </main>
         </div>
-        <main className="main-content" style={{ backgroundColor: 'transparent', flex: 1 }}>
-          <Outlet />
-        </main>
-      </div>
-      <Footer />
-      <FloatingSuri />
+        <Footer />
+        <FloatingSuri />
       </div>
     </div>
   );

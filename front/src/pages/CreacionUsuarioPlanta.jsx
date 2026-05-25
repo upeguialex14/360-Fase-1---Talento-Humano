@@ -215,6 +215,17 @@ const CreacionUsuarioPlanta = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
+    // Estados para gestión de credenciales en modal premium
+    const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+    const [createdCredentials, setCreatedCredentials] = useState(null);
+    const [copiedField, setCopiedField] = useState(null);
+
+    const handleCopy = (text, field) => {
+        navigator.clipboard.writeText(text);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 2000);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -351,18 +362,29 @@ const CreacionUsuarioPlanta = () => {
             const response = await api.post('/planta-operacion', formData);
             
             if (response && response.success) {
-                const mailMsg = formData.requiere_correo === 'si' && formData.correo_corp
-                    ? ` | 📧 Correo: ${formData.correo_corp}` 
-                    : '';
-                const osticketMsg = response.osticket?.temporary_password
-                    ? ` | 🎫 Clave osTicket: ${response.osticket.temporary_password}`
-                    : '';
+                // Configurar credenciales y abrir modal premium
+                setCreatedCredentials(response.credentials);
+                setShowCredentialsModal(true);
+
                 setMessage({ 
                     type: 'success', 
-                    text: `✅ Colaborador registrado exitosamente${mailMsg}${osticketMsg}` 
+                    text: `✅ Colaborador registrado exitosamente en la base de datos local.` 
                 });
+
+                // Limpiar campos específicos del formulario para el siguiente registro
+                setFormData(prev => ({
+                    ...prev,
+                    primer_nombre: '',
+                    segundo_nombre: '',
+                    primer_apellido: '',
+                    segundo_apellido: '',
+                    cedula: '',
+                    correo: '',
+                    correo_corp: '',
+                    usuario_ad: ''
+                }));
             } else {
-                throw new Error(response?.message || 'Error desconocido al registrar');
+                throw new Error(response?.message || 'Error de negocio al registrar en el servidor');
             }
         } catch (error) {
             console.error('Error al registrar usuario planta:', error);
@@ -715,6 +737,241 @@ const CreacionUsuarioPlanta = () => {
                 @keyframes fadeInSlideDown {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+
+                /* Premium Credentials Modal Styles */
+                .modal-backdrop {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(4, 6, 15, 0.85);
+                    backdrop-filter: blur(20px);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 999999 !important;
+                    animation: backdropFadeIn 0.3s ease-out forwards;
+                }
+                @keyframes backdropFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                .credentials-modal {
+                    background: rgba(15, 19, 34, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 24px;
+                    width: 90%;
+                    max-width: 650px;
+                    padding: 2.5rem;
+                    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 205, 4, 0.05);
+                    animation: modalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                    position: relative;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                }
+                @keyframes modalScaleUp {
+                    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+                .credentials-modal-header {
+                    text-align: center;
+                    margin-bottom: 2rem;
+                }
+                .credentials-modal-header h2 {
+                    color: #FFCD04;
+                    font-size: 1.8rem;
+                    font-weight: 800;
+                    margin: 0 0 0.5rem 0;
+                    text-shadow: 0 0 20px rgba(255, 205, 4, 0.2);
+                }
+                .credentials-modal-header p {
+                    color: #94a3b8;
+                    font-size: 0.95rem;
+                    margin: 0;
+                }
+                .credentials-cards-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.2rem;
+                    margin-bottom: 2rem;
+                }
+                .credential-card {
+                    background: rgba(30, 41, 59, 0.4);
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border-radius: 16px;
+                    padding: 1.2rem 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.2rem;
+                    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                    position: relative;
+                }
+                .credential-card:hover {
+                    background: rgba(30, 41, 59, 0.6);
+                    border-color: rgba(255, 255, 255, 0.1);
+                    transform: translateX(4px);
+                }
+                .credential-card.selected.ad { border-left: 5px solid #4A90E2; box-shadow: -10px 0 20px rgba(74, 144, 226, 0.05); }
+                .credential-card.selected.email { border-left: 5px solid #2ECC71; box-shadow: -10px 0 20px rgba(46, 204, 113, 0.05); }
+                .credential-card.selected.osticket { border-left: 5px solid #FFCD04; box-shadow: -10px 0 20px rgba(255, 205, 4, 0.05); }
+                
+                .credential-checkbox-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                }
+                .credential-checkbox {
+                    width: 22px;
+                    height: 22px;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.25s;
+                }
+                .credential-card.selected .credential-checkbox {
+                    border-color: currentColor;
+                    background: currentColor;
+                }
+                .credential-checkbox::after {
+                    content: '✓';
+                    color: #000;
+                    font-size: 14px;
+                    font-weight: 900;
+                    display: none;
+                }
+                .credential-card.selected .credential-checkbox::after {
+                    display: block;
+                }
+                .credential-card.ad { color: #4A90E2; }
+                .credential-card.email { color: #2ECC71; }
+                .credential-card.osticket { color: #FFCD04; }
+                
+                .credential-info {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.3rem;
+                    color: #fff;
+                }
+                .credential-title-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .credential-badge {
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    padding: 2px 8px;
+                    border-radius: 20px;
+                    background: rgba(255, 255, 255, 0.08);
+                }
+                .credential-card.ad .credential-badge { color: #4A90E2; background: rgba(74, 144, 226, 0.1); }
+                .credential-card.email .credential-badge { color: #2ECC71; background: rgba(46, 204, 113, 0.1); }
+                .credential-card.osticket .credential-badge { color: #FFCD04; background: rgba(255, 205, 4, 0.1); }
+                
+                .credential-failed-badge {
+                    color: #ef4444;
+                    background: rgba(239, 68, 68, 0.1);
+                    border: 1px solid rgba(239, 68, 68, 0.2);
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                }
+
+                .credential-field {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    margin-top: 4px;
+                    font-family: monospace;
+                    font-size: 0.9rem;
+                    border: 1px solid rgba(255, 255, 255, 0.03);
+                }
+                .credential-value {
+                    color: #e2e8f0;
+                    user-select: all;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 320px;
+                }
+                .btn-copy-small {
+                    background: transparent;
+                    border: none;
+                    color: #64748b;
+                    cursor: pointer;
+                    padding: 2px 6px;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                }
+                .btn-copy-small:hover {
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.1);
+                }
+                .btn-copy-small.copied {
+                    color: #2ECC71 !important;
+                }
+
+                .modal-actions {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    margin-top: 2rem;
+                }
+                .btn-close-modal {
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #fff;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 12px;
+                    padding: 0.9rem 2rem;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    text-align: center;
+                }
+                .btn-close-modal:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-color: rgba(255, 255, 255, 0.2);
+                }
+                .auto-send-notice {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    background: rgba(34, 197, 94, 0.08);
+                    border: 1px solid rgba(34, 197, 94, 0.25);
+                    border-radius: 12px;
+                    padding: 14px 18px;
+                    margin-top: 1.5rem;
+                }
+                .auto-send-notice .notice-icon {
+                    font-size: 1.4rem;
+                    flex-shrink: 0;
+                    margin-top: 2px;
+                }
+                .auto-send-notice .notice-text {
+                    color: #86efac;
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                }
+                .auto-send-notice .notice-text strong {
+                    color: #4ade80;
+                    display: block;
+                    margin-bottom: 3px;
+                    font-size: 0.95rem;
                 }
             `}</style>
 
@@ -1220,6 +1477,123 @@ const CreacionUsuarioPlanta = () => {
                     </button>
                 </form>
             </div>
+
+            {/* Premium Credentials Modal */}
+            {showCredentialsModal && createdCredentials && (
+                <div className="modal-backdrop" onClick={() => setShowCredentialsModal(false)}>
+                    <div className="credentials-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="credentials-modal-header">
+                            <h2>✅ Colaborador Registrado</h2>
+                            <p>Se crearon exitosamente las siguientes cuentas para el colaborador.</p>
+                        </div>
+
+                        <div className="credentials-cards-container">
+                            {/* Card 1: Directorio Activo */}
+                            <div
+                                className={`credential-card ad ${createdCredentials.ad?.success ? 'selected' : ''}`}
+                                style={{ opacity: createdCredentials.ad?.success ? 1 : 0.6, cursor: 'default' }}
+                            >
+                                <div className="credential-info">
+                                    <div className="credential-title-row">
+                                        <span className="credential-badge">💻 Directorio Activo</span>
+                                        {!createdCredentials.ad?.success && <span className="credential-failed-badge">No disponible</span>}
+                                    </div>
+                                    {createdCredentials.ad?.success ? (
+                                        <div className="credential-field">
+                                            <span>Usuario:</span>
+                                            <span className="credential-value">{createdCredentials.ad.username}</span>
+                                            <button
+                                                type="button"
+                                                className={`btn-copy-small ${copiedField === 'ad_user' ? 'copied' : ''}`}
+                                                onClick={(e) => { e.stopPropagation(); handleCopy(createdCredentials.ad.username, 'ad_user'); }}
+                                            >
+                                                {copiedField === 'ad_user' ? '✓ Copiado' : 'Copiar'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#94a3b8' }}>No se pudo aprovisionar la cuenta en el Directorio Activo.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Card 2: Correo Corporativo */}
+                            <div
+                                className={`credential-card email ${createdCredentials.email?.success ? 'selected' : ''}`}
+                                style={{ opacity: createdCredentials.email?.success ? 1 : 0.6, cursor: 'default' }}
+                            >
+                                <div className="credential-info">
+                                    <div className="credential-title-row">
+                                        <span className="credential-badge">📧 Correo Corporativo</span>
+                                        {!createdCredentials.email?.success && <span className="credential-failed-badge">No disponible</span>}
+                                    </div>
+                                    {createdCredentials.email?.success ? (
+                                        <div className="credential-field">
+                                            <span>Correo:</span>
+                                            <span className="credential-value">{createdCredentials.email.email}</span>
+                                            <button
+                                                type="button"
+                                                className={`btn-copy-small ${copiedField === 'email_user' ? 'copied' : ''}`}
+                                                onClick={(e) => { e.stopPropagation(); handleCopy(createdCredentials.email.email, 'email_user'); }}
+                                            >
+                                                {copiedField === 'email_user' ? '✓ Copiado' : 'Copiar'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#94a3b8' }}>Este colaborador no requería correo corporativo o falló el aprovisionamiento.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Card 3: osTicket */}
+                            <div
+                                className={`credential-card osticket ${createdCredentials.osticket?.success ? 'selected' : ''}`}
+                                style={{ opacity: createdCredentials.osticket?.success ? 1 : 0.6, cursor: 'default' }}
+                            >
+                                <div className="credential-info">
+                                    <div className="credential-title-row">
+                                        <span className="credential-badge">🎫 Portal osTicket / SAHG</span>
+                                        {!createdCredentials.osticket?.success && <span className="credential-failed-badge">No disponible</span>}
+                                    </div>
+                                    {createdCredentials.osticket?.success ? (
+                                        <div className="credential-field">
+                                            <span>Correo:</span>
+                                            <span className="credential-value">{createdCredentials.osticket.email}</span>
+                                            <button
+                                                type="button"
+                                                className={`btn-copy-small ${copiedField === 'ost_user' ? 'copied' : ''}`}
+                                                onClick={(e) => { e.stopPropagation(); handleCopy(createdCredentials.osticket.email, 'ost_user'); }}
+                                            >
+                                                {copiedField === 'ost_user' ? '✓ Copiado' : 'Copiar'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#94a3b8' }}>No se pudo aprovisionar la cuenta en el portal de soporte osTicket.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Aviso de envío automático por seguridad */}
+                        <div className="auto-send-notice">
+                            <span className="notice-icon">🔒</span>
+                            <div className="notice-text">
+                                <strong>Credenciales enviadas automáticamente</strong>
+                                Por directriz de Riesgo y Seguridad, las contraseñas temporales han sido enviadas de forma automática al correo personal registrado del colaborador y NO se almacenan en el sistema.
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button
+                                type="button"
+                                className="btn-close-modal"
+                                onClick={() => setShowCredentialsModal(false)}
+                            >
+                                Cerrar y finalizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

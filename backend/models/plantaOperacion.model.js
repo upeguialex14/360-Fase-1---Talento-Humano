@@ -27,8 +27,8 @@ class PlantaOperacion {
                 cc_helisa, oficina, vacante_sobrante, planta_aprobada, supervisor_gerente, 
                 status, novedad, motivo_retiro, fecha_inicial, fecha_final, fecha_retiro, 
                 traslado_oficina_destino, dias_ausencia, observacion, jornada, correo, 
-                estado, banco, cuenta_bancaria, tipo_cuenta
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                estado, banco, cuenta_bancaria, tipo_cuenta, usuario_osticket
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
         const params = [
@@ -67,7 +67,8 @@ class PlantaOperacion {
             data.estado || null, 
             data.banco || null, 
             data.cuenta || null, 
-            data.tipo_cuenta || null
+            data.tipo_cuenta || null,
+            data.correo_corp || null // usuario_osticket almacena el mismo correo corporativo
         ];
 
         try {
