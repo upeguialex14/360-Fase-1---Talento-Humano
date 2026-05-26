@@ -6,6 +6,7 @@
  */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const Parameter = require('../models/parameter.model');
@@ -14,6 +15,9 @@ const RolePermission = require('../models/rolePermission.model');
 const Page = require('../models/page.model');
 const LoggingService = require('./logging.service');
 const { validatePassword } = require('../validators/password.validator');
+
+const ALLOWED_DOMAINS = ['multipagas.com', 'reval.com.co', 'multival.com.co'];
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 class AuthService {
     async login(username, password, ip, userAgent) {
@@ -93,6 +97,102 @@ class AuthService {
                 pages
             },
             forceChangePassword: forceChange
+        };
+    }
+
+    async googleLogin(idToken, ip, userAgent) {
+        // 1. Verificar el token con Google
+        let payload;
+        try {
+            const ticket = await googleClient.verifyIdToken({
+                idToken,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            payload = ticket.getPayload();
+        } catch (err) {
+            throw new Error('Token de Google inválido o expirado');
+        }
+
+        const { email, given_name, family_name } = payload;
+
+        // 2. Validar dominio empresarial
+        const domain = email.split('@')[1];
+        if (!ALLOWED_DOMAINS.includes(domain)) {
+            throw new Error(
+                `Acceso denegado. Solo se permite el ingreso con dominios empresariales (@multipagas.com, @reval.com.co, @multival.com.co)`
+            );
+        }
+
+        // 3. Buscar usuario en la base de datos por email
+        const user = await User.findByEmail(email);
+        if (!user) {
+            const PendingAccess = require('../models/pendingAccess.model');
+            const pendingRequest = await PendingAccess.findByEmail(email);
+            
+            if (pendingRequest) {
+                 if (pendingRequest.status === 'pending') {
+                      throw new Error('PENDING_APPROVAL:Tu solicitud de acceso está pendiente de aprobación por un gerente.');
+                 } else if (pendingRequest.status === 'rejected') {
+                      throw new Error('Tu solicitud de acceso fue rechazada.');
+                 }
+            }
+
+            // Create pending request
+            await PendingAccess.create({ email, name: `${given_name || ''} ${family_name || ''}`.trim(), picture_url: payload.picture });
+            
+            // Emit socket event to gerentes
+            try {
+                const chatSocket = require('../sockets/chat.socket');
+                const io = chatSocket.getIO ? chatSocket.getIO() : null;
+                if (io) {
+                    io.to('GERENTE').emit('newPendingUser', { email, name: `${given_name || ''} ${family_name || ''}`.trim() });
+                }
+            } catch (e) {
+                console.error('Error emitting newPendingUser socket event:', e);
+            }
+
+            await LoggingService.logLogin(false, null, email, 'USER_PENDING', ip, userAgent);
+            throw new Error('PENDING_APPROVAL:Tu solicitud fue enviada al gerente. Espera su aprobación para poder ingresar.');
+        }
+
+        // 4. Verificar que el usuario esté activo
+        if (user.status_id === 0) {
+            await LoggingService.logLogin(false, user.user_id, email, 'USER_LOCKED', ip, userAgent);
+            throw new Error('Tu cuenta está bloqueada. Contacta a tu jefe de área.');
+        }
+
+        // 5. Login exitoso - actualizar datos de sesión
+        await User.resetLoginData(user.user_id);
+        await LoggingService.logLogin(true, user.user_id, email, null, ip, userAgent);
+        await this.logHistoricalLogin(user, ip, userAgent);
+
+        // 6. Obtener rol, permisos y páginas
+        const roleName = await Role.getRoleName(user.role_id);
+        user.role_name = roleName;
+        const permissions = await this.getUserPermissions(user.role_id);
+        const pages = await this.getUserPages(user.role_id, user.user_id);
+
+        // 7. Generar JWT interno del sistema (igual que el login normal)
+        const token = jwt.sign(
+            { user_id: user.user_id, role_id: user.role_id, document_number: user.document_number },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        return {
+            token,
+            user: {
+                user_id: user.user_id,
+                document_number: user.document_number,
+                email: user.email,
+                name: user.name,
+                last_name: user.last_name,
+                role_id: user.role_id,
+                role_name: user.role_name,
+                permissions,
+                pages
+            },
+            forceChangePassword: false // Google gestiona la seguridad, no forzamos cambio de contraseña
         };
     }
 

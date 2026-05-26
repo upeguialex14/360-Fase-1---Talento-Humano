@@ -13,6 +13,14 @@ const User = {
         return rows[0] || null;
     },
 
+    async findByEmail(email) {
+        const [rows] = await pool.execute(
+            'SELECT * FROM users WHERE email = ?',
+            [email]
+        );
+        return rows[0] || null;
+    },
+
     async findById(userId) {
         const [rows] = await pool.execute(
             'SELECT * FROM users WHERE user_id = ?',
@@ -154,6 +162,7 @@ const User = {
                 u.user_id, 
                 u.name, 
                 u.last_name, 
+                u.email,
                 CONCAT(u.name, ' ', u.last_name) AS full_name,
                 r.name_role AS role_name,
                 r.role_id,

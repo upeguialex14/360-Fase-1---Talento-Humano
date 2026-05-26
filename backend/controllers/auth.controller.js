@@ -32,6 +32,42 @@ const login = async (req, res) => {
     }
 };
 
+const googleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ success: false, message: 'Token de Google requerido' });
+        }
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+
+        const result = await authService.googleLogin(credential, ip, userAgent);
+
+        res.status(200).json({
+            success: true,
+            message: 'Inicio de sesión exitoso',
+            token: result.token,
+            user: result.user,
+            forceChangePassword: result.forceChangePassword
+        });
+    } catch (error) {
+        console.error('[AuthController] Google login error:', error);
+        let statusCode = 401;
+        let message = error.message || 'Error en autenticación con Google';
+        
+        if (message.startsWith('PENDING_APPROVAL:')) {
+            statusCode = 403;
+            message = message.replace('PENDING_APPROVAL:', '');
+        }
+
+        res.status(statusCode).json({
+            success: false,
+            message: message,
+            isPending: statusCode === 403
+        });
+    }
+};
+
 const changePassword = async (req, res) => {
     try {
         const { user_id } = req.user;
@@ -119,4 +155,4 @@ const forcePasswordChangeDemo = async (req, res) => {
     }
 };
 
-module.exports = { login, changePassword, logout, getLastSession, forcePasswordChangeDemo };
+module.exports = { login, googleLogin, changePassword, logout, getLastSession, forcePasswordChangeDemo };

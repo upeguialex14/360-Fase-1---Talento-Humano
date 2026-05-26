@@ -91,7 +91,8 @@
     padding: 0.625rem;
     font-size: 0.9rem;
     outline: none;
-    color: #000000; /* Texto negro explícito */
+    color: #000000;
+    /* Texto negro explícito */
 }
 
 .filter-select {
@@ -102,7 +103,8 @@
     font-size: 0.9rem;
     min-width: 150px;
     cursor: pointer;
-    color: #000000; /* Texto negro explícito */
+    color: #000000;
+    /* Texto negro explícito */
 }
 
 .btn-export {
@@ -160,14 +162,15 @@
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     white-space: nowrap;
-    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 .requisiciones-table td {
     padding: 1rem 0.75rem;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
-    color: #334155; /* Texto oscuro explícito */
+    color: #334155;
+    /* Texto oscuro explícito */
 }
 
 .requisiciones-table tr:last-child td {

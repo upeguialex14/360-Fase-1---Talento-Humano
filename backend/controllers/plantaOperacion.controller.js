@@ -28,6 +28,21 @@ function decryptText(text) {
     return decrypted.toString();
 }
 
+// Helper to generate dynamic, secure temporary passwords
+const generateTempPassword = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    let result = 'Temp';
+    for (let i = 0; i < 3; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    for (let i = 0; i < 2; i++) {
+        result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    result += '!';
+    return result;
+};
+
 // Helper to remove accents, convert to lowercase, and remove special characters
 const cleanText = (text) => {
     if (!text) return '';
@@ -67,6 +82,74 @@ const generateCorporateEmail = (empresa, primerNombre, primerApellido, nombreCom
     return `${pNombre}.${pApellido}@${domain}`;
 };
 
+const sendCredentialsEmail = async (personalEmail, nombreCompleto, correoCorp, usuarioAd, adPass, emailPass, osticketPass) => {
+    if (!personalEmail) {
+        console.error('Error auto-enviando credenciales: Colaborador no tiene correo personal.');
+        return false;
+    }
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.EMAIL_PORT) || 465,
+        secure: process.env.EMAIL_SECURE === 'true',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const showAd = !!adPass;
+    const showEmail = !!emailPass && !!correoCorp;
+    const showOsticket = !!osticketPass;
+
+    const mailOptions = {
+        from: `"Gestión 365" <${process.env.EMAIL_USER}>`,
+        to: personalEmail,
+        subject: '🔐 Credenciales de Acceso - Sistemas Corporativos',
+        html: `
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #2A2A54;">Hola, ${nombreCompleto}</h2>
+                <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente y se envían de forma automática por directriz de seguridad:</p>
+                
+                ${showAd ? `
+                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
+                    <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
+                    <p style="margin: 4px 0;"><strong>Usuario:</strong> ${usuarioAd}</p>
+                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPass}</p>
+                </div>
+                ` : ''}
+
+                ${showEmail ? `
+                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
+                    <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
+                    <p style="margin: 4px 0;"><strong>Correo:</strong> ${correoCorp}</p>
+                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPass}</p>
+                </div>
+                ` : ''}
+
+                ${showOsticket ? `
+                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
+                    <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
+                    <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${correoCorp || usuarioAd + '@reval.com.co'}</p>
+                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPass}</p>
+                </div>
+                ` : ''}
+
+                <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
+                <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Credenciales auto-enviadas exitosamente al correo personal ${personalEmail}`);
+        return true;
+    } catch (mailError) {
+        console.error('[NODEMAILER] Error de auto-envío de credenciales:', mailError.message);
+        return false;
+    }
+};
+
 const getAllPlantaOperaciones = async (req, res) => {
     try {
         const data = await PlantaOperacion.getAll();
@@ -88,17 +171,17 @@ const getAllPlantaOperaciones = async (req, res) => {
 const createPlantaOperacion = async (req, res) => {
     try {
         console.log('🔥 CONTROLADOR CORRECTO EJECUTADO');
-        
-        const { 
-            usuario_ad, 
-            nombre_completo, 
-            cedula, 
-            requiere_correo, 
-            empresa, 
-            correo_corp, 
-            primer_nombre: req_primer_nombre, 
+
+        const {
+            usuario_ad,
+            nombre_completo,
+            cedula,
+            requiere_correo,
+            empresa,
+            correo_corp,
+            primer_nombre: req_primer_nombre,
             segundo_nombre: req_segundo_nombre,
-            primer_apellido: req_primer_apellido 
+            primer_apellido: req_primer_apellido
         } = req.body;
 
         // Generar correo corporativo si requiere correo y no viene pre-calculado
@@ -142,6 +225,7 @@ const createPlantaOperacion = async (req, res) => {
         }
 
         req.body.usuario_ad = final_username;
+        req.body.usuario_osticket = req.body.correo_corp || null;
 
         // 1. Guardar en la base de datos local
         const result = await PlantaOperacion.create(req.body);
@@ -149,7 +233,7 @@ const createPlantaOperacion = async (req, res) => {
         // 2. Preparar datos para REVAL
         let primer_nombre = cleanText(req_primer_nombre);
         let primer_apellido = cleanText(req_primer_apellido);
-        
+
         if (!primer_nombre || !primer_apellido) {
             const cleaned = cleanText(nombre_completo);
             const parts = cleaned.split(/\s+/);
@@ -168,13 +252,14 @@ const createPlantaOperacion = async (req, res) => {
         }
 
         revalResult = { success: false };
+        const adPassword = generateTempPassword();
 
         // 3. Consumir API de Directorio Activo (Puerto 8000)
         let revalUserData = {
-            username: req.body.usuario_ad, 
+            username: req.body.usuario_ad,
             firstname: primer_nombre.toUpperCase(),
             lastname: primer_apellido.toUpperCase(),
-            password: 'Temp123!', 
+            password: adPassword,
             ou_path: 'OU=Usuarios,OU=Sac,DC=reval,DC=local',
             groups: ['SG_PTR_PLUS_PRODUCCION']
         };
@@ -191,8 +276,8 @@ const createPlantaOperacion = async (req, res) => {
         // --- MANEJO DE COLISIONES EN TIEMPO DE EJECUCIÓN (ACTIVE DIRECTORY) ---
         const errorDetail = revalResult.error?.detail || (typeof revalResult.error === 'string' ? revalResult.error : '');
         const errorStr = revalResult.error ? JSON.stringify(revalResult.error) : '';
-        const isCollision = (typeof errorDetail === 'string' && errorDetail.includes('entryAlreadyExists')) || 
-                            (typeof errorStr === 'string' && errorStr.includes('entryAlreadyExists'));
+        const isCollision = (typeof errorDetail === 'string' && errorDetail.includes('entryAlreadyExists')) ||
+            (typeof errorStr === 'string' && errorStr.includes('entryAlreadyExists'));
 
         if (revalResult.success === false && isCollision) {
             console.log(`⚠️ Colisión remota en AD detectada para: ${revalUserData.username}. Intentando resolución de colisión...`);
@@ -200,7 +285,7 @@ const createPlantaOperacion = async (req, res) => {
                 const initial1 = pNombreClean.charAt(0);
                 const initial2 = sNombreClean ? sNombreClean.charAt(0) : '';
                 const final_username = `${initial1}${initial1}${initial2}${pApellidoClean}`.toLowerCase();
-                
+
                 console.log(`🔄 Re-generando usuario AD a: ${final_username} para re-intento`);
                 req.body.usuario_ad = final_username;
                 revalUserData.username = final_username;
@@ -241,6 +326,10 @@ const createPlantaOperacion = async (req, res) => {
                 const emailResult = await revalService.createRevalEmailUser(revalEmailData);
                 console.log('📥 [PASO 2] Respuesta de REVAL EMAIL API:', emailResult);
                 revalResult.emailResult = emailResult;
+                if (emailResult && emailResult.success !== false) {
+                    const emailPassToSave = emailResult.temporary_password || emailResult.password || emailResult.temp_password || 'Mail123!';
+                    revalResult.emailResult.temporary_password = emailPassToSave;
+                }
             } catch (err) {
                 console.error('[REVAL_EMAIL] Error en integración paso 2 (Puerto 8003):', err.message);
                 revalResult.emailResult = { success: false, error: err.message };
@@ -252,7 +341,7 @@ const createPlantaOperacion = async (req, res) => {
         if (revalResult && revalResult.success !== false) {
             const emailForOsticket = req.body.correo_corp || `${primer_nombre}.${primer_apellido}@reval.com.co`;
             const osticketData = {
-                username: req.body.usuario_ad,
+                username: emailForOsticket, // El usuario de osTicket/SAHG es el correo corporativo
                 email: emailForOsticket,
                 name: `${primer_nombre} ${primer_apellido}`.toUpperCase()
             };
@@ -263,10 +352,6 @@ const createPlantaOperacion = async (req, res) => {
                 console.log('📥 [PASO 3] Respuesta de osTicket API:', osticketResult);
                 if (osticketResult?.temporary_password) {
                     console.log(`🔐 [OSTICKET] Contraseña temporal generada para ${osticketData.username}: ${osticketResult.temporary_password}`);
-                    
-                    // Encriptar y guardar la contraseña de osTicket en la base de datos
-                    const encryptedPass = encryptText(osticketResult.temporary_password);
-                    await pool.query('UPDATE planta_operaciones SET clave_osticket = ? WHERE id_planta = ?', [encryptedPass, result.insertId]);
                 }
             } catch (err) {
                 console.error('[OSTICKET] Error en integración paso 3 (Puerto 8001):', err.message);
@@ -274,10 +359,47 @@ const createPlantaOperacion = async (req, res) => {
             }
         }
 
+        // Estructurar objeto de credenciales completas para el modal de frontend (sin contraseñas por seguridad)
+        const responseCredentials = {
+            ad: {
+                username: req.body.usuario_ad,
+                success: revalResult && revalResult.success !== false
+            },
+            email: {
+                email: requiere_correo === 'si' ? (req.body.correo_corp || `${primer_nombre}.${primer_apellido}@reval.com.co`) : null,
+                success: requiere_correo === 'si' ? (revalResult?.emailResult && revalResult.emailResult.success !== false) : false
+            },
+            osticket: {
+                // El identificador de login en osTicket/SAHG es el correo corporativo
+                email: requiere_correo === 'si'
+                    ? (req.body.correo_corp || `${primer_nombre}.${primer_apellido}@reval.com.co`)
+                    : `${primer_nombre}.${primer_apellido}@reval.com.co`,
+                success: !!osticketResult?.temporary_password
+            }
+        };
+
+        // Auto-enviar credenciales al correo personal de forma automática
+        const finalAdPass = (revalResult && revalResult.success !== false) ? adPassword : null;
+        const finalEmailPass = (requiere_correo === 'si' && revalResult?.emailResult && revalResult.emailResult.success !== false) ? (revalResult.emailResult.temporary_password || 'Mail123!') : null;
+        const finalOsticketPass = osticketResult?.temporary_password || null;
+
+        if (req.body.correo) {
+            await sendCredentialsEmail(
+                req.body.correo,
+                req.body.nombre_completo || (req_primer_nombre + ' ' + req_primer_apellido),
+                req.body.correo_corp || (requiere_correo === 'si' ? `${primer_nombre}.${primer_apellido}@reval.com.co` : null),
+                req.body.usuario_ad,
+                finalAdPass,
+                finalEmailPass,
+                finalOsticketPass
+            );
+        }
+
         res.status(201).json({
             success: true,
             message: 'Colaborador registrado exitosamente',
             id: result.insertId,
+            credentials: responseCredentials,
             reval: revalResult,
             osticket: osticketResult
         });
@@ -295,21 +417,21 @@ const updatePlantaOperacion = async (req, res) => {
     try {
         const { id } = req.params;
         const data = req.body;
-        
+
         // Evitamos actualizar el ID o campos de auditoría por ahora
         delete data.id_planta;
         delete data.created_at;
         delete data.updated_at;
 
         const result = await PlantaOperacion.update(id, data);
-        
+
         if (!result) {
             return res.status(400).json({
                 success: false,
                 message: 'No hay datos para actualizar'
             });
         }
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({
                 success: false,
@@ -336,7 +458,7 @@ const getOficinaDetails = async (req, res) => {
     try {
         const { oficinaName } = req.params;
         const details = await PlantaOperacion.getOficinaDetails(oficinaName);
-        
+
         if (!details) {
             return res.status(404).json({
                 success: false,
@@ -361,29 +483,40 @@ const getOficinaDetails = async (req, res) => {
 const enviarCredencialesSahg = async (req, res) => {
     try {
         const { id } = req.params;
-        const { via } = req.body; // 'correo' o 'celular'
+        const { via, selected } = req.body; // 'correo' o 'celular', y selección opcional
 
         // 1. Obtener la data del usuario
-        const [rows] = await pool.query('SELECT nombre, usuario_ad, correo, clave_osticket FROM planta_operaciones WHERE id_planta = ?', [id]);
+        const [rows] = await pool.query('SELECT nombre, usuario_ad, correo, correo_corp, clave_ad, clave_correo, clave_osticket FROM planta_operaciones WHERE id_planta = ?', [id]);
         if (rows.length === 0) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-        
+
         const user = rows[0];
-        if (!user.clave_osticket) {
-            return res.status(400).json({ success: false, message: 'El usuario no tiene una contraseña de osTicket registrada.' });
+
+        // 2. Desencriptar contraseñas si existen
+        let adPassDecrypted = null;
+        let emailPassDecrypted = null;
+        let osticketPassDecrypted = null;
+
+        try {
+            if (user.clave_ad) adPassDecrypted = decryptText(user.clave_ad);
+            if (user.clave_correo) emailPassDecrypted = decryptText(user.clave_correo);
+            if (user.clave_osticket) osticketPassDecrypted = decryptText(user.clave_osticket);
+        } catch (e) {
+            console.error('Error desencriptando las claves:', e);
+            return res.status(500).json({ success: false, message: 'Error interno al procesar las contraseñas de seguridad.' });
         }
 
-        // 2. Desencriptar contraseña
-        let clavePlana;
-        try {
-            clavePlana = decryptText(user.clave_osticket);
-        } catch (e) {
-            console.error('Error desencriptando la clave:', e);
-            return res.status(500).json({ success: false, message: 'Error interno al procesar la contraseña de seguridad.' });
+        // Filtro de selección (si viene de frontend, de lo contrario todo lo que tenga clave)
+        const showAd = selected ? (selected.ad && adPassDecrypted) : !!adPassDecrypted;
+        const showEmail = selected ? (selected.email && emailPassDecrypted) : !!emailPassDecrypted;
+        const showOsticket = selected ? (selected.osticket && osticketPassDecrypted) : !!osticketPassDecrypted;
+
+        if (!showAd && !showEmail && !showOsticket) {
+            return res.status(400).json({ success: false, message: 'No hay ninguna credencial seleccionada o configurada para enviar.' });
         }
 
         // 3. Enviar según el medio
         if (via === 'correo') {
-            if (!user.correo) return res.status(400).json({ success: false, message: 'El usuario no tiene un correo personal asignado.' });
+            if (!user.correo) return res.status(400).json({ success: false, message: 'El colaborador no tiene un correo personal registrado para recibir las notificaciones.' });
 
             const transporter = nodemailer.createTransport({
                 host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -398,16 +531,37 @@ const enviarCredencialesSahg = async (req, res) => {
             const mailOptions = {
                 from: `"Gestión 365" <${process.env.EMAIL_USER}>`,
                 to: user.correo,
-                subject: '🔐 Credenciales de Acceso a SAHG / osTicket',
+                subject: '🔐 Credenciales de Acceso - Sistemas Corporativos',
                 html: `
                     <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
                         <h2 style="color: #2A2A54;">Hola, ${user.nombre}</h2>
-                        <p>Tus credenciales de acceso para el portal de soporte técnico (SAHG / osTicket) han sido generadas exitosamente:</p>
-                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 20px 0;">
-                            <p><strong>Usuario:</strong> ${user.usuario_ad}</p>
-                            <p><strong>Contraseña Temporal:</strong> ${clavePlana}</p>
+                        <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente:</p>
+                        
+                        ${showAd ? `
+                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
+                            <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
+                            <p style="margin: 4px 0;"><strong>Usuario:</strong> ${user.usuario_ad}</p>
+                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPassDecrypted}</p>
                         </div>
-                        <p style="color: #666; font-size: 0.9em;">Por favor, ingresa al portal y cambia tu contraseña lo antes posible por seguridad.</p>
+                        ` : ''}
+
+                        ${showEmail && user.correo_corp ? `
+                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
+                            <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
+                            <p style="margin: 4px 0;"><strong>Correo:</strong> ${user.correo_corp}</p>
+                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPassDecrypted}</p>
+                        </div>
+                        ` : ''}
+
+                        ${showOsticket ? `
+                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
+                            <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
+                            <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${user.correo_corp || user.usuario_ad + '@reval.com.co'}</p>
+                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPassDecrypted}</p>
+                        </div>
+                        ` : ''}
+
+                        <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
                         <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
                     </div>
                 `
@@ -419,9 +573,9 @@ const enviarCredencialesSahg = async (req, res) => {
             } catch (mailError) {
                 console.error('[NODEMAILER] Error de envío:', mailError.message);
                 if (mailError.message.includes('535-5.7.8')) {
-                    return res.status(401).json({ 
-                        success: false, 
-                        message: 'Google bloqueó el envío por seguridad. Debes generar una "Contraseña de Aplicación" en tu cuenta de Gmail.' 
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Google bloqueó el envío por seguridad. Debes generar una "Contraseña de Aplicación" en tu cuenta de Gmail.'
                     });
                 }
                 return res.status(502).json({ success: false, message: 'Fallo al conectar con el servidor de correo: ' + mailError.message });
@@ -429,14 +583,14 @@ const enviarCredencialesSahg = async (req, res) => {
 
         } else if (via === 'celular') {
             if (!user.celular) return res.status(400).json({ success: false, message: 'El usuario no tiene un número de celular asignado.' });
-            
+
             // Aquí iría la integración con SMS o WhatsApp si es necesario.
-            console.log(`[SMS MOCK] Enviando credenciales a celular ${user.celular}: Usuario ${user.usuario_ad} / Clave: ${clavePlana}`);
+            console.log(`[SMS MOCK] Enviando credenciales a celular ${user.celular}: Usuario ${user.usuario_ad}`);
             return res.status(200).json({ success: true, message: 'Credenciales enviadas vía celular (Simulado).' });
         } else {
             return res.status(400).json({ success: false, message: 'Método de envío no válido. Use "correo" o "celular".' });
         }
-        
+
     } catch (error) {
         console.error('Error in enviarCredencialesSahg:', error);
         res.status(500).json({ success: false, message: 'Error al enviar credenciales', error: error.message });

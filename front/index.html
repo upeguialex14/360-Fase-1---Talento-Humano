@@ -1,15 +1,27 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>talentohumano360</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="/src/main.jsx"></script>
 
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>talentohumano360</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script type="module" src="/src/main.jsx"></script>
+  <script src="http://192.168.7.27:3001/widget/agent-bridge.js"></script>
+  <script src="http://192.168.7.27:3001/widget/agent-functional.js"></script>
+  <script>
+    AgentFunctional.init({
+      serverUrl: "http://192.168.7.27:3001",
+      projectId: "talento-humano-360",
+      agentName: "SURI",
+      primaryColor: "#0f766e",
+    });
+  </script>
+</body>
+
 </html>

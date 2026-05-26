@@ -76,4 +76,20 @@ const getAll = async () => {
     }
 };
 
-module.exports = { getAll };
+const updateSizes = async (cedula, t_camisa, t_pantalon, t_zapatos) => {
+    try {
+        const sql = `
+            UPDATE people_details pd
+            JOIN people p ON p.details_id = pd.details_id
+            SET pd.size_shirt = ?, pd.size_jean = ?, pd.size_shoes = ?
+            WHERE p.document_number = ?
+        `;
+        const [result] = await db.query(sql, [t_camisa, t_pantalon, t_zapatos, cedula]);
+        return result.affectedRows > 0;
+    } catch (error) {
+        console.error('Error in BaseDatos.model.updateSizes:', error);
+        throw error;
+    }
+};
+
+module.exports = { getAll, updateSizes };

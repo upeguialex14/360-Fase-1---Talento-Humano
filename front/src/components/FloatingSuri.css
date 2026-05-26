@@ -1,6 +1,6 @@
 .floating-suri-container {
     position: fixed;
-    bottom: 20px;
+    bottom: -20px; /* Punto medio para no cortarla tanto */
     right: 20px;
     z-index: 9999;
     cursor: pointer;
@@ -14,7 +14,7 @@
 }
 
 .floating-suri-img {
-    width: 180px; /* Tamaño incrementado */
+    width: 140px; /* Tamaño reducido para obstruir menos */
     height: auto;
     display: block;
 }

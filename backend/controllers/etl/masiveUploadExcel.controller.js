@@ -86,4 +86,22 @@ const deleteAllBaseDatos = async (req, res) => {
     }
 };
 
-module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos };
+const updateBaseDatosSizes = async (req, res) => {
+    try {
+        const { cedula, t_camisa, t_pantalon, t_zapatos } = req.body;
+        if (!cedula) {
+            return res.status(400).json({ success: false, message: 'La cédula es requerida' });
+        }
+        const updated = await BaseDatosModel.updateSizes(cedula, t_camisa, t_pantalon, t_zapatos);
+        if (updated) {
+            return res.status(200).json({ success: true, message: 'Tallas de colaborador actualizadas en base de datos' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Colaborador no encontrado en la base de datos' });
+        }
+    } catch (error) {
+        console.error("Error in updateBaseDatosSizes:", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos, updateBaseDatosSizes };

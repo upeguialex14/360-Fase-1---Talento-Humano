@@ -14,6 +14,16 @@ export const authService = {
     },
 
     /**
+     * Iniciar sesión con Google
+     * @param {string} credential - Token JWT de Google
+     * @returns {Promise} - { success, token, user }
+     */
+    googleLogin: async (credential) => {
+        return await api.post('/auth/google', { credential });
+    },
+
+
+    /**
      * Cambiar contraseña
      * @param {object} data - { currentPassword, newPassword }
      * @returns {Promise} - Respuesta del servidor

@@ -42,28 +42,28 @@ export default function DotacionReasignacion() {
 
   const fetchReasignacionData = async () => {
     try {
-      // Obtenemos los trabajadores directamente de la tabla real
-      const response = await api.get('/planta-operacion');
+      // Obtenemos los trabajadores directamente de la Base de Datos Maestra
+      const response = await api.get('/etl/base-datos');
       if (response && response.success) {
         // Mapeamos los datos para adaptarlos a la vista actual
         const mapped = response.data.map((p, index) => ({
-            id: p.id_planta || index,
-            nombresApellidos: p.nombre || p.nombres_apellidos || 'Sin Nombre',
+            id: p.people_id || index,
+            nombresApellidos: p.apellidos_nombres || 'Sin Nombre',
             cedula: p.cedula || 'N/A',
             cargo: p.cargo || 'No Definido',
-            empresa: p.empresa || p.empleador || 'MULTIVALORES',
+            empresa: p.empresa || p.compania || 'MULTIVALORES',
             fechaEntrega: p.fecha_ingreso ? p.fecha_ingreso.slice(0,10) : 'Pendiente',
             // Simulamos temporalmente cantidades hasta tener la conexión completa con el kardex individual
             cantidadCamisas: Math.floor(Math.random() * 3) + 1,
             cantidadPantalones: Math.floor(Math.random() * 3) + 1,
             cantidadCamisasBlancasMangaLarga: Math.floor(Math.random() * 2),
-            estado: p.status === 'Activo' || p.estado === 'Activo' ? 'Activo' : 'Inactivo'
+            estado: p.estado === 'Activo' ? 'Activo' : 'Inactivo'
         }));
         setData(mapped);
       }
     } catch (error) {
       console.error('Error fetching reasignacion data:', error);
-      toast.error('Error al cargar la planta de operaciones');
+      toast.error('Error al cargar la base de datos maestra');
     } finally {
       setLoading(false);
     }

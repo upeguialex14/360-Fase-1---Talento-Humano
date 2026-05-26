@@ -27,7 +27,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -80,7 +80,8 @@
     gap: 0.5rem;
 }
 
-.btn-filter:hover, .btn-filter.active {
+.btn-filter:hover,
+.btn-filter.active {
     background: #FFD700;
     color: #1a202c;
 }
@@ -95,8 +96,15 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .filters-grid {
@@ -120,7 +128,8 @@
     font-weight: 600;
 }
 
-.filter-group input, .filter-group select {
+.filter-group input,
+.filter-group select {
     background: #111827;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
@@ -131,7 +140,8 @@
     transition: border-color 0.3s;
 }
 
-.filter-group input:focus, .filter-group select:focus {
+.filter-group input:focus,
+.filter-group select:focus {
     border-color: #FFD700;
 }
 
@@ -225,7 +235,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .empty-state {
@@ -283,8 +295,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .edit-modal-content {
@@ -302,8 +319,15 @@
 }
 
 @keyframes slideUp {
-    from { transform: translateY(40px) scale(0.95); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
+    from {
+        transform: translateY(40px) scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
 }
 
 .edit-modal-header {
@@ -354,14 +378,17 @@
 .edit-form-grid::-webkit-scrollbar {
     width: 8px;
 }
+
 .edit-form-grid::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
 }
+
 .edit-form-grid::-webkit-scrollbar-thumb {
     background: rgba(255, 215, 0, 0.3);
     border-radius: 4px;
 }
+
 .edit-form-grid::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 215, 0, 0.5);
 }

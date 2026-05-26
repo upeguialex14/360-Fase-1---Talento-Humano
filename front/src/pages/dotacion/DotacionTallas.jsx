@@ -3,32 +3,92 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Search, User, Save, RefreshCw, Ruler, Shirt, Footprints } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
+import api from '../../services/api';
 import '../../styles/DotacionLiquidEther.css';
 
-const tallasIniciales = [
-  { id: 1, nombre: 'Ana María Prada', cedula: '1010', empresa: 'MULTIVALORES', tallaCamisa: 'S', tallaPantalon: '8', tallaZapatos: '37' },
-  { id: 2, nombre: 'Carlos Mario Ruiz', cedula: '2020', empresa: 'MULTIVALORES', tallaCamisa: 'L', tallaPantalon: '34', tallaZapatos: '41' },
-];
-
 export default function DotacionTallas() {
-  const [tallas, setTallas] = useState(() => {
-    const saved = localStorage.getItem('multival_dotacion_tallas');
-    return saved ? JSON.parse(saved) : tallasIniciales;
-  });
+  const [tallas, setTallas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem('multival_dotacion_tallas', JSON.stringify(tallas));
-  }, [tallas]);
+  const fetchTallas = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/etl/base-datos');
+      if (response && response.success) {
+        const mapped = response.data.map((p, index) => ({
+          id: p.people_id || index,
+          nombre: p.apellidos_nombres || 'Sin Nombre',
+          cedula: p.cedula || 'N/A',
+          empresa: p.empresa || p.compania || 'MULTIVALORES',
+          tallaCamisa: p.t_camisa || '',
+          tallaPantalon: p.t_pantalon || '',
+          tallaZapatos: p.t_zapatos || ''
+        }));
+        setTallas(mapped);
+        
+        // Mantener la referencia del usuario seleccionado actualizada
+        if (selectedUser) {
+          const currentSelected = mapped.find(u => u.cedula === selectedUser.cedula);
+          if (currentSelected) {
+            setSelectedUser(currentSelected);
+          }
+        }
+      } else {
+        toast.error('Error al obtener datos del servidor');
+      }
+    } catch (error) {
+      console.error('Error fetching tallas:', error);
+      toast.error('Error al cargar la base de datos maestra');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filtered = tallas.filter(t => t.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || t.cedula.includes(searchTerm));
+  useEffect(() => {
+    fetchTallas();
+  }, []);
+
+  const filtered = tallas.filter(t => 
+    t.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    t.cedula.includes(searchTerm)
+  );
 
   const handleUpdateTalla = (field, value) => {
     if (!selectedUser) return;
     const updated = tallas.map(t => t.id === selectedUser.id ? { ...t, [field]: value } : t);
     setTallas(updated);
     setSelectedUser({ ...selectedUser, [field]: value });
+  };
+
+  const handleSaveTallas = async (userToSave) => {
+    if (!userToSave) {
+      toast.warning('Por favor seleccione un colaborador');
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        cedula: userToSave.cedula,
+        t_camisa: userToSave.tallaCamisa,
+        t_pantalon: userToSave.tallaPantalon,
+        t_zapatos: userToSave.tallaZapatos
+      };
+      const response = await api.put('/etl/base-datos/tallas', payload);
+      if (response && response.success) {
+        toast.success(`Tallas de ${userToSave.nombre} actualizadas con éxito en Base de Datos`);
+        fetchTallas();
+      } else {
+        toast.error(response?.message || 'Error al guardar las tallas');
+      }
+    } catch (error) {
+      console.error('Error saving tallas:', error);
+      toast.error('Error de conexión al guardar tallas');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -39,11 +99,15 @@ export default function DotacionTallas() {
             <div className="flex justify-between items-start">
                 <div>
                     <h1>Gestión de Tallas</h1>
-                    <p>Registro y actualización de medidas antropométricas del personal</p>
+                    <p>Registro y actualización de medidas antropométricas del personal vinculadas a la Base de Datos Maestra</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="nexus-btn nexus-btn-ghost"><RefreshCw className="h-4 w-4" /></Button>
-                    <Button className="nexus-btn nexus-btn-primary"><Save className="h-4 w-4 mr-2" /> Guardar Todo</Button>
+                    <Button variant="outline" onClick={fetchTallas} disabled={loading} className="nexus-btn nexus-btn-ghost">
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
+                    <Button onClick={() => handleSaveTallas(selectedUser)} disabled={saving || !selectedUser} className="nexus-btn nexus-btn-primary">
+                        <Save className="h-4 w-4 mr-2" /> {saving ? 'Guardando...' : 'Guardar Todo'}
+                    </Button>
                 </div>
             </div>
         </header>
@@ -57,23 +121,34 @@ export default function DotacionTallas() {
                     <Input placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="nexus-input pl-10" />
                 </div>
                 <div className="space-y-3 max-h-[500px] overflow-y-auto nexus-scrollbar pr-2">
-                    {filtered.map(user => (
-                        <button 
-                            key={user.id} 
-                            onClick={() => setSelectedUser(user)}
-                            className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 ${
-                                selectedUser?.id === user.id ? 'bg-[#FFCD04]/10 border-[#FFCD04]/30' : 'bg-white/5 border-white/5 hover:border-white/20'
-                            }`}
-                        >
-                            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${selectedUser?.id === user.id ? 'bg-[#FFCD04] text-black' : 'bg-white/10 text-white'}`}>
-                                <User className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <p className="font-bold text-sm text-white">{user.nombre}</p>
-                                <p className="text-[10px] text-gray-500 uppercase">CC: {user.cedula}</p>
-                            </div>
-                        </button>
-                    ))}
+                    {loading ? (
+                        <div className="text-center py-12 text-gray-500 flex flex-col items-center justify-center gap-3">
+                            <RefreshCw className="h-6 w-6 animate-spin text-[#FFCD04]" />
+                            <span>Cargando colaboradores...</span>
+                        </div>
+                    ) : filtered.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            No se encontraron colaboradores
+                        </div>
+                    ) : (
+                        filtered.map(user => (
+                            <button 
+                                key={user.id} 
+                                onClick={() => setSelectedUser(user)}
+                                className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 ${
+                                    selectedUser?.id === user.id ? 'bg-[#FFCD04]/10 border-[#FFCD04]/30' : 'bg-white/5 border-white/5 hover:border-white/20'
+                                }`}
+                            >
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${selectedUser?.id === user.id ? 'bg-[#FFCD04] text-black' : 'bg-white/10 text-white'}`}>
+                                    <User className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm text-white">{user.nombre}</p>
+                                    <p className="text-[10px] text-gray-500 uppercase">CC: {user.cedula}</p>
+                                </div>
+                            </button>
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -98,7 +173,7 @@ export default function DotacionTallas() {
                                 <Input value={selectedUser.tallaCamisa} onChange={e => handleUpdateTalla('tallaCamisa', e.target.value)} className="nexus-input text-center text-xl font-black" />
                             </div>
                             <div className="nexus-form-group">
-                                <label className="flex items-center gap-2">< Shirt className="h-3 w-3 rotate-180" /> Talla Pantalón</label>
+                                <label className="flex items-center gap-2"><Shirt className="h-3 w-3 rotate-180" /> Talla Pantalón</label>
                                 <Input value={selectedUser.tallaPantalon} onChange={e => handleUpdateTalla('tallaPantalon', e.target.value)} className="nexus-input text-center text-xl font-black" />
                             </div>
                             <div className="nexus-form-group">
@@ -108,7 +183,9 @@ export default function DotacionTallas() {
                         </div>
 
                         <div className="pt-6">
-                            <Button className="nexus-btn nexus-btn-primary w-full" onClick={() => toast.success('Tallas actualizadas localmente')}>Actualizar Perfil</Button>
+                            <Button className="nexus-btn nexus-btn-primary w-full" onClick={() => handleSaveTallas(selectedUser)} disabled={saving}>
+                                {saving ? 'Guardando Cambios...' : 'Actualizar Perfil'}
+                            </Button>
                         </div>
                     </div>
                 ) : (

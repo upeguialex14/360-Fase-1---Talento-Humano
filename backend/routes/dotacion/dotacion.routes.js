@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/dotacion/dotacion.controller');
+const firmaController = require('../../controllers/dotacion/dotacionFirma.controller');
 const verifyToken = require('../../middleware/auth.middleware');
 const { checkPageAccess } = require('../../middleware/permission.middleware');
 
@@ -14,6 +15,10 @@ const { checkPageAccess } = require('../../middleware/permission.middleware');
 router.get('/public/sign/:token', controller.validateSignatureToken);
 router.post('/public/sign/:token', controller.submitSignature);
 router.post('/public/survey', controller.submitSurvey);
+
+// Rutas Públicas de Firma Digital (Nuevas)
+router.get('/public/firmas/:token', firmaController.getPublicSignature);
+router.post('/public/firmas/:token', firmaController.savePublicSignature);
 
 // Todas las demás rutas requieren autenticación
 router.use(verifyToken);
@@ -88,6 +93,12 @@ router.put('/deliveries/:id/process', checkPageAccess('DOTACION', 'can_edit'), c
 // ─────────────────────────────────────────────────────────────────────────
 router.post('/deliveries/:id/send-email', checkPageAccess('DOTACION', 'can_edit'), controller.sendSignatureEmail);
 router.put('/deliveries/:id/shipping', checkPageAccess('DOTACION', 'can_edit'), controller.updateShippingInfo);
+
+// ─────────────────────────────────────────────────────────────────────────
+// FIRMA DIGITAL DE PROVEEDORES (NUEVO FLUJO)
+// ─────────────────────────────────────────────────────────────────────────
+router.get('/firmas', checkPageAccess('DOTACION', 'can_view'), firmaController.getFirmas);
+router.post('/firmas/send/:id', checkPageAccess('DOTACION', 'can_edit'), firmaController.sendSignature);
 
 // ─────────────────────────────────────────────────────────────────────────
 // PROVEEDORES

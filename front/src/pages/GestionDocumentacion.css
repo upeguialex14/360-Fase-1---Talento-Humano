@@ -6,8 +6,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Dashboard de métricas */
@@ -44,10 +51,25 @@
     font-size: 1.5rem;
 }
 
-.stat-icon-wrapper.total { background: #eef2ff; color: #4f46e5; }
-.stat-icon-wrapper.pending { background: #fffbeb; color: #d97706; }
-.stat-icon-wrapper.expired { background: #fef2f2; color: #dc2626; }
-.stat-icon-wrapper.verified { background: #f0fdf4; color: #16a34a; }
+.stat-icon-wrapper.total {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.stat-icon-wrapper.pending {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.stat-icon-wrapper.expired {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.stat-icon-wrapper.verified {
+    background: #f0fdf4;
+    color: #16a34a;
+}
 
 .stat-info h3 {
     margin: 0;
@@ -161,9 +183,20 @@
     text-transform: uppercase;
 }
 
-.badge-blue { background: #e0e7ff; color: #4338ca; }
-.badge-green { background: #dcfce7; color: #15803d; }
-.badge-orange { background: #fef3c7; color: #b45309; }
+.badge-blue {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.badge-green {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-orange {
+    background: #fef3c7;
+    color: #b45309;
+}
 
 .doc-menu-btn {
     background: none;
@@ -344,4 +377,3 @@
     font-weight: 600;
     border: 1px solid #f1f5f9;
 }
-

@@ -19,7 +19,7 @@ const io = new Server(server, {
 });
 
 // Cargar manejador de sockets
-require('./sockets/chat.socket')(io);
+require('./sockets/chat.socket').init(io);
 
 server.listen(PORT, () => {
     console.log(`🚀 Servidor backend ejecutándose en puerto ${PORT}`);
