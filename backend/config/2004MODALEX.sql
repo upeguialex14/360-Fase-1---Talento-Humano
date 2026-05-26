@@ -1039,4 +1039,10 @@ ADD COLUMN analyst_id INT NULL,
 ADD CONSTRAINT fk_analyst FOREIGN KEY (analyst_id) REFERENCES USERS(user_id);
 
 
+-- Agregamos la columna de salario a extend info que no existia
+
+ALTER TABLE people_extended_info 
+ADD COLUMN cuenta_bancaria VARCHAR(50) NULL;
+
+
 
