@@ -1,7 +1,7 @@
 const PlantaOperacion = require('../models/plantaOperacion.model');
 const revalService = require('../services/reval.service');
 const pool = require('../config/db');
-const nodemailer = require('nodemailer');
+const emailService = require('../services/email.service');
 const crypto = require('crypto');
 
 // Utilidad para Encriptación Simétrica (Clave de 32 bytes)
@@ -87,65 +87,56 @@ const sendCredentialsEmail = async (personalEmail, nombreCompleto, correoCorp, u
         console.error('Error auto-enviando credenciales: Colaborador no tiene correo personal.');
         return false;
     }
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT) || 465,
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
 
     const showAd = !!adPass;
     const showEmail = !!emailPass && !!correoCorp;
     const showOsticket = !!osticketPass;
 
-    const mailOptions = {
-        from: `"Gestión 365" <${process.env.EMAIL_USER}>`,
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #2A2A54;">Hola, ${nombreCompleto}</h2>
+            <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente y se envían de forma automática por directriz de seguridad:</p>
+            
+            ${showAd ? `
+            <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
+                <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
+                <p style="margin: 4px 0;"><strong>Usuario:</strong> ${usuarioAd}</p>
+                <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPass}</p>
+            </div>
+            ` : ''}
+
+            ${showEmail ? `
+            <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
+                <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
+                <p style="margin: 4px 0;"><strong>Correo:</strong> ${correoCorp}</p>
+                <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPass}</p>
+            </div>
+            ` : ''}
+
+            ${showOsticket ? `
+            <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
+                <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
+                <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${correoCorp || usuarioAd + '@reval.com.co'}</p>
+                <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPass}</p>
+            </div>
+            ` : ''}
+
+            <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
+            <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
+        </div>
+    `;
+
+    const result = await emailService.sendMail({
         to: personalEmail,
         subject: '🔐 Credenciales de Acceso - Sistemas Corporativos',
-        html: `
-            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
-                <h2 style="color: #2A2A54;">Hola, ${nombreCompleto}</h2>
-                <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente y se envían de forma automática por directriz de seguridad:</p>
-                
-                ${showAd ? `
-                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
-                    <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
-                    <p style="margin: 4px 0;"><strong>Usuario:</strong> ${usuarioAd}</p>
-                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPass}</p>
-                </div>
-                ` : ''}
+        html: htmlContent
+    });
 
-                ${showEmail ? `
-                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
-                    <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
-                    <p style="margin: 4px 0;"><strong>Correo:</strong> ${correoCorp}</p>
-                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPass}</p>
-                </div>
-                ` : ''}
-
-                ${showOsticket ? `
-                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
-                    <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
-                    <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${correoCorp || usuarioAd + '@reval.com.co'}</p>
-                    <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPass}</p>
-                </div>
-                ` : ''}
-
-                <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
-                <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
-            </div>
-        `
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
+    if (result.success) {
         console.log(`✅ Credenciales auto-enviadas exitosamente al correo personal ${personalEmail}`);
         return true;
-    } catch (mailError) {
-        console.error('[NODEMAILER] Error de auto-envío de credenciales:', mailError.message);
+    } else {
+        console.error('[EMAIL_SERVICE] Error de auto-envío de credenciales:', result.error);
         return false;
     }
 };
@@ -518,67 +509,57 @@ const enviarCredencialesSahg = async (req, res) => {
         if (via === 'correo') {
             if (!user.correo) return res.status(400).json({ success: false, message: 'El colaborador no tiene un correo personal registrado para recibir las notificaciones.' });
 
-            const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-                port: parseInt(process.env.EMAIL_PORT) || 465,
-                secure: process.env.EMAIL_SECURE === 'true',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
-            });
+            const htmlContent = `
+                <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
+                    <h2 style="color: #2A2A54;">Hola, ${user.nombre}</h2>
+                    <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente:</p>
+                    
+                    ${showAd ? `
+                    <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
+                        <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
+                        <p style="margin: 4px 0;"><strong>Usuario:</strong> ${user.usuario_ad}</p>
+                        <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPassDecrypted}</p>
+                    </div>
+                    ` : ''}
 
-            const mailOptions = {
-                from: `"Gestión 365" <${process.env.EMAIL_USER}>`,
+                    ${showEmail && user.correo_corp ? `
+                    <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
+                        <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
+                        <p style="margin: 4px 0;"><strong>Correo:</strong> ${user.correo_corp}</p>
+                        <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPassDecrypted}</p>
+                    </div>
+                    ` : ''}
+
+                    ${showOsticket ? `
+                    <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
+                        <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
+                        <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${user.correo_corp || user.usuario_ad + '@reval.com.co'}</p>
+                        <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPassDecrypted}</p>
+                    </div>
+                    ` : ''}
+
+                    <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
+                    <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
+                </div>
+            `;
+
+            const result = await emailService.sendMail({
                 to: user.correo,
                 subject: '🔐 Credenciales de Acceso - Sistemas Corporativos',
-                html: `
-                    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
-                        <h2 style="color: #2A2A54;">Hola, ${user.nombre}</h2>
-                        <p>Tus credenciales de acceso a los sistemas corporativos han sido generadas exitosamente:</p>
-                        
-                        ${showAd ? `
-                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4A90E2; margin: 15px 0; border-radius: 4px;">
-                            <h3 style="color: #4A90E2; margin-top: 0; margin-bottom: 8px;">💻 Directorio Activo (PC / Red)</h3>
-                            <p style="margin: 4px 0;"><strong>Usuario:</strong> ${user.usuario_ad}</p>
-                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${adPassDecrypted}</p>
-                        </div>
-                        ` : ''}
+                html: htmlContent
+            });
 
-                        ${showEmail && user.correo_corp ? `
-                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2ECC71; margin: 15px 0; border-radius: 4px;">
-                            <h3 style="color: #2ECC71; margin-top: 0; margin-bottom: 8px;">📧 Correo Corporativo</h3>
-                            <p style="margin: 4px 0;"><strong>Correo:</strong> ${user.correo_corp}</p>
-                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${emailPassDecrypted}</p>
-                        </div>
-                        ` : ''}
-
-                        ${showOsticket ? `
-                        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #FFCD04; margin: 15px 0; border-radius: 4px;">
-                            <h3 style="color: #FFCD04; margin-top: 0; margin-bottom: 8px;">🎫 Portal de Soporte (SAHG / osTicket)</h3>
-                            <p style="margin: 4px 0;"><strong>Usuario (Correo):</strong> ${user.correo_corp || user.usuario_ad + '@reval.com.co'}</p>
-                            <p style="margin: 4px 0;"><strong>Contraseña Temporal:</strong> ${osticketPassDecrypted}</p>
-                        </div>
-                        ` : ''}
-
-                        <p style="color: #666; font-size: 0.9em; margin-top: 20px;">Por seguridad, por favor cambia tus contraseñas temporales al iniciar sesión por primera vez.</p>
-                        <p>Atentamente,<br><strong>Equipo NEXUS 360</strong></p>
-                    </div>
-                `
-            };
-
-            try {
-                await transporter.sendMail(mailOptions);
+            if (result.success) {
                 return res.status(200).json({ success: true, message: 'Credenciales enviadas al correo registrado.' });
-            } catch (mailError) {
-                console.error('[NODEMAILER] Error de envío:', mailError.message);
-                if (mailError.message.includes('535-5.7.8')) {
+            } else {
+                console.error('[EMAIL_SERVICE] Error de envío:', result.error);
+                if (result.error.includes('535-5.7.8')) {
                     return res.status(401).json({
                         success: false,
                         message: 'Google bloqueó el envío por seguridad. Debes generar una "Contraseña de Aplicación" en tu cuenta de Gmail.'
                     });
                 }
-                return res.status(502).json({ success: false, message: 'Fallo al conectar con el servidor de correo: ' + mailError.message });
+                return res.status(502).json({ success: false, message: 'Fallo al conectar con el servidor de correo: ' + result.error });
             }
 
         } else if (via === 'celular') {
@@ -597,10 +578,68 @@ const enviarCredencialesSahg = async (req, res) => {
     }
 };
 
+const getRetirados = async (req, res) => {
+    try {
+        const data = await PlantaOperacion.getRetirados();
+        res.json({
+            success: true,
+            count: data.length,
+            data
+        });
+    } catch (error) {
+        console.error('Error in getRetirados:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener los datos de la base inactiva',
+            error: error.message
+        });
+    }
+};
+
+const transferirYLimpiar = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await PlantaOperacion.transferirYLimpiar(id);
+        res.json({
+            success: true,
+            message: 'Empleado transferido a Retiros y datos personales limpiados exitosamente'
+        });
+    } catch (error) {
+        console.error('Error in transferirYLimpiar:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error al transferir y limpiar los datos',
+            error: error.message
+        });
+    }
+};
+
+const transferirYEliminar = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await PlantaOperacion.transferirYEliminar(id);
+        res.json({
+            success: true,
+            message: 'Empleado transferido a Retiros y registro eliminado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error in transferirYEliminar:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error al transferir y eliminar el registro',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getAllPlantaOperaciones,
     createPlantaOperacion,
     updatePlantaOperacion,
     getOficinaDetails,
-    enviarCredencialesSahg
+    enviarCredencialesSahg,
+    getRetirados,
+    transferirYLimpiar,
+    transferirYEliminar
 };
+

@@ -1,7 +1,7 @@
 .floating-suri-container {
     position: fixed;
     bottom: -20px; /* Punto medio para no cortarla tanto */
-    right: 20px;
+    right: 110px; /* Separado de SURI Asistente para evitar solapamientos */
     z-index: 9999;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -48,11 +48,20 @@
     animation: bounceIn 0.5s ease-out;
 }
 
+.animate-idle {
+    animation: idleFloat 3s ease-in-out infinite;
+}
+
 @keyframes bounceIn {
     0% { transform: scale(0.3); opacity: 0; }
     50% { transform: scale(1.05); }
     70% { transform: scale(0.9); }
     100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes idleFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
 }
 
 @keyframes pulseBadge {

@@ -355,6 +355,11 @@ const CreacionUsuarioPlanta = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!formData.correo || formData.correo.trim() === '') {
+            setMessage({ type: 'error', text: '⚠️ El Correo Personal es obligatorio para poder enviar las credenciales.' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
         setLoading(true);
         setMessage({ type: '', text: '' });
 
@@ -1316,10 +1321,15 @@ const CreacionUsuarioPlanta = () => {
                     <div className="form-section">
                         <div className="form-section-title">Gestión de Planta</div>
                         <div className="form-grid">
-                            <div className="form-group">
-                                <label>Vacante/Sob.</label>
-                                <input type="text" name="vacante_sob" className="planta-input" value={formData.vacante_sob} onChange={handleChange} placeholder="Detalle de vacante" />
-                            </div>
+                            <CustomDropdown 
+                                label="Vacante/Sob." 
+                                name="vacante_sob" 
+                                value={formData.vacante_sob} 
+                                options={[
+                                    "OP", "AP", "NI", "CP", "VA", "TP", "SP", "TD", "SO", "TPS", "CD", "ADM", "VADM", "VAOP", "VAP", "VD"
+                                ]} 
+                                onChange={handleChange} 
+                            />
 
                             <div className="form-group">
                                 <label>Supervisor/Gerente</label>
@@ -1333,7 +1343,7 @@ const CreacionUsuarioPlanta = () => {
 
                             <div className="form-group">
                                 <label>Correo Personal</label>
-                                <input type="email" name="correo" className="planta-input" value={formData.correo} onChange={handleChange} placeholder="correo@personal.com" />
+                                <input type="email" name="correo" className="planta-input" value={formData.correo} onChange={handleChange} required placeholder="correo@personal.com" />
                             </div>
 
                             <div className="form-group">
@@ -1381,10 +1391,17 @@ const CreacionUsuarioPlanta = () => {
                                 </>
                             )}
 
-                            <div className="form-group">
-                                <label>Estado</label>
-                                <input type="text" name="estado" className="planta-input" value={formData.estado} onChange={handleChange} placeholder="Estado actual" />
-                            </div>
+                            <CustomDropdown 
+                                label="Estado" 
+                                name="estado" 
+                                value={formData.estado} 
+                                options={[
+                                    "FUERO MEDICO", "PROCESO CAMBIO DE CONTRATO", "MADRES GESTANTES", "LICENCIA DE MATERNIDAD",
+                                    "COMPENSADOR", "FUERO MEDICO,COMPENSADOR", "COMPENSADOR,MADRES GESTANTES", "CEDIDO AL SENA",
+                                    "CEDIDO AL SENA,DISCAPACIDAD", "FUERO PENSION"
+                                ]} 
+                                onChange={handleChange} 
+                            />
                         </div>
                     </div>
 
@@ -1396,7 +1413,12 @@ const CreacionUsuarioPlanta = () => {
                                 label="Status" 
                                 name="status" 
                                 value={formData.status} 
-                                options={["ACTIVO", "INACTIVO", "SUSPENDIDO"]} 
+                                options={[
+                                    "ACTIVO", "ACTIVO SENA", "INCAPACIDAD", "VACANTE", "VACACIONES", "LICENCIA DE MATERNIDAD",
+                                    "LICENCIA NO REMUNERADA", "LICENCIA POR LUTO", "ACTIVO DIAS", "DIA DE LA FAMILIA",
+                                    "AUSENCIA INJUSTIFICADA", "CALAMIDAD", "MEDICO", "HOSPITALIZADO", "SANCION",
+                                    "LICENCIA DE PATERNIDAD", "LICENCIA REMUNERADA", "PERMISO"
+                                ]} 
                                 onChange={handleChange} 
                             />
 

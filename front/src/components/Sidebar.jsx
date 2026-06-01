@@ -534,11 +534,11 @@ const Sidebar = () => {
                                         <span className="sidebar-icon">{Icons.fileText}</span> Gestión de Documentación
                                     </NavLink>
                                 </li>
-                                <li>
+                                {/* <li>
                                     <NavLink to="/home/vacaciones" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.calendar}</span> Vacaciones
                                     </NavLink>
-                                </li>
+                                </li> */}
                             </ul>
                         </li>
                     )}
@@ -561,11 +561,11 @@ const Sidebar = () => {
                                         <span className="sidebar-icon">{Icons.archive}</span> Base inactiva
                                     </NavLink>
                                 </li>
-                                <li>
+                                {/* <li>
                                     <NavLink to="/home/base-unificada" className={({ isActive }) => isActive ? 'sidebar-link submenu-link menu-btn font-body active' : 'sidebar-link submenu-link menu-btn font-body'}>
                                         <span className="sidebar-icon">{Icons.gitMerge}</span> Base unificada
                                     </NavLink>
-                                </li>
+                                </li> */}
                             </ul>
                         </li>
                     )}

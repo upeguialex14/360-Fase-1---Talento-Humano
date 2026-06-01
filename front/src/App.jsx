@@ -23,8 +23,8 @@ import GestionRequisiciones from './pages/GestionRequisiciones';
 import Documentacion from './pages/Documentacion';
 import GestionDocumentacion from './pages/GestionDocumentacion';
 import BaseInactiva from './pages/BaseInactiva';
-import BaseUnificada from './pages/BaseUnificada';
-import Vacaciones from './pages/Vacaciones';
+// import BaseUnificada from './pages/BaseUnificada';
+// import Vacaciones from './pages/Vacaciones';
 import Selection from './pages/Selection';
 import Upcoming from './pages/Upcoming';
 import BaseDatos from './pages/BaseDatos';
@@ -88,9 +88,9 @@ function App() {
             <Route path="gestion-requisiciones" element={<PageProtectedRoute requiredPageCode="GESTION_REQUISICIONES" isOptional={true}><GestionRequisiciones /></PageProtectedRoute>} />
             <Route path="documentacion" element={<PageProtectedRoute requiredPageCode="DOCUMENTACION" isOptional={true}><Documentacion /></PageProtectedRoute>} />
             <Route path="gestion-documentacion" element={<PageProtectedRoute requiredPageCode="GESTION_DOCUMENTACION" isOptional={true}><GestionDocumentacion /></PageProtectedRoute>} />
-            <Route path="vacaciones" element={<PageProtectedRoute requiredPageCode="VACACIONES" isOptional={true}><Vacaciones /></PageProtectedRoute>} />
+            {/* <Route path="vacaciones" element={<PageProtectedRoute requiredPageCode="VACACIONES" isOptional={true}><Vacaciones /></PageProtectedRoute>} /> */}
             <Route path="base-inactiva" element={<PageProtectedRoute requiredPageCode="BASE_INACTIVA" isOptional={true}><BaseInactiva /></PageProtectedRoute>} />
-            <Route path="base-unificada" element={<PageProtectedRoute requiredPageCode="BASE_UNIFICADA" isOptional={true}><BaseUnificada /></PageProtectedRoute>} />
+            {/* <Route path="base-unificada" element={<PageProtectedRoute requiredPageCode="BASE_UNIFICADA" isOptional={true}><BaseUnificada /></PageProtectedRoute>} /> */}
             <Route path="role-page-access" element={<PageProtectedRoute requiredPageCode="ROLE_PAGE_ACCESS" isOptional={true}><RolePageAccess /></PageProtectedRoute>} />
             <Route path="admin/blocked-users" element={<PageProtectedRoute requiredPageCode="BLOCKED_USERS" isOptional={true}><AdminBlockedUsers /></PageProtectedRoute>} />
             <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
