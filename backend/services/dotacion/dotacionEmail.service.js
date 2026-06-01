@@ -1,13 +1,12 @@
 /**
  * Servicio de Notificaciones por Email para Dotación
  */
-let nodemailer;
+const emailService = require('../email.service');
 let xlsx;
 try {
-    nodemailer = require('nodemailer');
     xlsx = require('xlsx');
 } catch (e) {
-    console.warn('[DOTACION] Nodemailer o xlsx no están instalados. Los correos se registrarán solo en consola.');
+    console.warn('[DOTACION] xlsx no está instalado. Los correos se registrarán solo en consola.');
 }
 
 const DotacionEmailService = {
@@ -46,7 +45,7 @@ const DotacionEmailService = {
             </div>
         `;
 
-        if (!nodemailer) {
+        if (!process.env.EMAIL_USER) {
             console.log('--------------------------------------------------');
             console.log(`📧 [EMAIL SIMULADO] Enviado a: ${employeeEmail}`);
             console.log(`🔗 Link: ${signUrl}`);
@@ -54,26 +53,20 @@ const DotacionEmailService = {
             return { success: true, simulated: true, url: signUrl };
         }
 
-        // Si nodemailer está instalado, intentar enviar
+        // Intentar enviar con el servicio de correo
         try {
-            const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
-                port: process.env.EMAIL_PORT,
-                secure: process.env.EMAIL_SECURE === 'true',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
-            });
-
-            await transporter.sendMail({
+            const result = await emailService.sendMail({
                 from: `"Gestion365 Talentum" <${process.env.EMAIL_USER}>`,
                 to: employeeEmail,
                 subject: subject,
                 html: html
             });
 
-            return { success: true, sent: true };
+            if (result.success) {
+                return { success: true, sent: true };
+            } else {
+                throw new Error(result.error);
+            }
         } catch (error) {
             console.error('[DOTACION] Error enviando email real:', error);
             return { success: false, error: error.message, url: signUrl };
@@ -84,7 +77,7 @@ const DotacionEmailService = {
      * Envía la orden en formato Excel al proveedor
      */
     async sendProviderExcel(email, nombre, notas, jsonDatos) {
-        if (!xlsx || !nodemailer) {
+        if (!xlsx || !process.env.EMAIL_USER) {
             console.log('--------------------------------------------------');
             console.log(`📧 [EMAIL SIMULADO] Enviado a Proveedor: ${email}`);
             console.log(`📎 Adjunto: Excel con ${jsonDatos.length} registros simulado.`);
@@ -113,18 +106,8 @@ const DotacionEmailService = {
                 </div>
             `;
 
-            // 2. Enviar el correo con el adjunto
-            const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
-                port: process.env.EMAIL_PORT,
-                secure: process.env.EMAIL_SECURE === 'true',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
-            });
-
-            await transporter.sendMail({
+            // 2. Enviar el correo con el adjunto usando el servicio centralizado
+            const result = await emailService.sendMail({
                 from: `"Gestion365 Talentum" <${process.env.EMAIL_USER}>`,
                 to: email,
                 subject: subject,
@@ -137,7 +120,11 @@ const DotacionEmailService = {
                 ]
             });
 
-            return { success: true, sent: true };
+            if (result.success) {
+                return { success: true, sent: true };
+            } else {
+                throw new Error(result.error);
+            }
         } catch (error) {
             console.error('[DOTACION] Error enviando Excel al proveedor:', error);
             throw new Error('No se pudo enviar el correo al proveedor: ' + error.message);

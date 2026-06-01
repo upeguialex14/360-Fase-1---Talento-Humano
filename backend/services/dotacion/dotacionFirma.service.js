@@ -1,5 +1,6 @@
 const pool = require('../../config/db');
 const { v4: uuidv4 } = require('uuid');
+const emailService = require('../email.service');
 
 const DotacionFirmaService = {
 
@@ -177,26 +178,19 @@ const DotacionFirmaService = {
 
         // 6. Intentar enviar el correo real; si falla, simular en consola
         try {
-            const nodemailer = require('nodemailer');
-            const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
-                port: parseInt(process.env.EMAIL_PORT) || 587,
-                secure: process.env.EMAIL_SECURE === 'true',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
-            });
-
-            await transporter.sendMail({
+            const result = await emailService.sendMail({
                 from: `"Gestión365 Talentum" <${process.env.EMAIL_USER}>`,
                 to: email,
                 subject: 'Firma Pendiente: Acta de Entrega de Dotación',
                 html: html
             });
 
-            console.log(`[FIRMA] ✅ Correo enviado a ${email}`);
-            return { success: true, email, simulated: false };
+            if (result.success) {
+                console.log(`[FIRMA] ✅ Correo enviado a ${email}`);
+                return { success: true, email, simulated: false };
+            } else {
+                throw new Error(result.error);
+            }
 
         } catch (emailError) {
             console.warn('[FIRMA] ⚠️  No se pudo enviar el correo real. Modo simulado activado.');

@@ -492,3 +492,217 @@
     animation: spin 1s linear infinite;
     display: inline-block;
 }
+
+/* =========================================
+   PREMIUM TRANSFER MODAL
+   ========================================= */
+.transfer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 15, 25, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.transfer-modal-content {
+    background: #111827;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 2.2rem;
+    border-radius: 16px;
+    width: 95%;
+    max-width: 580px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px rgba(239, 68, 68, 0.05);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow-y: auto;
+}
+
+.transfer-modal-header {
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+.transfer-header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.transfer-modal-header .subtitle-text {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Tarjeta de Resumen */
+.transfer-summary-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.summary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.summary-row-full {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: 0.9rem;
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+.summary-value.code-value {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.summary-value.name-value {
+    font-size: 1.05rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.summary-value.email-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 220px;
+}
+
+.transfer-options-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.options-title {
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    margin: 0 0 0.2rem 0;
+}
+
+.transfer-option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+    background: transparent;
+    width: 100%;
+}
+
+.transfer-option-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.option-icon {
+    font-size: 1.4rem;
+    line-height: 1.2;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.option-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.option-btn-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.option-btn-desc {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Opción Limpiar - Naranja/Rojo */
+.option-clean {
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    color: #f97316;
+}
+
+.option-clean:hover:not(:disabled) {
+    background: rgba(249, 115, 22, 0.08);
+    border-color: #f97316;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Opción Eliminar Todo - Rojo Sólido */
+.option-delete {
+    border: 1px solid #ef4444;
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.option-delete .option-btn-desc {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.option-delete:hover:not(:disabled) {
+    background: #dc2626;
+    border-color: #dc2626;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Efecto hover general en botones de la fila */
+.btn-transfer-row {
+    transition: all 0.2s ease;
+}
+
+.btn-transfer-row:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}

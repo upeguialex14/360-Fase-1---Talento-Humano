@@ -145,6 +145,227 @@ class PlantaOperacion {
             throw error;
         }
     }
+
+    static async getById(id) {
+        try {
+            const [rows] = await pool.execute('SELECT * FROM planta_operaciones WHERE id_planta = ?', [id]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async transferirYEliminar(id) {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // 1. Obtener la fila actual de planta_operaciones
+            const [rows] = await connection.execute('SELECT * FROM planta_operaciones WHERE id_planta = ?', [id]);
+            if (rows.length === 0) {
+                throw new Error('Registro no encontrado en Planta de Operación');
+            }
+            const row = rows[0];
+
+            if (!row.cedula && !row.nombre) {
+                throw new Error('Este registro no tiene un empleado asignado para transferir');
+            }
+
+            // Si fecha_retiro no está establecida, usamos el día de hoy
+            const fechaRetiro = row.fecha_retiro || new Date().toISOString().split('T')[0];
+
+            // 2. Insertar/Actualizar en retirados
+            const insertQuery = `
+                INSERT INTO retirados (
+                    empleador, cedula, nombre, cargo, fecha_ingreso, contrato, tipo_empleado,
+                    regional, zona, ciudad, unidad_negocio, cliente, empresa, codigo_ptr,
+                    cc_helisa, oficina, vacante_sobrante, planta_aprobada, supervisor_gerente,
+                    status, novedad, motivo_retiro, fecha_inicial, fecha_final, fecha_retiro,
+                    traslado_oficina_destino, dias_ausencia, observacion, jornada, correo,
+                    estado, banco, cuenta_bancaria, tipo_cuenta
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    empleador = VALUES(empleador),
+                    nombre = VALUES(nombre),
+                    cargo = VALUES(cargo),
+                    fecha_ingreso = VALUES(fecha_ingreso),
+                    contrato = VALUES(contrato),
+                    tipo_empleado = VALUES(tipo_empleado),
+                    regional = VALUES(regional),
+                    zona = VALUES(zona),
+                    ciudad = VALUES(ciudad),
+                    unidad_negocio = VALUES(unidad_negocio),
+                    cliente = VALUES(cliente),
+                    empresa = VALUES(empresa),
+                    codigo_ptr = VALUES(codigo_ptr),
+                    cc_helisa = VALUES(cc_helisa),
+                    oficina = VALUES(oficina),
+                    vacante_sobrante = VALUES(vacante_sobrante),
+                    planta_aprobada = VALUES(planta_aprobada),
+                    supervisor_gerente = VALUES(supervisor_gerente),
+                    status = VALUES(status),
+                    novedad = VALUES(novedad),
+                    motivo_retiro = VALUES(motivo_retiro),
+                    fecha_inicial = VALUES(fecha_inicial),
+                    fecha_final = VALUES(fecha_final),
+                    fecha_retiro = VALUES(fecha_retiro),
+                    traslado_oficina_destino = VALUES(traslado_oficina_destino),
+                    dias_ausencia = VALUES(dias_ausencia),
+                    observacion = VALUES(observacion),
+                    jornada = VALUES(jornada),
+                    correo = VALUES(correo),
+                    estado = VALUES(estado),
+                    banco = VALUES(banco),
+                    cuenta_bancaria = VALUES(cuenta_bancaria),
+                    tipo_cuenta = VALUES(tipo_cuenta)
+            `;
+
+            const params = [
+                row.empleador, row.cedula, row.nombre, row.cargo, row.fecha_ingreso, row.contrato, row.tipo_empleado,
+                row.regional, row.zona, row.ciudad, row.unidad_negocio, row.cliente, row.empresa, row.codigo_ptr,
+                row.cc_helisa, row.oficina, row.vacante_sobrante, row.planta_aprobada, row.supervisor_gerente,
+                'RETIRADO', row.novedad, row.motivo_retiro || 'RETIRO', row.fecha_inicial, row.fecha_final, fechaRetiro,
+                row.traslado_oficina_destino, row.dias_ausencia, row.observacion, row.jornada, row.correo,
+                row.estado, row.banco, row.cuenta_bancaria, row.tipo_cuenta
+            ];
+
+            await connection.execute(insertQuery, params);
+
+            // 3. Eliminar el registro de planta_operaciones
+            await connection.execute('DELETE FROM planta_operaciones WHERE id_planta = ?', [id]);
+
+            await connection.commit();
+            return { success: true };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    static async transferirYLimpiar(id) {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // 1. Obtener la fila actual de planta_operaciones
+            const [rows] = await connection.execute('SELECT * FROM planta_operaciones WHERE id_planta = ?', [id]);
+            if (rows.length === 0) {
+                throw new Error('Registro no encontrado en Planta de Operación');
+            }
+            const row = rows[0];
+
+            if (!row.cedula && !row.nombre) {
+                throw new Error('Este registro no tiene un empleado asignado para transferir');
+            }
+
+            // Si fecha_retiro no está establecida, usamos el día de hoy
+            const fechaRetiro = row.fecha_retiro || new Date().toISOString().split('T')[0];
+
+            // 2. Insertar/Actualizar en retirados
+            const insertQuery = `
+                INSERT INTO retirados (
+                    empleador, cedula, nombre, cargo, fecha_ingreso, contrato, tipo_empleado,
+                    regional, zona, ciudad, unidad_negocio, cliente, empresa, codigo_ptr,
+                    cc_helisa, oficina, vacante_sobrante, planta_aprobada, supervisor_gerente,
+                    status, novedad, motivo_retiro, fecha_inicial, fecha_final, fecha_retiro,
+                    traslado_oficina_destino, dias_ausencia, observacion, jornada, correo,
+                    estado, banco, cuenta_bancaria, tipo_cuenta
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    empleador = VALUES(empleador),
+                    nombre = VALUES(nombre),
+                    cargo = VALUES(cargo),
+                    fecha_ingreso = VALUES(fecha_ingreso),
+                    contrato = VALUES(contrato),
+                    tipo_empleado = VALUES(tipo_empleado),
+                    regional = VALUES(regional),
+                    zona = VALUES(zona),
+                    ciudad = VALUES(ciudad),
+                    unidad_negocio = VALUES(unidad_negocio),
+                    cliente = VALUES(cliente),
+                    empresa = VALUES(empresa),
+                    codigo_ptr = VALUES(codigo_ptr),
+                    cc_helisa = VALUES(cc_helisa),
+                    oficina = VALUES(oficina),
+                    vacante_sobrante = VALUES(vacante_sobrante),
+                    planta_aprobada = VALUES(planta_aprobada),
+                    supervisor_gerente = VALUES(supervisor_gerente),
+                    status = VALUES(status),
+                    novedad = VALUES(novedad),
+                    motivo_retiro = VALUES(motivo_retiro),
+                    fecha_inicial = VALUES(fecha_inicial),
+                    fecha_final = VALUES(fecha_final),
+                    fecha_retiro = VALUES(fecha_retiro),
+                    traslado_oficina_destino = VALUES(traslado_oficina_destino),
+                    dias_ausencia = VALUES(dias_ausencia),
+                    observacion = VALUES(observacion),
+                    jornada = VALUES(jornada),
+                    correo = VALUES(correo),
+                    estado = VALUES(estado),
+                    banco = VALUES(banco),
+                    cuenta_bancaria = VALUES(cuenta_bancaria),
+                    tipo_cuenta = VALUES(tipo_cuenta)
+            `;
+
+            const params = [
+                row.empleador, row.cedula, row.nombre, row.cargo, row.fecha_ingreso, row.contrato, row.tipo_empleado,
+                row.regional, row.zona, row.ciudad, row.unidad_negocio, row.cliente, row.empresa, row.codigo_ptr,
+                row.cc_helisa, row.oficina, row.vacante_sobrante, row.planta_aprobada, row.supervisor_gerente,
+                'RETIRADO', row.novedad, row.motivo_retiro || 'RETIRO', row.fecha_inicial, row.fecha_final, fechaRetiro,
+                row.traslado_oficina_destino, row.dias_ausencia, row.observacion, row.jornada, row.correo,
+                row.estado, row.banco, row.cuenta_bancaria, row.tipo_cuenta
+            ];
+
+            await connection.execute(insertQuery, params);
+
+            // 3. Limpiar los datos personales del registro en planta_operaciones
+            const updateQuery = `
+                UPDATE planta_operaciones SET
+                    cedula = NULL,
+                    nombre = NULL,
+                    fecha_ingreso = NULL,
+                    fecha_retiro = NULL,
+                    motivo_retiro = NULL,
+                    correo = NULL,
+                    correo_corp = NULL,
+                    usuario_ad = NULL,
+                    usuario_osticket = NULL,
+                    banco = NULL,
+                    cuenta_bancaria = NULL,
+                    tipo_cuenta = NULL,
+                    novedad = NULL,
+                    fecha_inicial = NULL,
+                    fecha_final = NULL,
+                    dias_ausencia = 0,
+                    estado = NULL,
+                    status = 'VACANTE',
+                    observacion = NULL
+                WHERE id_planta = ?
+            `;
+
+            await connection.execute(updateQuery, [id]);
+
+            await connection.commit();
+            return { success: true };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    static async getRetirados() {
+        try {
+            const [rows] = await pool.execute('SELECT * FROM retirados ORDER BY id_planta ASC');
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = PlantaOperacion;
+

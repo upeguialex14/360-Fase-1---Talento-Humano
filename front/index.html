@@ -6,6 +6,31 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>talentohumano360</title>
+
+  <!-- ══════════════════════════════════════════════════════
+       SURI Asistente Funcional — posición LADO IZQUIERDO DEL FOOTER
+       Redireccionamos el contenedor principal únicamente.
+  ══════════════════════════════════════════════════════ -->
+  <style>
+    /* Selector seguro que ONLY targets direct child elements of body to prevent breaking widget internal layout */
+    body>[id*="agent-functional"],
+    body>[id*="agentFunctional"],
+    body>[id*="af-widget"],
+    body>[class*="agent-functional"],
+    body>[class*="agentFunctional"],
+    body>[class*="af-widget"],
+    body>[class*="chat-widget-container"],
+    body>[class*="floating-agent"],
+    body>[id*="suri-widget"],
+    body>[class*="suri-widget"] {
+      right: auto !important;
+      left: 20px !important;
+      bottom: 20px !important;
+      top: auto !important;
+      position: fixed !important;
+      z-index: 100000 !important;
+    }
+  </style>
 </head>
 
 <body>
