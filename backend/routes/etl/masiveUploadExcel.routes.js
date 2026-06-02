@@ -15,6 +15,7 @@ const checkUploadPermission = (req, res, next) => {
     else if (type === 'base-datos' || type === 'BASE_DATOS') pageCode = 'BASE_DATOS';
     else if (type === 'HIRING_ORDER') pageCode = 'ORDEN_CONTRATACION';
     else if (type === 'DOTACION') pageCode = 'DOTACION';
+    else if (type === 'OFFICES' || type === 'oficinas') pageCode = 'COSTOS';
 
     if (!pageCode) return res.status(400).json({ success: false, message: 'Tipo no válido' });
     return checkPageAccess(pageCode, 'can_edit')(req, res, next);
@@ -22,9 +23,11 @@ const checkUploadPermission = (req, res, next) => {
 
 router.post('/upload/:type', checkUploadPermission, middleware.uploadExcel, controller.controllerUploadExcel);
 router.get('/cost-centers', checkPageAccess('COSTOS', 'can_view'), controller.getCostCenters);
+router.get('/offices', checkPageAccess('COSTOS', 'can_view'), controller.getOffices);
 router.get('/base-datos', checkPageAccess('BASE_DATOS', 'can_view'), controller.getBaseDatos);
 
 router.delete('/cost-centers', checkPageAccess('COSTOS', 'can_edit'), controller.deleteAllCostCenters);
+router.delete('/offices', checkPageAccess('COSTOS', 'can_edit'), controller.deleteAllOffices);
 router.delete('/base-datos', checkPageAccess('BASE_DATOS', 'can_edit'), controller.deleteAllBaseDatos);
 router.put('/base-datos/tallas', checkPageAccess('DOTACION', 'can_edit'), controller.updateBaseDatosSizes);
 

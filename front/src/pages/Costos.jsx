@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Costos = () => {
+    const [activeTab, setActiveTab] = useState('cecos'); // 'cecos' o 'oficinas'
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
@@ -19,7 +20,8 @@ const Costos = () => {
 
     const fetchExistingData = async () => {
         try {
-            const response = await api.get('/etl/cost-centers');
+            const endpoint = activeTab === 'cecos' ? '/etl/cost-centers' : '/etl/offices';
+            const response = await api.get(endpoint);
             if (response.success) {
                 setExistingData(response.data);
             }
@@ -30,7 +32,7 @@ const Costos = () => {
 
     useEffect(() => {
         fetchExistingData();
-    }, []);
+    }, [activeTab]);
 
     const handleFileSelect = (selectedFile) => {
         setError(null);
@@ -65,19 +67,31 @@ const Costos = () => {
                 const worksheet = workbook.Sheets[firstSheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                // Normalizar y filtrar columnas requeridas
-                const normalizedData = jsonData.slice(0, 200).map(row => ({
-                    'OFICINA': row['OFICINA'] || row['oficina'] || '',
-                    'PTR': row['PTR'] || row['ptr'] || '',
-                    'C.C HELISA': row['C.C HELISA'] || row['c.c helisa'] || row['HELISA'] || '',
-                    'CLIENTE': row['CLIENTE'] || row['cliente'] || '',
-                    'UNIDAD DE NEGOCIO': row['UNIDAD DE NEGOCIO'] || row['unidad de negocio'] || '',
-                    'CIUDAD': row['CIUDAD'] || row['ciudad'] || '',
-                    'ZONA': row['ZONA'] || row['zona'] || '',
-                    'REGIONAL': row['REGIONAL'] || row['regional'] || '',
-                    'EMPRESA': row['EMPRESA'] || row['empresa'] || '',
-                    'LIDER': row['LIDER'] || row['lider'] || ''
-                }));
+                // Normalizar y filtrar columnas requeridas según pestaña activa
+                const normalizedData = jsonData.slice(0, 200).map(row => {
+                    if (activeTab === 'oficinas') {
+                        return {
+                            'OFICINA': row['OFICINA'] || row['oficina'] || '',
+                            'CIUDAD': row['CIUDAD'] || row['ciudad'] || '',
+                            'ZONA': row['ZONA'] || row['zona'] || '',
+                            'REGIONAL': row['REGIONAL'] || row['regional'] || '',
+                            'LIDER': row['LIDER'] || row['lider'] || row['LÍDER'] || ''
+                        };
+                    } else {
+                        return {
+                            'OFICINA': row['OFICINA'] || row['oficina'] || '',
+                            'PTR': row['PTR'] || row['ptr'] || '',
+                            'C.C HELISA': row['C.C HELISA'] || row['c.c helisa'] || row['HELISA'] || '',
+                            'CLIENTE': row['CLIENTE'] || row['cliente'] || '',
+                            'UNIDAD DE NEGOCIO': row['UNIDAD DE NEGOCIO'] || row['unidad de negocio'] || '',
+                            'CIUDAD': row['CIUDAD'] || row['ciudad'] || '',
+                            'ZONA': row['ZONA'] || row['zona'] || '',
+                            'REGIONAL': row['REGIONAL'] || row['regional'] || '',
+                            'EMPRESA': row['EMPRESA'] || row['empresa'] || '',
+                            'LIDER': row['LIDER'] || row['lider'] || row['LÍDER'] || ''
+                        };
+                    }
+                });
 
                 setPreviewData(normalizedData);
             } catch (err) {
@@ -106,14 +120,17 @@ const Costos = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const data = await api.upload('/etl/upload/COST_CENTER', formData);
+            const endpoint = activeTab === 'cecos' ? '/etl/upload/COST_CENTER' : '/etl/upload/OFFICES';
+            const data = await api.upload(endpoint, formData);
 
             if (data && data.success) {
                 setResult({
                     success: true,
                     totalProcessed: data.totalProcessed,
                     inserted: data.inserted,
-                    message: `Carga exitosa: ${data.inserted} de ${data.totalProcessed} registros procesados.`
+                    message: activeTab === 'cecos'
+                        ? `Carga exitosa: ${data.inserted} de ${data.totalProcessed} registros procesados.`
+                        : `Carga exitosa de oficinas: ${data.inserted} de ${data.totalProcessed} procesadas correctamente.`
                 });
                 setFile(null);
                 setPreviewData([]); // Limpiar preview
@@ -322,17 +339,86 @@ const Costos = () => {
                     animation: spin 0.8s linear infinite;
                 }
                 @keyframes spin { to { transform: rotate(360deg); } }
+
+                .costos-tabs {
+                    display: flex;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-bottom: 0.5rem;
+                }
+                .tab-btn {
+                    background: transparent;
+                    border: none;
+                    color: #9ca3af;
+                    font-size: 1.05rem;
+                    font-weight: 600;
+                    padding: 0.5rem 1.2rem;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border-radius: 8px 8px 0 0;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                .tab-btn:hover {
+                    color: #fff;
+                }
+                .tab-btn.active {
+                    color: #FFD700;
+                }
+                .tab-btn.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -0.65rem;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: #FFD700;
+                    border-radius: 3px;
+                }
             `}</style>
 
             <div className="costos-header">
-                <h2>🏢 Centro de Costos</h2>
-                <p>Carga y actualización masiva de centros de costo desde un archivo Excel.</p>
+                <h2>🏢 {activeTab === 'cecos' ? 'Centro de Costos' : 'Maestro de Oficinas'}</h2>
+                <p>Carga y actualización masiva de {activeTab === 'cecos' ? 'centros de costo' : 'oficinas certificadas'} desde un archivo Excel.</p>
+            </div>
+
+            {/* Selector de Pestañas Premium */}
+            <div className="costos-tabs">
+                <button 
+                    className={`tab-btn ${activeTab === 'cecos' ? 'active' : ''}`}
+                    onClick={() => {
+                        setActiveTab('cecos');
+                        setFile(null);
+                        setError(null);
+                        setResult(null);
+                        setPreviewData([]);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                >
+                    💼 Centros de Costo
+                </button>
+                <button 
+                    className={`tab-btn ${activeTab === 'oficinas' ? 'active' : ''}`}
+                    onClick={() => {
+                        setActiveTab('oficinas');
+                        setFile(null);
+                        setError(null);
+                        setResult(null);
+                        setPreviewData([]);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                >
+                    🏢 Oficinas (Maestro)
+                </button>
             </div>
 
             <div className="costos-layout">
                 <div className="costos-main-grid">
                     <div className="costos-card">
-                        <h3>📤 Cargar archivo Excel</h3>
+                        <h3>📤 {activeTab === 'cecos' ? 'Cargar archivo Excel de Cecos' : 'Cargar archivo Excel de Oficinas'}</h3>
 
                         <div
                             className={`drop-zone ${dragOver && canEdit ? 'active' : ''}`}
@@ -389,14 +475,17 @@ const Costos = () => {
                             style={{ marginTop: '1rem', background: '#EF4444', color: 'white', opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? 'not-allowed' : 'pointer' }}
                             onClick={async () => {
                                 if (!canEdit) return;
-                                if (window.confirm("¿Estás seguro de que quieres eliminar TODOS los registros de Centro de Costos?")) {
+                                const deleteUrl = activeTab === 'cecos' ? '/etl/cost-centers' : '/etl/offices';
+                                const confirmMsg = activeTab === 'cecos'
+                                    ? "¿Estás seguro de que quieres eliminar TODOS los registros de Centro de Costos?"
+                                    : "¿Estás seguro de que quieres eliminar TODAS las Oficinas?";
+                                if (window.confirm(confirmMsg)) {
                                     try {
                                         setLoading(true);
-                                        const res = await api.delete('/etl/cost-centers');
+                                        const res = await api.delete(deleteUrl);
                                         if (res && res.success) {
-                                            alert("Registros eliminados");
-                                            fetchExistingData(); // This should exist, I'll assume it exists if not it might fail, wait, let me check if fetchExistingData exists. Oh wait, Costos uses fetchExistingData? Let me check line 100 or something. Actually `window.location.reload()` is safer.
-                                            window.location.reload();
+                                            alert("Registros eliminados correctamente");
+                                            fetchExistingData();
                                         }
                                     } catch (e) { alert("Error: " + e.message); }
                                     finally { setLoading(false); }
@@ -435,13 +524,28 @@ const Costos = () => {
                         )}
 
                         <div className="info-box">
-                            <strong>📋 Columnas detectadas automáticamente:</strong>
-                            <ul>
-                                <li><b>OFICINA, PTR, C.C HELISA</b></li>
-                                <li><b>CLIENTE, UNIDAD DE NEGOCIO</b></li>
-                                <li><b>CIUDAD, ZONA, REGIONAL</b></li>
-                                <li><b>EMPRESA, LIDER</b></li>
-                            </ul>
+                            {activeTab === 'cecos' ? (
+                                <>
+                                    <strong>📋 Columnas detectadas automáticamente:</strong>
+                                    <ul>
+                                        <li><b>OFICINA, PTR, C.C HELISA</b></li>
+                                        <li><b>CLIENTE, UNIDAD DE NEGOCIO</b></li>
+                                        <li><b>CIUDAD, ZONA, REGIONAL</b></li>
+                                        <li><b>EMPRESA, LIDER</b></li>
+                                    </ul>
+                                </>
+                            ) : (
+                                <>
+                                    <strong>📋 Columnas requeridas en Oficinas:</strong>
+                                    <ul>
+                                        <li><b>OFICINA</b> (Nombre de la oficina)</li>
+                                        <li><b>CIUDAD</b> (Nombre de la ciudad)</li>
+                                        <li><b>ZONA</b> o <b>ZONA_ID</b> (Nombre del área)</li>
+                                        <li><b>REGIONAL</b> (Nombre de la regional)</li>
+                                        <li><b>LIDER</b> (Nombre completo del líder)</li>
+                                    </ul>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -457,32 +561,53 @@ const Costos = () => {
                             {(file ? previewData : existingData).length > 0 ? (
                                 <table className="excel-table">
                                     <thead>
-                                        <tr>
-                                            <th>OFICINA</th>
-                                            <th>PTR</th>
-                                            <th>C.C HELISA</th>
-                                            <th>CLIENTE</th>
-                                            <th>UNIDAD DE NEGOCIO</th>
-                                            <th>CIUDAD</th>
-                                            <th>ZONA</th>
-                                            <th>REGIONAL</th>
-                                            <th>EMPRESA</th>
-                                            <th>LIDER</th>
-                                        </tr>
+                                        {activeTab === 'cecos' ? (
+                                            <tr>
+                                                <th>OFICINA</th>
+                                                <th>PTR</th>
+                                                <th>C.C HELISA</th>
+                                                <th>CLIENTE</th>
+                                                <th>UNIDAD DE NEGOCIO</th>
+                                                <th>CIUDAD</th>
+                                                <th>ZONA</th>
+                                                <th>REGIONAL</th>
+                                                <th>EMPRESA</th>
+                                                <th>LIDER</th>
+                                            </tr>
+                                        ) : (
+                                            <tr>
+                                                <th>OFICINA</th>
+                                                <th>CIUDAD</th>
+                                                <th>ZONA</th>
+                                                <th>REGIONAL</th>
+                                                <th>LIDER</th>
+                                            </tr>
+                                        )}
                                     </thead>
                                     <tbody>
                                         {(file ? previewData : existingData).map((row, index) => (
                                             <tr key={index}>
                                                 <td>{row.OFICINA}</td>
-                                                <td>{row.PTR}</td>
-                                                <td>{row['C.C HELISA']}</td>
-                                                <td>{row.CLIENTE}</td>
-                                                <td>{row['UNIDAD DE NEGOCIO']}</td>
-                                                <td>{row.CIUDAD}</td>
-                                                <td>{row.ZONA}</td>
-                                                <td>{row.REGIONAL}</td>
-                                                <td>{row.EMPRESA}</td>
-                                                <td>{row.LIDER}</td>
+                                                {activeTab === 'cecos' ? (
+                                                    <>
+                                                        <td>{row.PTR}</td>
+                                                        <td>{row['C.C HELISA']}</td>
+                                                        <td>{row.CLIENTE}</td>
+                                                        <td>{row['UNIDAD DE NEGOCIO']}</td>
+                                                        <td>{row.CIUDAD}</td>
+                                                        <td>{row.ZONA}</td>
+                                                        <td>{row.REGIONAL}</td>
+                                                        <td>{row.EMPRESA}</td>
+                                                        <td>{row.LIDER}</td>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <td>{row.CIUDAD}</td>
+                                                        <td>{row.ZONA}</td>
+                                                        <td>{row.REGIONAL}</td>
+                                                        <td>{row.LIDER}</td>
+                                                    </>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>

@@ -63,6 +63,19 @@ const deleteAllCostCenters = async (req, res) => {
     }
 };
 
+const deleteAllOffices = async (req, res) => {
+    try {
+        const db = require('../../config/db');
+        await db.execute('SET FOREIGN_KEY_CHECKS = 0');
+        await db.execute('DELETE FROM master_offices');
+        await db.execute('SET FOREIGN_KEY_CHECKS = 1');
+        return res.status(200).json({ success: true, message: 'Todos los registros de oficinas han sido eliminados correctamente' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 const deleteAllBaseDatos = async (req, res) => {
     const connection = await require('../../config/db').getConnection();
     try {
@@ -86,6 +99,32 @@ const deleteAllBaseDatos = async (req, res) => {
     }
 };
 
+const getOffices = async (req, res) => {
+    try {
+        const db = require('../../config/db');
+        const [rows] = await db.execute(`
+            SELECT 
+                o.office_id, 
+                o.name as OFICINA,
+                c.name as CIUDAD,
+                a.name as ZONA,
+                r.name as REGIONAL,
+                CONCAT(u.name, ' ', u.last_name) as LIDER
+            FROM master_offices o
+            LEFT JOIN master_cities c ON o.id_ciudad = c.city_id
+            LEFT JOIN master_area a ON o.zona_id = a.area_id
+            LEFT JOIN master_regional r ON o.id_regional = r.regional_id
+            LEFT JOIN master_leader ml ON o.leader_id = ml.leader_id
+            LEFT JOIN users u ON ml.user_id = u.user_id
+            ORDER BY o.office_id DESC
+        `);
+        return res.status(200).json({ success: true, data: rows });
+    } catch (error) {
+        console.error("Error getOffices:", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 const updateBaseDatosSizes = async (req, res) => {
     try {
         const { cedula, t_camisa, t_pantalon, t_zapatos } = req.body;
@@ -104,4 +143,4 @@ const updateBaseDatosSizes = async (req, res) => {
     }
 };
 
-module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos, updateBaseDatosSizes };
+module.exports = { controllerUploadExcel, getCostCenters, getOffices, getBaseDatos, deleteAllCostCenters, deleteAllOffices, deleteAllBaseDatos, updateBaseDatosSizes };

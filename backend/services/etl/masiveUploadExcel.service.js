@@ -4,6 +4,7 @@ const hiringOrderProcessor = require('./processors/hiringOrderProcessor.service'
 const baseDatosProcessor = require('./processors/baseDatosProcessor.service');
 // Importamos el nuevo procesador que armamos
 const dotacionProcessor = require('./processors/dotacion.processor.service');
+const officeProcessor = require('./processors/officeProcessor.service');
 
 const uploadExcel = async (data) => {
     const { fileBuffer, type, username } = data;
@@ -31,6 +32,10 @@ const uploadExcel = async (data) => {
         // Nuevo caso para el inventario y dotación de las imágenes
         case 'DOTACION':
             result = await dotacionProcessor.process(rawJson);
+            break;
+        case 'OFFICES':
+        case 'oficinas':
+            result = await officeProcessor.process(rawJson);
             break;
         default:
             throw new Error("Tipo de carga no soportado: " + type);

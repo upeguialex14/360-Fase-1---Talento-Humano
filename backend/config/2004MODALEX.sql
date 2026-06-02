@@ -1045,4 +1045,11 @@ ALTER TABLE people_extended_info
 ADD COLUMN cuenta_bancaria VARCHAR(50) NULL;
 
 
+USE talentohumano360;
+
+
+
+SELECT * FROM MASTER_OFFICES;
+DESCRIBE MASTER_OFFICES;
+
 
