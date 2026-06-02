@@ -27,5 +27,6 @@ router.get('/base-datos', checkPageAccess('BASE_DATOS', 'can_view'), controller.
 router.delete('/cost-centers', checkPageAccess('COSTOS', 'can_edit'), controller.deleteAllCostCenters);
 router.delete('/base-datos', checkPageAccess('BASE_DATOS', 'can_edit'), controller.deleteAllBaseDatos);
 router.put('/base-datos/tallas', checkPageAccess('DOTACION', 'can_edit'), controller.updateBaseDatosSizes);
+router.post('/base-datos/crear', checkPageAccess('BASE_DATOS', 'can_edit'), controller.createBaseDatosUser);
 
 module.exports = router;

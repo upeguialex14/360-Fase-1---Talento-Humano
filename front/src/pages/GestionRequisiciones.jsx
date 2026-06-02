@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import './GestionRequisiciones.css';
+import { calcularDiasMora, calcularMoraPromedio } from '../utils/calcularMora';
+
 
 // Chart.js
 import {
@@ -342,7 +344,7 @@ const GestionRequisiciones = () => {
 
     // Calcular estadísticas para dashboard
     const getDashboardStats = () => {
-        if (!estadisticas) return null;
+        if (!estadisticas?.porEstado) return null;
         
         const enProceso = (estadisticas.porEstado['Evaluación'] || 0) + 
                          (estadisticas.porEstado['Revisión'] || 0) + 
@@ -356,7 +358,7 @@ const GestionRequisiciones = () => {
             cerradas,
             rechazadas,
             cumplimiento: Math.round(estadisticas.cumplimientoPromedio),
-            moraPromedio: Math.round(estadisticas.moraPromedio),
+            moraPromedio: calcularMoraPromedio(requisiciones),
             recursos: estadisticas.totalRecursos
         };
     };
@@ -520,8 +522,8 @@ const GestionRequisiciones = () => {
                                                 </select>
                                             </td>
                                             <td>
-                                                <span className={`mora-badge ${req.dias_mora > 0 ? 'has-mora' : ''}`}>
-                                                    {req.dias_mora || 0}
+                                                <span className={`mora-badge ${calcularDiasMora(req.created_at) > 0 ? 'has-mora' : ''}`}>
+                                                    {calcularDiasMora(req.created_at)}
                                                 </span>
                                             </td>
                                             <td>
@@ -599,12 +601,12 @@ const GestionRequisiciones = () => {
                                     <div className="metric-header">
                                         <span className="metric-title">Cumplimiento Promedio</span>
                                     </div>
-                                    <div className="metric-value">{stats.cumplimiento}%</div>
+                                    <div className="metric-value">{stats.cumplimiento ?? 0}%</div>
                                     <div className="metric-bar">
                                         <div 
                                             className="metric-fill"
                                             style={{ 
-                                                width: `${stats.cumplimiento}%`,
+                                                width: `${Math.min(stats.cumplimiento ?? 0, 100)}%`,
                                                 backgroundColor: stats.cumplimiento >= 80 ? '#10b981' : 
                                                                   stats.cumplimiento >= 60 ? '#f59e0b' : '#ef4444'
                                             }}
@@ -615,12 +617,12 @@ const GestionRequisiciones = () => {
                                     <div className="metric-header">
                                         <span className="metric-title">Mora Promedio</span>
                                     </div>
-                                    <div className="metric-value">{stats.moraPromedio} días</div>
+                                    <div className="metric-value">{stats.moraPromedio ?? 0} días</div>
                                     <div className="metric-bar">
                                         <div 
                                             className="metric-fill mora"
                                             style={{ 
-                                                width: `${Math.min(stats.moraPromedio * 10, 100)}%`,
+                                                width: `${Math.min(((stats.moraPromedio ?? 0) / 30) * 100, 100)}%`,
                                                 backgroundColor: stats.moraPromedio > 10 ? '#ef4444' : '#10b981'
                                             }}
                                         />
@@ -630,7 +632,7 @@ const GestionRequisiciones = () => {
                                     <div className="metric-header">
                                         <span className="metric-title">Total Recursos Solicitados</span>
                                     </div>
-                                    <div className="metric-value">{stats.recursos}</div>
+                                    <div className="metric-value">{(stats.recursos ?? 0).toLocaleString('es-CO')}</div>
                                 </div>
                             </div>
                             

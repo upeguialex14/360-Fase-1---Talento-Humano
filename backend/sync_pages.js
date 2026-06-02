@@ -19,6 +19,7 @@ const DEFINITIVE_PAGES = [
     // { code: 'BASE_UNIFICADA', name: 'Base Unificada', route: '/base-unificada', desc: 'Consolidado general de información' },
     { code: 'USUARIO_SAHG', name: 'Usuario Sahg', route: '/usuario-sahg', desc: 'Módulo de gestión Usuario Sahg' },
     { code: 'CREACION_USUARIO_PLANTA', name: 'Creación Usuario Planta', route: '/creacion-usuario-planta', desc: 'Formulario de ingreso para planta' },
+    { code: 'CREACION_USUARIO_BASE', name: 'Creación Usuario Base', route: '/creacion-usuario-base', desc: 'Formulario de ingreso manual para Base de Datos' },
     { code: 'EMPLEADOS', name: 'Empleados', route: '/empleados', desc: 'Vista general de personal y nómina' },
     { code: 'DEPARTAMENTOS', name: 'Departamentos', route: '/departamentos', desc: 'Estructura organizacional y áreas' }
 ];

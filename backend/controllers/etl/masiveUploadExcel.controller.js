@@ -1,6 +1,7 @@
 const uploadService = require('../../services/etl/masiveUploadExcel.service');
 const CostCenterModel = require('../../models/etl/costCenter.model');
 const BaseDatosModel = require('../../models/etl/BaseDatos.model');
+const baseDatosProcessor = require('../../services/etl/processors/baseDatosProcessor.service');
 
 const controllerUploadExcel = async (req, res) => {
     try {
@@ -104,4 +105,24 @@ const updateBaseDatosSizes = async (req, res) => {
     }
 };
 
-module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos, updateBaseDatosSizes };
+const createBaseDatosUser = async (req, res) => {
+    try {
+        const formData = req.body;
+        if (!formData || !formData.cedula) {
+            return res.status(400).json({ success: false, message: 'La cédula es requerida.' });
+        }
+        const result = await baseDatosProcessor.createSingle(formData);
+        return res.status(201).json({
+            success: true,
+            message: result.action === 'updated'
+                ? 'Colaborador actualizado exitosamente en la Base de Datos.'
+                : 'Colaborador registrado exitosamente en la Base de Datos.',
+            ...result
+        });
+    } catch (error) {
+        console.error('Error en createBaseDatosUser:', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { controllerUploadExcel, getCostCenters, getBaseDatos, deleteAllCostCenters, deleteAllBaseDatos, updateBaseDatosSizes, createBaseDatosUser };

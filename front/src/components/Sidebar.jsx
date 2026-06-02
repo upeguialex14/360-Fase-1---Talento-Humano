@@ -336,7 +336,7 @@ const Sidebar = () => {
 
             // Para asegurar el orden exacto: Planta -> Creacion Planta -> Costos -> Base de datos -> Contratacion -> Usuario Sahg
             finalPages.sort((a, b) => {
-                const order = ['DASHBOARD', 'PLANTA', 'CREACION_USUARIO_PLANTA', 'COSTOS', 'BASE_DATOS', 'CONTRATACION', 'USUARIO_SAHG'];
+                const order = ['DASHBOARD', 'PLANTA', 'CREACION_USUARIO_PLANTA', 'COSTOS', 'BASE_DATOS', 'CREACION_USUARIO_BASE', 'CONTRATACION', 'USUARIO_SAHG'];
                 let indexA = order.indexOf(a.page_code);
 
 
@@ -448,6 +448,7 @@ const Sidebar = () => {
                             DOTACION: Icons.shoppingBag,
                             USUARIO_SAHG: Icons.shield,
                             CREACION_USUARIO_PLANTA: Icons.userPlus,
+                            CREACION_USUARIO_BASE: Icons.database,
                         };
                         const pageIcon = pageIconMap[page.page_code] || Icons.briefcase;
 

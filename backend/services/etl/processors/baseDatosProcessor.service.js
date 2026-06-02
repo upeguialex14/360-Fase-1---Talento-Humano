@@ -268,4 +268,207 @@ const process = async (jsonData) => {
     return { success: true, processed, inserted, updated, errors };
 };
 
-module.exports = { process };
+/**
+ * Crea o actualiza UN SOLO registro de persona en la base de datos normalizada
+ * a partir de los datos enviados desde el formulario CreacionUsuarioBase.
+ */
+const createSingle = async (formData) => {
+    const resolver = new MasterMemoryResolver();
+    await resolver.init();
+
+    const parseDate = (val) => {
+        if (!val || val === '') return null;
+        const s = val.toString();
+        if (s.includes('T')) return s.split('T')[0];
+        const parts = s.split(/[/-]/);
+        if (parts.length === 3) {
+            if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+            return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+        }
+        return s;
+    };
+
+    const cleanNum = (val) => {
+        if (val === undefined || val === null || val === '') return 0;
+        const num = parseFloat(val.toString().replace(/[$, ]/g, ''));
+        return isNaN(num) ? 0 : num;
+    };
+
+    const cleanStr = (val, maxLen = 255) => {
+        if (!val) return null;
+        return val.toString().trim().substring(0, maxLen);
+    };
+
+    const cedula = formData.cedula?.toString().trim();
+    if (!cedula) throw new Error('La cédula es requerida para crear el registro.');
+
+    // Resolver IDs de tablas maestras
+    const genderId       = resolver.resolve('master_type_gender',       formData.genero);
+    const bloodId        = resolver.resolve('master_type_blood',        formData.rh);
+    const orientationId  = resolver.resolve('master_sexual_orientation', formData.orientacion_sexual);
+    const specialPopId   = resolver.resolve('master_special_population', formData.poblacion_especial);
+    const ethnicId       = resolver.resolve('master_ethnic_group',      formData.grupo_etnico);
+    const housingId      = resolver.resolve('master_type_housing',      formData.tipo_vivienda);
+    const vehicleId      = resolver.resolve('master_type_vehicle',      formData.cuenta_vehiculo_propio);
+    const epsId          = resolver.resolve('master_eps',               formData.salud);
+    const pensionId      = resolver.resolve('master_pension',           formData.pension);
+    const ccfId          = resolver.resolve('master_compensation_box',  formData.caja);
+    const jobTitleId     = resolver.resolve('master_job_titles',        formData.cargo);
+    const contractId     = resolver.resolve('master_contracts',         formData.tipo_contrato);
+    const clientId       = resolver.resolve('master_client',            formData.cliente);
+    const cityWorkId     = resolver.resolve('master_cities',            formData.ciudad);
+    const costCenterId   = resolver.resolve('cost_center',              formData.ceco);
+    const officeId       = resolver.resolve('master_offices',           formData.oficina);
+    const companyId      = resolver.resolve('master_company',           formData.empresa);
+    const areaId         = resolver.resolve('master_area',              formData.departamento || formData.zona || '');
+    const unitId         = resolver.resolve('master_unit',              formData.unidad_negocio);
+    const statusId       = resolver.resolve('status_master',            formData.estado);
+
+    // Construcción de nombre
+    const fullName = formData.apellidos_nombres || [
+        formData.primer_nombre, formData.segundo_nombre,
+        formData.primer_apellido, formData.segundo_apellido
+    ].filter(Boolean).join(' ') || 'N/A';
+
+    const firstName = cleanStr([formData.primer_nombre, formData.segundo_nombre].filter(Boolean).join(' '), 100) || fullName.split(' ')[0] || 'N/A';
+    const lastName  = cleanStr([formData.primer_apellido, formData.segundo_apellido].filter(Boolean).join(' '), 100) || fullName.split(' ').slice(1).join(' ') || 'N/A';
+
+    const detailsData = [
+        orientationId, specialPopId, ethnicId,
+        cleanNum(formData.estrato),
+        cleanStr(formData.nombre_pareja, 200),
+        cleanStr(formData.barrio, 50),
+        cleanStr(formData.direccion, 100),
+        cleanNum(formData.nro_hijos),
+        cleanStr(formData.nro_pareja, 50),
+        cleanStr(formData.t_camisa, 20),
+        cleanStr(formData.t_pantalon, 20),
+        cleanStr(formData.t_zapatos, 20),
+        cleanStr(formData.t_chaquetas, 20),
+        cleanStr(formData.t_chalecos, 20),
+        bloodId, housingId, vehicleId
+    ];
+
+    const bizData = [
+        clientId, cityWorkId, contractId,
+        cleanNum(formData.sueldo_2026),
+        parseDate(formData.fecha_ingreso),
+        parseDate(formData.fecha_retiro),
+        jobTitleId, costCenterId, companyId,
+        areaId, unitId, statusId,
+        cleanStr(formData.motivo_retiro, 200),
+        officeId
+    ];
+
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [existing] = await connection.execute(
+            'SELECT people_id, details_id, people_business_id FROM people WHERE document_number = ?',
+            [cedula]
+        );
+
+        let peopleId, detailsId, bizId;
+
+        if (existing.length > 0) {
+            // ── ACTUALIZAR ──
+            peopleId  = existing[0].people_id;
+            detailsId = existing[0].details_id;
+            bizId     = existing[0].people_business_id;
+
+            if (detailsId) {
+                await connection.execute(
+                    `UPDATE people_details SET orientation_id=?, special_population_id=?, ethnic_id=?, stratum=?, partner_name=?, neighborhood=?, address=?, children_count=?, partner_id_number=?, size_shirt=?, size_jean=?, size_shoes=?, size_jacket=?, size_vest=?, blood_id=?, housing_id=?, vehicle_id=? WHERE details_id=?`,
+                    [...detailsData, detailsId]
+                );
+            } else {
+                const [detRes] = await connection.execute(
+                    `INSERT INTO people_details (orientation_id, special_population_id, ethnic_id, stratum, partner_name, neighborhood, address, children_count, partner_id_number, size_shirt, size_jean, size_shoes, size_jacket, size_vest, blood_id, housing_id, vehicle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    detailsData
+                );
+                detailsId = detRes.insertId;
+            }
+
+            if (bizId) {
+                await connection.execute(
+                    `UPDATE business_people_data SET client_id=?, city_work_id=?, contract_id=?, salary=?, start_date=?, termination_date=?, job_title=?, cost_center_id=?, company_id=?, area_id=?, unit_id=?, status_id=?, notes=?, office_id=? WHERE people_business_id=?`,
+                    [...bizData, bizId]
+                );
+            } else {
+                const [bizRes] = await connection.execute(
+                    `INSERT INTO business_people_data (client_id, city_work_id, contract_id, salary, start_date, termination_date, job_title, cost_center_id, company_id, area_id, unit_id, status_id, notes, office_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    bizData
+                );
+                bizId = bizRes.insertId;
+            }
+
+            await connection.execute(
+                `UPDATE people SET first_name=?, last_name=?, email=?, phone_number=?, birthdate=?, registration_date=?, gender_id=?, details_id=?, people_business_id=?, type_id=1 WHERE people_id=?`,
+                [firstName, lastName, cleanStr(formData.correo_electronico, 150), cleanStr(formData.telefono, 50), parseDate(formData.fecha_nacimiento), parseDate(formData.fecha_ingreso), genderId, detailsId, bizId, peopleId]
+            );
+        } else {
+            // ── INSERTAR ──
+            const [detRes] = await connection.execute(
+                `INSERT INTO people_details (orientation_id, special_population_id, ethnic_id, stratum, partner_name, neighborhood, address, children_count, partner_id_number, size_shirt, size_jean, size_shoes, size_jacket, size_vest, blood_id, housing_id, vehicle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                detailsData
+            );
+            detailsId = detRes.insertId;
+
+            const [bizRes] = await connection.execute(
+                `INSERT INTO business_people_data (client_id, city_work_id, contract_id, salary, start_date, termination_date, job_title, cost_center_id, company_id, area_id, unit_id, status_id, notes, office_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                bizData
+            );
+            bizId = bizRes.insertId;
+
+            const [pRes] = await connection.execute(
+                `INSERT INTO people (document_number, first_name, last_name, email, phone_number, birthdate, registration_date, gender_id, details_id, people_business_id, type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [cedula, firstName, lastName, cleanStr(formData.correo_electronico, 150), cleanStr(formData.telefono, 50), parseDate(formData.fecha_nacimiento), parseDate(formData.fecha_ingreso), genderId, detailsId, bizId, 1]
+            );
+            peopleId = pRes.insertId;
+        }
+
+        // Extended info (emergencia + referencias + PEP)
+        const refMeta = `${cleanStr(formData.hv_referida, 25) || ''} | ${cleanStr(formData.nombre_referido, 50) || ''}`.substring(0, 100);
+        const pepMeta = `${cleanStr(formData.familiares_pep, 25) || ''} | ${cleanStr(formData.porque_pep, 100) || ''}`.substring(0, 255);
+        await connection.execute(
+            `INSERT INTO people_extended_info (people_id, ref_int_metadata, pep_metadata, name_emergency, number_phone_emergency, contact_relationship)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               ref_int_metadata=VALUES(ref_int_metadata),
+               pep_metadata=VALUES(pep_metadata),
+               name_emergency=VALUES(name_emergency),
+               number_phone_emergency=VALUES(number_phone_emergency),
+               contact_relationship=VALUES(contact_relationship)`,
+            [peopleId, refMeta, pepMeta,
+             cleanStr(formData.nombre_contacto_emergencia, 150),
+             cleanStr(formData.cel_emergencia, 50),
+             cleanStr(formData.parentesco_contacto, 100)]
+        );
+
+        // Salud / seguridad
+        await connection.execute(
+            `INSERT INTO people_healt_security (people_id, eps_id, pension_id, compensation_box_id, bank_account, data_processing_authorization)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               eps_id=VALUES(eps_id),
+               pension_id=VALUES(pension_id),
+               compensation_box_id=VALUES(compensation_box_id),
+               bank_account=VALUES(bank_account),
+               data_processing_authorization=VALUES(data_processing_authorization)`,
+            [peopleId, epsId, pensionId, ccfId,
+             cleanStr(formData.cuenta_bancaria, 50),
+             (formData.autorizacion_tramite_datos === 'SI' || formData.autorizacion_tramite_datos === true) ? 1 : 0]
+        );
+
+        await connection.commit();
+        return { success: true, peopleId, action: existing.length > 0 ? 'updated' : 'inserted' };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
+module.exports = { process, createSingle };

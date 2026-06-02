@@ -30,6 +30,7 @@ import Upcoming from './pages/Upcoming';
 import BaseDatos from './pages/BaseDatos';
 import UsuarioSahg from './pages/UsuarioSahg';
 import CreacionUsuarioPlanta from './pages/CreacionUsuarioPlanta';
+import CreacionUsuarioBase from './pages/CreacionUsuarioBase';
 import DotacionDashboard from './pages/DotacionDashboard';
 import PublicSignature from './pages/PublicSignature';
 // Dotación routes
@@ -96,6 +97,7 @@ function App() {
             <Route path="base-datos" element={<PageProtectedRoute requiredPageCode="BASE_DATOS" isOptional={true}><BaseDatos /></PageProtectedRoute>} />
             <Route path="usuario-sahg" element={<PageProtectedRoute requiredPageCode="USUARIO_SAHG" isOptional={true}><UsuarioSahg /></PageProtectedRoute>} />
             <Route path="creacion-usuario-planta" element={<PageProtectedRoute requiredPageCode="CREACION_USUARIO_PLANTA" isOptional={true}><CreacionUsuarioPlanta /></PageProtectedRoute>} />
+            <Route path="creacion-usuario-base" element={<PageProtectedRoute requiredPageCode="CREACION_USUARIO_BASE" isOptional={true}><CreacionUsuarioBase /></PageProtectedRoute>} />
             <Route path="dotacion" element={<PageProtectedRoute requiredPageCode="DOTACION" isOptional={true}><DotacionDashboard /></PageProtectedRoute>} />
             <Route path="dotacion/solicitud" element={<PageProtectedRoute requiredPageCode="DOTACION_SOLICITUD" isOptional={true}><DotacionSolicitud /></PageProtectedRoute>} />
             <Route path="dotacion/reasignacion" element={<PageProtectedRoute requiredPageCode="DOTACION_REASIGNACION" isOptional={true}><DotacionReasignacion /></PageProtectedRoute>} />
